@@ -41,4 +41,18 @@
     <string name="nikon_takeover_message_holder">%1$s 正在使用这台相机。连接将使其断开。</string>
     <string name="nikon_takeover_message_other">另一台设备正在使用这台相机。连接将使其断开。</string>
 
+    <!-- 采集弹窗锁定横幅与步骤提示（NikonCapturePopupState） -->
+    <string name="nikon_popup_shutter_locked">相机上已锁定快门。按住任意位置可解锁。</string>
+    <string name="nikon_popup_iso_locked_recording">在 R3D NE 录制期间 ISO 已锁定</string>
+    <string name="nikon_popup_auto_iso_on_manual">自动 ISO 已开启。由相机设定感光度。切换到“手动”即可选择数值。</string>
+    <string name="nikon_popup_manual_iso_needs_modes">手动 ISO 需要 P、S、A、M 模式或 U 库。当前由相机设定感光度。</string>
+    <string name="nikon_popup_auto_iso_on_off">自动 ISO 已开启。由相机设定感光度。切换到“自动关闭”即可选择数值。</string>
+    <string name="nikon_popup_manual_iso_needs_m">手动 ISO 需要 M 曝光模式。当前由相机设定感光度。</string>
+    <string name="nikon_popup_kelvin_steps_hint">使用所选数值旁的 −10 和 +10 进行微调</string>
+    <string name="nikon_popup_codec_steps_hint">使用编解码器旁的位深按钮切换位深</string>
+    <string name="nikon_popup_kelvin_decrease">开尔文降低 %1$d</string>
+    <string name="nikon_popup_kelvin_increase">开尔文提高 %1$d</string>
+    <string name="nikon_popup_codec_record_at">以 %2$d bit 录制 %1$s</string>
+    <string name="nikon_shots_remaining">剩余 %1$d 张照片</string>
+
 </resources>

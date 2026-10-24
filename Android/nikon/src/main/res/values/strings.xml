@@ -43,4 +43,18 @@
     <string name="nikon_takeover_message_holder">%1$s is using this camera. Connecting will disconnect it.</string>
     <string name="nikon_takeover_message_other">Another device is using this camera. Connecting will disconnect it.</string>
 
+    <!-- Capture popup lock banners and step hints (NikonCapturePopupState) -->
+    <string name="nikon_popup_shutter_locked">Shutter locked on camera. Hold anywhere to unlock.</string>
+    <string name="nikon_popup_iso_locked_recording">ISO is locked while recording in R3D NE</string>
+    <string name="nikon_popup_auto_iso_on_manual">Auto ISO is on. The camera sets sensitivity. Switch to Manual to choose a value.</string>
+    <string name="nikon_popup_manual_iso_needs_modes">Manual ISO needs P, S, A, M or a U bank. The camera is setting sensitivity.</string>
+    <string name="nikon_popup_auto_iso_on_off">Auto ISO is on. The camera sets sensitivity. Switch to Auto Off to choose a value.</string>
+    <string name="nikon_popup_manual_iso_needs_m">Manual ISO needs exposure mode M. The camera is setting sensitivity.</string>
+    <string name="nikon_popup_kelvin_steps_hint">Use minus 10 and plus 10 beside the selected value to fine-adjust</string>
+    <string name="nikon_popup_codec_steps_hint">Use the bit-depth buttons beside the codec to switch depth</string>
+    <string name="nikon_popup_kelvin_decrease">Decrease Kelvin by %1$d</string>
+    <string name="nikon_popup_kelvin_increase">Increase Kelvin by %1$d</string>
+    <string name="nikon_popup_codec_record_at">Record %1$s at %2$d bit</string>
+    <string name="nikon_shots_remaining">%1$d shots remaining</string>
+
 </resources>

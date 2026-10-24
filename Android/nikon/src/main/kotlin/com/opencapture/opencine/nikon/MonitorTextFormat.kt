@@ -1,5 +1,6 @@
 package com.opencapture.opencine.nikon
 
+import android.content.Context
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -43,8 +44,13 @@ object MonitorTextFormat {
         }
     }
 
-    /** The complete count the compact readout stands for, as VoiceOver and TalkBack speak it. */
-    fun shotsRemainingAccessibilityLabel(count: Int): String = "${maxOf(0, count)} shots remaining"
+    /**
+     * The complete count the compact readout stands for, as VoiceOver and TalkBack speak it.
+     * Pass a [Context] to localize; without one (JVM unit tests) the bundled English copy keeps
+     * behaviour and assertions unchanged off-device.
+     */
+    fun shotsRemainingAccessibilityLabel(count: Int, context: Context? = null): String =
+        lstr(context, R.string.nikon_shots_remaining, maxOf(0, count))
 
     /** Whether a codec label names a RAW format (R3D NE, N-RAW, ProRes RAW HQ). */
     fun isRawCodec(codec: String): Boolean {

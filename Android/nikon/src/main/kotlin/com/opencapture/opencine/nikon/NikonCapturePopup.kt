@@ -1,5 +1,6 @@
 package com.opencapture.opencine.nikon
 
+import android.content.Context
 import com.opencapture.opencine.core.SettingKey
 import com.opencapture.opencine.core.SettingValue
 import com.opencapture.opencine.vocabulary.CaptureLadder
@@ -117,6 +118,11 @@ data class NikonCapturePopupState(
     val activeCodecDepth: Int? = null,
     /** The common setting a typed drum edits; null keeps label drums (demo, relay, untyped). */
     val typed: NikonControlSetting? = null,
+    /**
+     * Localizes the lock banners, step hints and step descriptions; without one (JVM unit tests)
+     * the bundled English copy keeps behaviour and assertions unchanged off-device.
+     */
+    val context: Context? = null,
 ) {
     /** The popup as the shared ladder sheet draws it. */
     val presentation: LadderSheetPresentation<NikonLadderControl>
@@ -179,22 +185,22 @@ data class NikonCapturePopupState(
     internal val banner: String?
         get() {
             when (sheetLock) {
-                CaptureLock.CAMERA_CONTROL -> return "Shutter locked on camera. Hold anywhere to unlock."
-                CaptureLock.RECORDING -> return "ISO is locked while recording in R3D NE"
+                CaptureLock.CAMERA_CONTROL -> return lstr(context, R.string.nikon_popup_shutter_locked)
+                CaptureLock.RECORDING -> return lstr(context, R.string.nikon_popup_iso_locked_recording)
                 else -> Unit
             }
             if (kind == NikonCapturePopupKind.STILL_ISO) {
                 return if (stillAllowsManualIso) {
-                    "Auto ISO is on. The camera sets sensitivity. Switch to Manual to choose a value."
+                    lstr(context, R.string.nikon_popup_auto_iso_on_manual)
                 } else {
-                    "Manual ISO needs P, S, A, M or a U bank. The camera is setting sensitivity."
+                    lstr(context, R.string.nikon_popup_manual_iso_needs_modes)
                 }
             }
             if (kind != NikonCapturePopupKind.ISO || !autoIso || !isoCameraOwned) return null
             return if (allowsManualIso) {
-                "Auto ISO is on. The camera sets sensitivity. Switch to Auto Off to choose a value."
+                lstr(context, R.string.nikon_popup_auto_iso_on_off)
             } else {
-                "Manual ISO needs exposure mode M. The camera is setting sensitivity."
+                lstr(context, R.string.nikon_popup_manual_iso_needs_m)
             }
         }
 
@@ -281,8 +287,8 @@ data class NikonCapturePopupState(
     }
 
     internal fun stepsHint(kelvin: Boolean): String? = when {
-        kind == NikonCapturePopupKind.CODEC -> CODEC_STEPS_HINT
-        kelvin -> KELVIN_STEPS_HINT
+        kind == NikonCapturePopupKind.CODEC -> lstr(context, R.string.nikon_popup_codec_steps_hint)
+        kelvin -> lstr(context, R.string.nikon_popup_kelvin_steps_hint)
         else -> null
     }
 
@@ -290,9 +296,9 @@ data class NikonCapturePopupState(
         if (kind == NikonCapturePopupKind.CODEC) {
             val depths = codecDepths
             val active = activeCodecDepth
-            return { selected -> codecSteps(depths, selected, active) }
+            return { selected -> codecSteps(depths, selected, active, context) }
         }
-        return if (kelvin) ({ selected -> kelvinSteps(selected) }) else null
+        return if (kelvin) ({ selected -> kelvinSteps(selected, context) }) else null
     }
 
     companion object {
@@ -310,26 +316,29 @@ data class NikonCapturePopupState(
             return ladder.toMutableList().apply { add(index, live) }
         }
 
-        fun kelvinSteps(selected: String): Pair<LadderStep, LadderStep> {
+        fun kelvinSteps(selected: String, context: Context? = null): Pair<LadderStep, LadderStep> {
             fun step(delta: Int, label: String, description: String): LadderStep = LadderStep(
                 label = label,
                 value = if (WbPickerPolicy.canFineAdjust(selected, delta)) WbPickerPolicy.fineAdjust(selected, delta) else null,
                 description = description, lands = true,
             )
             val fine = WbPickerPolicy.FINE_STEP_KELVIN
-            return step(-fine, "−$fine", "Decrease Kelvin by $fine") to
-                step(fine, "+$fine", "Increase Kelvin by $fine")
+            return step(-fine, "−$fine", lstr(context, R.string.nikon_popup_kelvin_decrease, fine)) to
+                step(fine, "+$fine", lstr(context, R.string.nikon_popup_kelvin_increase, fine))
         }
 
         /** The low and high depth beside a codec row that offers a choice; null otherwise. */
-        fun codecSteps(depths: List<CodecBitDepthOption>, selected: String, activeDepth: Int?): Pair<LadderStep, LadderStep>? {
+        fun codecSteps(
+            depths: List<CodecBitDepthOption>, selected: String, activeDepth: Int?, context: Context? = null,
+        ): Pair<LadderStep, LadderStep>? {
             val row = depths.filter { it.codec == selected }
             if (row.size < 2) return null
             fun step(depth: CodecBitDepthOption): LadderStep {
                 val bits = depth.bitDepth
                 return LadderStep(
                     label = depth.label, value = depth.writeValue,
-                    description = "Record $selected at $bits bit",
+                    // A null bit depth interpolates as "null", exactly as the Swift twin's "$bits".
+                    description = lstr(context, R.string.nikon_popup_codec_record_at, selected, bits as Any?),
                     selected = bits != null && activeDepth == bits, lands = false,
                 )
             }

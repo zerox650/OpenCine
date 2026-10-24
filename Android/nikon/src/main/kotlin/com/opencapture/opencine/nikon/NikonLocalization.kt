@@ -44,9 +44,22 @@ private val NIKON_ENGLISH_STRINGS = mapOf(
     R.string.nikon_takeover_cancel to "Cancel",
     R.string.nikon_takeover_message_holder to "%1\$s is using this camera. Connecting will disconnect it.",
     R.string.nikon_takeover_message_other to "Another device is using this camera. Connecting will disconnect it.",
+
+    R.string.nikon_popup_shutter_locked to "Shutter locked on camera. Hold anywhere to unlock.",
+    R.string.nikon_popup_iso_locked_recording to "ISO is locked while recording in R3D NE",
+    R.string.nikon_popup_auto_iso_on_manual to "Auto ISO is on. The camera sets sensitivity. Switch to Manual to choose a value.",
+    R.string.nikon_popup_manual_iso_needs_modes to "Manual ISO needs P, S, A, M or a U bank. The camera is setting sensitivity.",
+    R.string.nikon_popup_auto_iso_on_off to "Auto ISO is on. The camera sets sensitivity. Switch to Auto Off to choose a value.",
+    R.string.nikon_popup_manual_iso_needs_m to "Manual ISO needs exposure mode M. The camera is setting sensitivity.",
+    R.string.nikon_popup_kelvin_steps_hint to "Use minus 10 and plus 10 beside the selected value to fine-adjust",
+    R.string.nikon_popup_codec_steps_hint to "Use the bit-depth buttons beside the codec to switch depth",
+    R.string.nikon_popup_kelvin_decrease to "Decrease Kelvin by %1\$d",
+    R.string.nikon_popup_kelvin_increase to "Increase Kelvin by %1\$d",
+    R.string.nikon_popup_codec_record_at to "Record %1\$s at %2\$d bit",
+    R.string.nikon_shots_remaining to "%1\$d shots remaining",
 )
 
-internal fun lstr(context: Context?, resId: Int, vararg args: Any): String {
+internal fun lstr(context: Context?, resId: Int, vararg args: Any?): String {
     if (context != null) return context.getString(resId, *args)
     val template = NIKON_ENGLISH_STRINGS[resId] ?: return ""
     return if (args.isEmpty()) template else String.format(Locale.US, template, *args)
