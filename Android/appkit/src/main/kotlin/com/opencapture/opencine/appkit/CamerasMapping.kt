@@ -26,7 +26,7 @@ import java.util.Locale
  * falls back to the bundled English copy so behaviour and assertions are unchanged off-device.
  * Pass a [Context] from a Composable (`LocalContext.current`) to localize the presentation.
  */
-private val ENGLISH_STRINGS = mapOf(
+internal val ENGLISH_STRINGS = mapOf(
     R.string.appkit_on_the_camera to "On the camera",
     R.string.appkit_on_this_phone to "On this phone",
     R.string.appkit_next to "Next",
@@ -98,6 +98,21 @@ private val ENGLISH_STRINGS = mapOf(
     R.string.appkit_wizard_waiting to "WAITING",
     R.string.appkit_wizard_nothing_type to "Nothing to type. Approve it on the camera",
     R.string.appkit_wizard_android_asks to "Android asks to join the camera network",
+
+    // Monitor control notes (MonitorControlModel) — kept verbatim for JVM tests.
+    R.string.monitor_connect_first to "Connect the camera to use its controls.",
+    R.string.monitor_recording_unknown to "Recording state is not known yet. Try again in a moment.",
+    R.string.monitor_note_refused to "%1\$s: the camera refused it.",
+    R.string.monitor_note_not_offered to "%1\$s is not offered by this camera.",
+    R.string.monitor_note_stale to "%1\$s was not sent: the camera state changed. Try again.",
+    R.string.monitor_note_unavailable_mode to "%1\$s is not available in this mode.",
+    R.string.monitor_note_unavailable_now to "%1\$s is not available right now.",
+    R.string.monitor_note_not_applied to "%1\$s was not applied by the camera.",
+    R.string.monitor_note_not_sent to "%1\$s was not sent.",
+    R.string.monitor_note_link_dropped to "%1\$s: the camera link dropped before it confirmed.",
+    R.string.monitor_note_not_confirmed to "The camera did not confirm %1\$s.",
+    R.string.monitor_label_record to "Record",
+    R.string.monitor_label_stop to "Stop",
 )
 
 internal fun lstr(context: Context?, resId: Int, vararg args: Any): String {

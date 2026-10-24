@@ -1,5 +1,6 @@
 package com.opencapture.opencine.appkit
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -69,6 +70,7 @@ public class MonitorControlModel(
     private val scope: CoroutineScope,
     private val coalescingMs: Long = 120,
     delay: suspend (Long) -> Unit = { kotlinx.coroutines.delay(it) },
+    private val context: Context? = null,
 ) {
     /** One open editor (a drum, a picker) and the assumptions it was opened under. */
     public data class Editor internal constructor(
@@ -123,7 +125,7 @@ public class MonitorControlModel(
     public var onNote: (String) -> Unit = {}
 
     /** The copy for a finished write or record ([note] by default); `null` stays silent. A host may keep its own. */
-    public var noteFor: (CommandStage, String) -> String? = { stage, label -> note(stage, label) }
+    public var noteFor: (CommandStage, String) -> String? = { stage, label -> note(stage, label, context) }
 
     /** A record operation finished (any stage), for the app's follow-up (refresh media). */
     public var onRecordFinished: (CommandReceipt) -> Unit = {}
@@ -168,8 +170,9 @@ public class MonitorControlModel(
     /** Additive deterministic timing overload; the existing positional/trailing-delay API is intact. */
     public constructor(scope: CoroutineScope, now: () -> MonotonicInstant,
         recordingDelay: suspend (Long) -> Unit = { kotlinx.coroutines.delay(it) },
-        coalescingMs: Long = 120, delay: suspend (Long) -> Unit = { kotlinx.coroutines.delay(it) }) :
-        this(scope, coalescingMs, delay) {
+        coalescingMs: Long = 120, delay: suspend (Long) -> Unit = { kotlinx.coroutines.delay(it) },
+        context: Context? = null) :
+        this(scope, coalescingMs, delay, context) {
         recordingNow = now
         this.recordingDelay = recordingDelay
     }
@@ -387,7 +390,7 @@ public class MonitorControlModel(
     private fun set(
         value: SettingValue, label: String, editor: Editor?, admission: CommandDispatchAdmission?,
     ) {
-        if (state.value.session == null) return onNote(CONNECT_FIRST)
+        if (state.value.session == null) return onNote(connectFirst())
         val key = value.key
         mutable.update { it.copy(pending = it.pending + (key to value)) }
         operations[key] = PendingEdit(OperationID(), label, editor, admission)
@@ -409,7 +412,7 @@ public class MonitorControlModel(
         if (editor != null && !admits(value, editor)) return finish(key, operation, binding, null)
         val session = state.value.session
         val snapshot = state.value.snapshot
-        if (session == null || snapshot == null) return finish(key, operation, binding, CONNECT_FIRST)
+        if (session == null || snapshot == null) return finish(key, operation, binding, connectFirst())
         val command = CameraCommand(CameraCommandIntent.Set(value), CommandPreconditions(snapshot), operation)
         val current = binding
         scope.launch {
@@ -491,7 +494,7 @@ public class MonitorControlModel(
         start: Boolean?, approved: RecordEditor?, admission: CommandDispatchAdmission? = null,
     ): Deferred<CommandReceipt?>? {
         if (state.value.recordPending) return null
-        val session = state.value.session ?: run { onNote(CONNECT_FIRST); return null }
+        val session = state.value.session ?: run { onNote(connectFirst()); return null }
         val operation = OperationID()
         val current = binding
         recordOperation = operation
@@ -510,11 +513,11 @@ public class MonitorControlModel(
                 else -> null
             }
             if (intent == null) {
-                finishRecord(operation, current, RECORDING_UNKNOWN, null)
+                finishRecord(operation, current, recordingUnknown(), null)
                 return@async null
             }
             val receipt = finished(session, CameraCommand(intent, CommandPreconditions(fresh), operation), admission)
-            val label = if (intent == CameraCommandIntent.StartRecording) "Record" else "Stop"
+            val label = recordLabel(intent == CameraCommandIntent.StartRecording)
             if (binding != current || recordOperation != operation) return@async null
             finishRecord(operation, current, noteFor(receipt.stage, label), receipt)
             receipt
@@ -528,6 +531,16 @@ public class MonitorControlModel(
         note?.let(onNote)
         receipt?.let(onRecordFinished)
     }
+
+    /** The operator copy for a control that needs a connected session, in [context]'s language. */
+    private fun connectFirst(): String = lstr(context, R.string.monitor_connect_first)
+
+    /** The operator copy for a record start or stop the snapshot cannot resolve yet. */
+    private fun recordingUnknown(): String = lstr(context, R.string.monitor_recording_unknown)
+
+    /** The operator label for a record start or stop, in [context]'s language. */
+    private fun recordLabel(start: Boolean): String =
+        lstr(context, if (start) R.string.monitor_label_record else R.string.monitor_label_stop)
 
     public companion object {
         public const val CONNECT_FIRST: String = "Connect the camera to use its controls."
@@ -546,27 +559,33 @@ public class MonitorControlModel(
 
         /**
          * Operator copy for an outcome that is not a confirmation; `null` for a confirmation or a
-         * superseded write (the newer receipt carries the outcome).
+         * superseded write (the newer receipt carries the outcome). Pass a [Context] from a
+         * Composable (`LocalContext.current`) to localize; without one (JVM unit tests) the
+         * bundled English copy keeps behaviour and assertions unchanged off-device.
          */
-        public fun note(stage: CommandStage, label: String): String? = when (stage) {
+        public fun note(stage: CommandStage, label: String, context: Context? = null): String? = when (stage) {
             CommandStage.Confirmed -> null
             is CommandStage.Rejected -> when (val rejection = stage.rejection) {
-                CommandRejection.CameraRefused -> "$label: the camera refused it."
+                CommandRejection.CameraRefused -> lstr(context, R.string.monitor_note_refused, label)
                 CommandRejection.OutOfDomain, CommandRejection.Unsupported, CommandRejection.SupportUnknown ->
-                    "$label is not offered by this camera."
+                    lstr(context, R.string.monitor_note_not_offered, label)
                 CommandRejection.StaleCapabilities, CommandRejection.StaleEpoch ->
-                    "$label was not sent: the camera state changed. Try again."
+                    lstr(context, R.string.monitor_note_stale, label)
                 is CommandRejection.Unavailable ->
-                    if (rejection.reason == UnavailableReason.Mode) "$label is not available in this mode." else "$label is not available right now."
-                else -> CONNECT_FIRST
+                    if (rejection.reason == UnavailableReason.Mode) {
+                        lstr(context, R.string.monitor_note_unavailable_mode, label)
+                    } else {
+                        lstr(context, R.string.monitor_note_unavailable_now, label)
+                    }
+                else -> lstr(context, R.string.monitor_connect_first)
             }
             is CommandStage.Failed -> when (stage.failure) {
-                CommandFailure.NOT_APPLIED -> "$label was not applied by the camera."
-                CommandFailure.NOT_SENT -> "$label was not sent."
+                CommandFailure.NOT_APPLIED -> lstr(context, R.string.monitor_note_not_applied, label)
+                CommandFailure.NOT_SENT -> lstr(context, R.string.monitor_note_not_sent, label)
                 CommandFailure.SUPERSEDED -> null
             }
-            CommandStage.OutcomeUnknown -> "$label: the camera link dropped before it confirmed."
-            else -> "The camera did not confirm $label."
+            CommandStage.OutcomeUnknown -> lstr(context, R.string.monitor_note_link_dropped, label)
+            else -> lstr(context, R.string.monitor_note_not_confirmed, label)
         }
     }
 }

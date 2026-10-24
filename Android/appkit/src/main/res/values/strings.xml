@@ -96,4 +96,19 @@
     <string name="appkit_wizard_waiting">WAITING</string>
     <string name="appkit_wizard_nothing_type">Nothing to type. Approve it on the camera</string>
     <string name="appkit_wizard_android_asks">Android asks to join the camera network</string>
+
+    <!-- Monitor control notes (MonitorControlModel.note / CONNECT_FIRST / RECORDING_UNKNOWN) -->
+    <string name="monitor_connect_first">Connect the camera to use its controls.</string>
+    <string name="monitor_recording_unknown">Recording state is not known yet. Try again in a moment.</string>
+    <string name="monitor_note_refused">%1$s: the camera refused it.</string>
+    <string name="monitor_note_not_offered">%1$s is not offered by this camera.</string>
+    <string name="monitor_note_stale">%1$s was not sent: the camera state changed. Try again.</string>
+    <string name="monitor_note_unavailable_mode">%1$s is not available in this mode.</string>
+    <string name="monitor_note_unavailable_now">%1$s is not available right now.</string>
+    <string name="monitor_note_not_applied">%1$s was not applied by the camera.</string>
+    <string name="monitor_note_not_sent">%1$s was not sent.</string>
+    <string name="monitor_note_link_dropped">%1$s: the camera link dropped before it confirmed.</string>
+    <string name="monitor_note_not_confirmed">The camera did not confirm %1$s.</string>
+    <string name="monitor_label_record">Record</string>
+    <string name="monitor_label_stop">Stop</string>
 </resources>

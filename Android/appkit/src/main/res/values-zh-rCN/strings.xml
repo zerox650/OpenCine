@@ -94,4 +94,19 @@
     <string name="appkit_wizard_waiting">等待</string>
     <string name="appkit_wizard_nothing_type">无需输入。在相机上批准即可</string>
     <string name="appkit_wizard_android_asks">Android 会提示你加入相机网络</string>
+
+    <!-- 监看控制提示（MonitorControlModel.note / CONNECT_FIRST / RECORDING_UNKNOWN） -->
+    <string name="monitor_connect_first">连接相机后即可使用其控制项。</string>
+    <string name="monitor_recording_unknown">尚不明确当前的录制状态。请稍后重试。</string>
+    <string name="monitor_note_refused">%1$s：相机拒绝了该操作。</string>
+    <string name="monitor_note_not_offered">本相机不支持 %1$s。</string>
+    <string name="monitor_note_stale">%1$s 未发送：相机状态已改变。请重试。</string>
+    <string name="monitor_note_unavailable_mode">当前模式下不可用 %1$s。</string>
+    <string name="monitor_note_unavailable_now">当前不可用 %1$s。</string>
+    <string name="monitor_note_not_applied">相机未应用 %1$s。</string>
+    <string name="monitor_note_not_sent">%1$s 未发送。</string>
+    <string name="monitor_note_link_dropped">%1$s：相机连接在确认前中断。</string>
+    <string name="monitor_note_not_confirmed">相机未确认 %1$s。</string>
+    <string name="monitor_label_record">录制</string>
+    <string name="monitor_label_stop">停止</string>
 </resources>
