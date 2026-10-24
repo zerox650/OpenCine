@@ -113,6 +113,12 @@ internal val ENGLISH_STRINGS = mapOf(
     R.string.monitor_note_not_confirmed to "The camera did not confirm %1\$s.",
     R.string.monitor_label_record to "Record",
     R.string.monitor_label_stop to "Stop",
+    R.string.appkit_confirm_start_recording to "Start recording?",
+    R.string.appkit_confirm_stop_recording to "Stop recording?",
+    R.string.appkit_action_start to "Start",
+    R.string.appkit_action_stop to "Stop",
+    R.string.appkit_chrome_edit_title to "Editing %1\$s",
+    R.string.appkit_chrome_edit_hint to "Tap an eye to show or hide it",
 )
 
 internal fun lstr(context: Context?, resId: Int, vararg args: Any): String {

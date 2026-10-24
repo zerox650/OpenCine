@@ -111,4 +111,10 @@
     <string name="monitor_note_not_confirmed">The camera did not confirm %1$s.</string>
     <string name="monitor_label_record">Record</string>
     <string name="monitor_label_stop">Stop</string>
+    <string name="appkit_confirm_start_recording">Start recording?</string>
+    <string name="appkit_confirm_stop_recording">Stop recording?</string>
+    <string name="appkit_action_start">Start</string>
+    <string name="appkit_action_stop">Stop</string>
+    <string name="appkit_chrome_edit_title">Editing %1$s</string>
+    <string name="appkit_chrome_edit_hint">Tap an eye to show or hide it</string>
 </resources>

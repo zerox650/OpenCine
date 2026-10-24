@@ -27,6 +27,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -146,8 +147,8 @@ public fun MonitorChromeEditBanner(
     ) {
         MonitorIcon(MonitorIcon.EYE, null, Modifier.size(11.dp), MonitorPalette.accent)
         Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-            Text("Editing $modeTitle", color = MonitorPalette.text, style = MonitorTypography.text(11.5f, FontWeight.SemiBold))
-            Text("Tap an eye to show or hide it", color = MonitorPalette.muted, style = MonitorTypography.text(10f))
+            Text(stringResource(R.string.appkit_chrome_edit_title, modeTitle), color = MonitorPalette.text, style = MonitorTypography.text(11.5f, FontWeight.SemiBold))
+            Text(stringResource(R.string.appkit_chrome_edit_hint), color = MonitorPalette.muted, style = MonitorTypography.text(10f))
         }
         Box(
             Modifier

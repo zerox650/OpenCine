@@ -109,4 +109,10 @@
     <string name="monitor_note_not_confirmed">相机未确认 %1$s。</string>
     <string name="monitor_label_record">录制</string>
     <string name="monitor_label_stop">停止</string>
+    <string name="appkit_confirm_start_recording">开始录制？</string>
+    <string name="appkit_confirm_stop_recording">停止录制？</string>
+    <string name="appkit_action_start">开始</string>
+    <string name="appkit_action_stop">停止</string>
+    <string name="appkit_chrome_edit_title">正在编辑 %1$s</string>
+    <string name="appkit_chrome_edit_hint">点击眼睛图标可显示或隐藏对应元素</string>
 </resources>
