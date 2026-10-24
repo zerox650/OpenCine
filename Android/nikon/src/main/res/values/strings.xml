@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  English (default) strings for the Nikon integration's connection flow: the progress-sheet
+  step titles, route-kind words, per-phase detail lines and connect failures. These mirror the
+  literals in NikonIntegration.kt verbatim; the JVM unit tests resolve the same text through the
+  ENGLISH_STRINGS fallback in NikonLocalization.kt, so the values here must match those exactly.
+-->
+<resources>
+
+    <!-- Connection progress step titles -->
+    <string name="nikon_step_joining_wifi">Joining the camera&#8217;s Wi-Fi</string>
+    <string name="nikon_step_finding_camera">Finding the camera</string>
+    <string name="nikon_step_connecting">Connecting</string>
+    <string name="nikon_step_pairing">Pairing</string>
+    <string name="nikon_step_starting_live">Starting live view</string>
+    <string name="nikon_step_waiting_on">Waiting for the camera on %1$s</string>
+
+    <!-- Route-kind words used inside the "Waiting for the camera on …" step -->
+    <string name="nikon_route_its_wifi">its Wi-Fi</string>
+    <string name="nikon_route_wifi">Wi-Fi</string>
+    <string name="nikon_route_your_hotspot">your hotspot</string>
+    <string name="nikon_route_usb_c">USB-C</string>
+    <string name="nikon_route_hdmi">HDMI</string>
+
+    <!-- Per-phase detail lines (%1$s = camera display name) -->
+    <string name="nikon_detail_ready_join">Join %1$s\'s Wi&#8209;Fi network to continue.</string>
+    <string name="nikon_detail_joining_wifi">Approve the network request to switch networks.</string>
+    <string name="nikon_detail_discovering">Looking for %1$s on your network.</string>
+    <string name="nikon_detail_handshaking">Establishing a secure link with %1$s.</string>
+    <string name="nikon_detail_pairing">Confirm the pairing request on %1$s.</string>
+    <string name="nikon_detail_confirm_on_camera">Tap &#8220;Confirm&#8221; on %1$s. It will restart its Wi&#8209;Fi, then this phone reconnects.</string>
+    <string name="nikon_detail_preparing_live">Opening the live monitor for %1$s.</string>
+
+    <!-- Connect failures -->
+    <string name="nikon_fail_route_unreachable">This setup can no longer be reached.</string>
+    <string name="nikon_fail_route_cannot_add">This setup cannot be added.</string>
+    <string name="nikon_fail_not_connected">The camera did not connect.</string>
+
+</resources>

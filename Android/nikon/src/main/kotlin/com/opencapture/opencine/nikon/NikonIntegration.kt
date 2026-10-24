@@ -20,6 +20,7 @@ import com.opencapture.opencine.core.RouteKind
 import com.opencapture.opencine.core.SavedCamera
 import com.opencapture.opencine.core.SavedRoute
 import com.opencapture.opencine.core.UnavailableReason
+import android.content.Context
 import java.util.UUID
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -137,7 +138,7 @@ data class NikonTakeOverPrompt(
  * prompts, a take-over prompt before connecting to a held camera, and forget. Collect on the main
  * thread.
  */
-class NikonIntegration(private val port: NikonConnectPort) : CameraIntegration {
+class NikonIntegration(private val port: NikonConnectPort, private val context: Context? = null) : CameraIntegration {
     override val id = NikonOpenCineSession.INTEGRATION
     override val profiles: List<CameraProfile> = listOf(
         CameraProfile(
@@ -220,7 +221,7 @@ class NikonIntegration(private val port: NikonConnectPort) : CameraIntegration {
                 val route = target.camera.routes.firstOrNull { it.id == target.route }
                 val host = route?.extras?.get(NikonSavedRecordsV0.Extra.HOST)
                 if (route == null || host == null) {
-                    send(ConnectionEvent.Failed(failure(ConnectionFailure.Reason.Unsupported, "route.unsupported", "This setup can no longer be reached.")))
+                    send(ConnectionEvent.Failed(failure(ConnectionFailure.Reason.Unsupported, "route.unsupported", lstr(context, R.string.nikon_fail_route_unreachable))))
                     return@channelFlow
                 }
                 request = NikonConnectRequest.Saved(host, route.kind)
@@ -242,7 +243,7 @@ class NikonIntegration(private val port: NikonConnectPort) : CameraIntegration {
                 val anchor = target.camera.routes.firstOrNull { it.id == target.camera.preferredRoute } ?: target.camera.routes.firstOrNull()
                 val host = anchor?.extras?.get(NikonSavedRecordsV0.Extra.HOST)
                 if (anchor == null || host == null || target.draft.kind == RouteKind.CAPTURE_DEVICE) {
-                    send(ConnectionEvent.Failed(failure(ConnectionFailure.Reason.Unsupported, "route.unsupported", "This setup cannot be added.")))
+                    send(ConnectionEvent.Failed(failure(ConnectionFailure.Reason.Unsupported, "route.unsupported", lstr(context, R.string.nikon_fail_route_cannot_add))))
                     return@channelFlow
                 }
                 request = NikonConnectRequest.AddSetup(host, anchor.kind, target.draft.kind)
@@ -251,7 +252,7 @@ class NikonIntegration(private val port: NikonConnectPort) : CameraIntegration {
             }
         }
         val attempt = ConnectionAttemptID()
-        val plan = plan(request)
+        val plan = plan(request, context)
         val owner = currentCoroutineContext().job
         val previousProducer = currentConnect
         currentConnect = owner
@@ -310,7 +311,7 @@ class NikonIntegration(private val port: NikonConnectPort) : CameraIntegration {
                 port.phase.collect { value ->
                     if (waitingForConsent) return@collect
                     val (phase, detail) = value ?: return@collect
-                    val text = detail?.takeIf { it.isNotEmpty() } ?: defaultText(phase, device)
+                    val text = detail?.takeIf { it.isNotEmpty() } ?: defaultText(phase, device, context)
                     val (core, prompt) = when (phase) {
                         NikonConnectionPhase.READY_TO_JOIN, NikonConnectionPhase.JOINING_WIFI ->
                             CorePhase.JOINING_NETWORK to ConnectionPrompt.AcceptNetworkJoin(network ?: device, text)
@@ -335,7 +336,7 @@ class NikonIntegration(private val port: NikonConnectPort) : CameraIntegration {
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
-                outcome = ConnectionEvent.Failed(failure(ConnectionFailure.Reason.Other, "connect.failed", error.message ?: "The camera did not connect."))
+                outcome = ConnectionEvent.Failed(failure(ConnectionFailure.Reason.Other, "connect.failed", error.message ?: lstr(context, R.string.nikon_fail_not_connected)))
             } finally {
                 phases.cancel()
                 // The consumer stopped listening before an outcome: cancel the attempt.
@@ -395,40 +396,40 @@ class NikonIntegration(private val port: NikonConnectPort) : CameraIntegration {
         )
 
         /** The card's plan for a request; each step lists the app phases it covers. */
-        fun plan(request: NikonConnectRequest): List<Pair<ConnectionStep, Set<NikonConnectionPhase>>> {
-            val join = ConnectionStep("Joining the camera’s Wi-Fi") to setOf(NikonConnectionPhase.READY_TO_JOIN, NikonConnectionPhase.JOINING_WIFI)
-            val find = ConnectionStep("Finding the camera") to setOf(NikonConnectionPhase.DISCOVERING)
-            val connect = ConnectionStep("Connecting") to setOf(NikonConnectionPhase.HANDSHAKING)
-            val pair = ConnectionStep("Pairing") to setOf(NikonConnectionPhase.PAIRING, NikonConnectionPhase.CONFIRM_ON_CAMERA)
-            val live = ConnectionStep("Starting live view") to setOf(NikonConnectionPhase.PREPARING_LIVE_VIEW)
+        fun plan(request: NikonConnectRequest, context: Context? = null): List<Pair<ConnectionStep, Set<NikonConnectionPhase>>> {
+            val join = ConnectionStep(lstr(context, R.string.nikon_step_joining_wifi)) to setOf(NikonConnectionPhase.READY_TO_JOIN, NikonConnectionPhase.JOINING_WIFI)
+            val find = ConnectionStep(lstr(context, R.string.nikon_step_finding_camera)) to setOf(NikonConnectionPhase.DISCOVERING)
+            val connect = ConnectionStep(lstr(context, R.string.nikon_step_connecting)) to setOf(NikonConnectionPhase.HANDSHAKING)
+            val pair = ConnectionStep(lstr(context, R.string.nikon_step_pairing)) to setOf(NikonConnectionPhase.PAIRING, NikonConnectionPhase.CONFIRM_ON_CAMERA)
+            val live = ConnectionStep(lstr(context, R.string.nikon_step_starting_live)) to setOf(NikonConnectionPhase.PREPARING_LIVE_VIEW)
             return when (request) {
                 is NikonConnectRequest.Saved -> if (request.kind == RouteKind.CAMERA_ACCESS_POINT) listOf(join, find, connect, live) else listOf(find, connect, live)
                 is NikonConnectRequest.Discovered -> listOf(connect, pair, live)
                 is NikonConnectRequest.AddSetup -> listOf(
-                    ConnectionStep("Waiting for the camera on ${label(request.kind)}") to
+                    ConnectionStep(lstr(context, R.string.nikon_step_waiting_on, label(request.kind, context))) to
                         setOf(NikonConnectionPhase.DISCOVERING, NikonConnectionPhase.READY_TO_JOIN, NikonConnectionPhase.JOINING_WIFI),
                     connect, live,
                 )
             }
         }
 
-        private fun label(kind: RouteKind): String = when (kind) {
-            RouteKind.CAMERA_ACCESS_POINT -> "its Wi-Fi"
-            RouteKind.INFRASTRUCTURE_NETWORK -> "Wi-Fi"
-            RouteKind.PHONE_HOTSPOT -> "your hotspot"
-            RouteKind.USB -> "USB-C"
-            RouteKind.CAPTURE_DEVICE -> "HDMI"
+        private fun label(kind: RouteKind, context: Context? = null): String = when (kind) {
+            RouteKind.CAMERA_ACCESS_POINT -> lstr(context, R.string.nikon_route_its_wifi)
+            RouteKind.INFRASTRUCTURE_NETWORK -> lstr(context, R.string.nikon_route_wifi)
+            RouteKind.PHONE_HOTSPOT -> lstr(context, R.string.nikon_route_your_hotspot)
+            RouteKind.USB -> lstr(context, R.string.nikon_route_usb_c)
+            RouteKind.CAPTURE_DEVICE -> lstr(context, R.string.nikon_route_hdmi)
         }
 
         /** The progress sheet's detail line when the app sends none (Swift `ConnectionProgressCopy.statusDetail`). */
-        fun defaultText(phase: NikonConnectionPhase, device: String): String = when (phase) {
-            NikonConnectionPhase.READY_TO_JOIN -> "Join $device's Wi‑Fi network to continue."
-            NikonConnectionPhase.JOINING_WIFI -> "Approve the network request to switch networks."
-            NikonConnectionPhase.DISCOVERING -> "Looking for $device on your network."
-            NikonConnectionPhase.HANDSHAKING -> "Establishing a secure link with $device."
-            NikonConnectionPhase.PAIRING -> "Confirm the pairing request on $device."
-            NikonConnectionPhase.CONFIRM_ON_CAMERA -> "Tap “Confirm” on $device. It will restart its Wi‑Fi, then this phone reconnects."
-            NikonConnectionPhase.PREPARING_LIVE_VIEW -> "Opening the live monitor for $device."
+        fun defaultText(phase: NikonConnectionPhase, device: String, context: Context? = null): String = when (phase) {
+            NikonConnectionPhase.READY_TO_JOIN -> lstr(context, R.string.nikon_detail_ready_join, device)
+            NikonConnectionPhase.JOINING_WIFI -> lstr(context, R.string.nikon_detail_joining_wifi)
+            NikonConnectionPhase.DISCOVERING -> lstr(context, R.string.nikon_detail_discovering, device)
+            NikonConnectionPhase.HANDSHAKING -> lstr(context, R.string.nikon_detail_handshaking, device)
+            NikonConnectionPhase.PAIRING -> lstr(context, R.string.nikon_detail_pairing, device)
+            NikonConnectionPhase.CONFIRM_ON_CAMERA -> lstr(context, R.string.nikon_detail_confirm_on_camera, device)
+            NikonConnectionPhase.PREPARING_LIVE_VIEW -> lstr(context, R.string.nikon_detail_preparing_live, device)
         }
     }
 }
