@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OpenCine/Android · camera-controls module · Simplified Chinese (zh-rCN)
+  简体中文翻译。占位符与英文版一致；产品名（CineStop、D-Log、Rec.709、RED、ARRI、Pocket 3）保留原文。
+-->
+<resources>
+    <string name="assist_peaking_sensitivity_help">灵敏度越高越能捕捉到更细微的边缘，但在细节丰富的画面上可能产生噪点。</string>
+    <string name="assist_peaking_color_help">选择在常见画面上依然清晰可读的边缘颜色。</string>
+    <string name="assist_false_color_scale_help">相机的色彩模式会自动选择 D-Log、D-Log2、D-Log M、Rec.709 或 HLG。CineStop 以 18% 灰为中心绘制五档：墨绿 −2、黄绿 −1、中性灰、粉红 +1（肤色）、黄色 +2（上层肤色）、红色代表削波、紫色代表暗部缺失，其余为平灰。Video 在亮度灰度上叠加视频级 IRE 条纹。IRE 在亮度灰度上叠加六个视频级分区。Limits 只绘制暗部与亮部警告。D-Log M 使用直接的 0–100 信号刻度，其灰卡参考与 CineStop 档位为 Pocket 3 的估算值，并非经过标定的传感器极限；在其他 D-Log M 相机上请使用 IRE。</string>
+    <string name="assist_false_color_read_help">伪色彩读取 log 素材的方式。709 采用相机的官方 Rec.709 观感，与 RED、ARRI 以及多数监视器的伪色彩方式一致，因此削波即表示 Rec.709 画面已经削波。LOG 与 WAVE 相同，读取原始信号，保留完整的高光范围与相机自身的削波点。</string>
+    <string name="assist_false_color_key_help">伪色彩启用时，在实时画面上显示紧凑色标。</string>
+    <string name="assist_zebra_unit_help">在原生 0-255 编码值与 0-100 的监视 IRE 刻度之间切换。</string>
+    <string name="assist_zebra_high_help">补偿当前 log 曲线后，当高光细节接近削波时给出高位斑马纹警告。</string>
+    <string name="assist_zebra_midtone_help">中间调斑马纹提供经过曲线补偿的参考带，用于人脸或关键主体的曝光。</string>
+    <string name="assist_encoded_code_note">编码值百分比。源标定不可用。</string>
+    <string name="assist_traffic_compensation_help">通道指示灯点亮前允许的暗部缺失/削波容差档数。与直方图红绿灯共用此设置。</string>
+    <string name="mirror_explanation">当相机朝向自己或倒置安装时翻转监视画面。录制文件与示波器从不镜像。</string>
+    <string name="mirror_horizontal_help">左右翻转，适用于相机朝向自己的情况。</string>
+    <string name="mirror_vertical_help">上下翻转，适用于下挂式安装。两者同时开启则旋转 180°。</string>
+    <string name="anamorphic_help">校正变形宽银幕画面在实时预览与播放中的显示比例。水平方向使画面变宽；垂直方向使画面变高。整幅画面保持完整适配。录制文件、照片、导出结果与示波器测量均不受影响。</string>
+    <string name="audio_assist_help">测量相机的音频电平。仅在实时画面开启时可用。</string>
+</resources>

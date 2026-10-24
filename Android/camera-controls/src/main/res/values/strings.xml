@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OpenCine/Android · camera-controls module (namespace: com.opencapture.opencine.cameracontrols)
+  English is the default locale. The paired values-zh-rCN/strings.xml overrides these for
+  Simplified Chinese. Monitor-assist help copy that was previously hardcoded in the Composables.
+-->
+<resources>
+    <string name="assist_peaking_sensitivity_help">Higher sensitivity catches finer edges but can get noisy on detailed scenes.</string>
+    <string name="assist_peaking_color_help">Choose the edge color that stays readable over your typical scene.</string>
+    <string name="assist_false_color_scale_help">The camera color mode selects D-Log, D-Log2, D-Log M, Rec.709, or HLG automatically. CineStop paints five stops around 18% gray: dark green −2, yellow-green −1, gray, pink +1 skin, yellow +2 upper skin, red clip, violet crush, flat gray elsewhere. Video paints video-level IRE stripes over luminance grayscale. IRE paints six video-level zones over luminance grayscale. Limits paints only shadow and highlight warnings. D-Log M uses a direct 0–100 signal scale. Its gray guide and CineStop stops are Pocket 3 estimates, not calibrated sensor limits. Use IRE on other D-Log M cameras.</string>
+    <string name="assist_false_color_read_help">How false color reads log footage. 709 reads the camera\'s official Rec.709 look, the way RED, ARRI and most monitors apply false color, so clip means clipped in the Rec.709 image. LOG reads the raw signal like WAVE, with the full highlight range and the camera\'s own clip.</string>
+    <string name="assist_false_color_key_help">Show a compact color key over live view while False Color is active.</string>
+    <string name="assist_zebra_unit_help">Switch between native 0-255 encoded codes and a 0-100 monitoring IRE scale.</string>
+    <string name="assist_zebra_high_help">High zebra warns when bright detail approaches clipping after the active log curve is compensated.</string>
+    <string name="assist_zebra_midtone_help">Midtone zebra gives a curve-compensated reference band for faces or key subject exposure.</string>
+    <string name="assist_encoded_code_note">Encoded code percentage. Source calibration unavailable.</string>
+    <string name="assist_traffic_compensation_help">Stops of crush/clip tolerance before a channel indicator glows. Shared with the histogram traffic lights.</string>
+    <string name="mirror_explanation">Flips the monitor for a camera pointed back at you or mounted upside down. The recording and the scopes are never mirrored.</string>
+    <string name="mirror_horizontal_help">Left-to-right, for a camera pointed back at you.</string>
+    <string name="mirror_vertical_help">Top-to-bottom, for an underslung mount. Both on turns it 180°.</string>
+    <string name="anamorphic_help">Corrects the displayed shape of an anamorphic image in live view and playback. Horizontal widens the image; Vertical makes it taller. The full image stays fitted. Recordings, photos, exports and scope measurements are unchanged.</string>
+    <string name="audio_assist_help">Meters the camera\'s audio. Available while live view is up.</string>
+</resources>

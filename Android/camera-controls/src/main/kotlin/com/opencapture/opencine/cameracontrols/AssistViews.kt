@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -249,7 +250,7 @@ private fun AssistOptionsBody(tool: MonitorAssistTool, state: MonitorAssistState
         MonitorAssistTool.CROSS -> com.opencapture.monitorui.MonitorAssistHelp(MonitorCrosshairGeometry.HELP)
         MonitorAssistTool.MIRROR -> MirrorOptions(state)
         MonitorAssistTool.AUDIO -> com.opencapture.monitorui.MonitorAudioMenu(state.audioOrientation,
-            state::updateAudioOrientation, state.audioShowDB, state::updateAudioShowDB, AudioAssist.HELP)
+            state::updateAudioOrientation, state.audioShowDB, state::updateAudioShowDB, stringResource(R.string.audio_assist_help))
     }
 }
 
@@ -258,8 +259,8 @@ private fun PeakingOptions(state: MonitorAssistState, host: AssistHost) {
     val haptics = LocalOperatorHaptics.current
     com.opencapture.monitorui.MonitorPeakingMenu(state.peakingSensitivity, state.peakingColor,
         host.peakingColors,
-        "Higher sensitivity catches finer edges but can get noisy on detailed scenes.",
-        "Choose the edge color that stays readable over your typical scene.",
+        stringResource(R.string.assist_peaking_sensitivity_help),
+        stringResource(R.string.assist_peaking_color_help),
         onSensitivity = { haptics.selection(); state.setPeaking(sense = it) },
         onColor = { haptics.selection(); state.setPeaking(color = it) })
 }
@@ -267,28 +268,15 @@ private fun PeakingOptions(state: MonitorAssistState, host: AssistHost) {
 @Composable
 private fun FalseColorOptions(state: MonitorAssistState, transfer: MonitorTransfer, host: AssistHost) {
     val haptics = LocalOperatorHaptics.current
-    val scaleHelp =
-            "The camera color mode selects D-Log, D-Log2, D-Log M, Rec.709, or HLG automatically. " +
-                "CineStop paints five stops around 18% gray: dark green −2, yellow-green −1, gray, " +
-                "pink +1 skin, yellow +2 upper skin, red clip, violet crush, flat gray elsewhere. " +
-                "Video paints video-level IRE stripes over " +
-                "luminance grayscale. IRE paints " +
-                "six video-level zones over luminance grayscale. Limits " +
-                "paints only shadow and highlight warnings." +
-                " D-Log M uses a direct 0–100 signal scale. Its gray guide and CineStop stops are " +
-                "Pocket 3 estimates, not calibrated sensor limits. Use IRE on other D-Log M cameras."
-    val readHelp =
-            "How false color reads log footage. 709 reads the camera's official Rec.709 look, " +
-                "the way RED, ARRI and most monitors apply false color, so clip means clipped in " +
-                "the Rec.709 image. LOG reads the raw signal like WAVE, with the full highlight " +
-                "range and the camera's own clip."
+    val scaleHelp = stringResource(R.string.assist_false_color_scale_help)
+    val readHelp = stringResource(R.string.assist_false_color_read_help)
     com.opencapture.monitorui.MonitorFalseColorMenu(
         listOf("CineStop", "Video", "IRE", "Limits").map(MonitorFalseColorSelection::fromMenuLabel),
         state.falseColorScale, { haptics.selection(); state.setFalseColor(scale = it) }, { it.menuLabel },
         state.falseColorRec709, { haptics.selection(); state.setFalseColorRead(it) },
         falseColorReferenceValues(state, transfer, host.scopeCeiling(state), host.rec709LookCurve(transfer)), state.falseColorReference,
         { haptics.selection(); state.setFalseColor(reference = it) }, scaleHelp, readHelp,
-        "Show a compact color key over live view while False Color is active.")
+        stringResource(R.string.assist_false_color_key_help))
 }
 
 @Composable
@@ -298,9 +286,9 @@ private fun ZebraOptions(state: MonitorAssistState, transfer: MonitorTransfer, h
     val ceiling = host.scopeCeiling(state)
     com.opencapture.monitorui.MonitorZebraMenu(MonitorZebraUnit.entries, state.zebraUnit, { it.editorLabel },
         { haptics.selection(); state.updateZebraUnit(it) },
-        "Switch between native 0-255 encoded codes and a 0-100 monitoring IRE scale.",
-        "High zebra warns when bright detail approaches clipping after the active log curve is compensated.",
-        "Midtone zebra gives a curve-compensated reference band for faces or key subject exposure.",
+        stringResource(R.string.assist_zebra_unit_help),
+        stringResource(R.string.assist_zebra_high_help),
+        stringResource(R.string.assist_zebra_midtone_help),
         com.opencapture.monitorui.MonitorZebraZone(state.zebraHighlight,
             ZebraEditor.displayValue(state.zebraHighlightIRE, state.zebraUnit, transfer, ceiling),
             maximum, state.zebraHighlightColor, host.highlightColors,
@@ -336,7 +324,7 @@ private fun ParadeOptions(state: MonitorAssistState, supportsCalibratedReference
 @Composable
 private fun HistogramOptions(state: MonitorAssistState, supportsCalibratedReferences: Boolean) {
     if (!supportsCalibratedReferences) {
-        Text("Encoded code percentage. Source calibration unavailable.", color = MonitorPalette.muted, fontSize = 11.sp)
+        Text(stringResource(R.string.assist_encoded_code_note), color = MonitorPalette.muted, fontSize = 11.sp)
         return
     }
     val haptics = LocalOperatorHaptics.current
@@ -359,7 +347,7 @@ private fun LightsOptions(state: MonitorAssistState) {
     val haptics = LocalOperatorHaptics.current
     com.opencapture.monitorui.MonitorCrushClipMenu(state.crushClipCompensation,
         { haptics.selection(); state.setCompensation(it) },
-        "Stops of crush/clip tolerance before a channel indicator glows. Shared with the histogram traffic lights.",
+        stringResource(R.string.assist_traffic_compensation_help),
         showTopDivider = false)
 }
 
@@ -396,13 +384,14 @@ private fun MirrorOptions(state: MonitorAssistState) {
     com.opencapture.monitorui.MonitorMirrorMenu(state.mirrorHorizontal,
         { haptics.selection(); state.setMirrorAxes(horizontal = it) }, state.mirrorVertical,
         { haptics.selection(); state.setMirrorAxes(vertical = it) },
-        MirrorAssist.EXPLANATION, MirrorAssist.HORIZONTAL_HELP, MirrorAssist.VERTICAL_HELP)
+        stringResource(R.string.mirror_explanation), stringResource(R.string.mirror_horizontal_help),
+        stringResource(R.string.mirror_vertical_help))
 }
 
 @Composable
 fun DesqueezeOptions(state: MonitorAssistState) {
     com.opencapture.monitorui.MonitorDesqueezeMenu(state.desqueezePreset, state.desqueezeCustom,
-        state.desqueezeCustomFactor, state.desqueezeDirection, AnamorphicDesqueeze.HELP,
+        state.desqueezeCustomFactor, state.desqueezeDirection, stringResource(R.string.anamorphic_help),
         onSelect = { if (it == null) state.selectCustomDesqueeze() else state.selectDesqueezePreset(it) },
         onFactor = state::updateDesqueezeFactor, onDirection = state::updateDesqueezeDirection)
 }
