@@ -110,94 +110,98 @@ fun formatAppVersion(versionName: String, versionCode: Long): String = "$version
 
 /** The operator setup help copy both apps show; [appName] fills the lines that name the app. */
 @Suppress("PropertyName")
-open class OperatorHelpCopy(appName: String) {
-    val CURRENT_TRANSPORT =
-        "Pocket uses Bluetooth to pair, then the camera's own Wi-Fi for HEVC. USB-C, hotspot, and HDMI capture are not in this build."
-    val PHASE = "Where the BLE → Wi-Fi → datalink handshake is right now."
-    val CAMERA_WIFI =
-        "SSID joined for this session. The password stays in the Android Keystore on this phone."
-    val SAVED_CAMERAS =
-        "Pair from the home list. Settings does not start a new pair \u2014 that stays on Your cameras."
-    val EDIT_VIEW = "Opens the monitor with an eye on each element you can show or hide."
-    val FRAME_IO =
-        "Sign in to upload clips from the share popup. Frame.io needs the internet, so the phone hops off the camera Wi‑Fi for the upload."
-    val RECORD_CONFIRMATION = "Ask before starting or stopping recording to prevent mistaps."
-    val SHOOTING_MODE =
-        "Switch the camera between Video, Photo and the time-based modes. The camera reports " +
-            "the mode back, so this follows a change made on the body itself."
-    val HAPTICS =
-        "Short confirmation pulses for switches, settings, and gimbal limits. A connected controller also rumbles at a stop."
-    val JOYSTICK_SENSITIVITY =
-        "How far a stick throw moves the gimbal \u2014 on-screen and a connected game controller. Small throws crawl; full throw is fastest. 4 is the captured feel. 5 reaches full speed sooner; 1 is the slowest."
-    val VIRTUAL_JOYSTICK_SIZE =
-        "How large the on-screen stick is. Medium is the default. Large is easier to grab; Small keeps more of the picture clear."
-    val VIRTUAL_JOYSTICK_INVERT_PAN =
-        "Reverse left and right on the on-screen stick. Off is the default. A game controller is unchanged."
-    val VIRTUAL_JOYSTICK_INVERT_TILT =
-        "Reverse up and down on the on-screen stick. Off is the default. A game controller is unchanged."
-    val VIRTUAL_JOYSTICK_DEADZONE =
-        "Ignore small movements near the center. The default is 8%. Increase it to make the center less sensitive."
-    val VIRTUAL_JOYSTICK_RESPONSE =
-        "Standard keeps the current feel. Linear responds evenly. Fine makes small movements gentler."
-    val GIMBAL_JOYSTICK =
-        "Which analog stick pans and tilts. Left is the default. The other stick does not move the gimbal."
-    val GAMEPAD =
-        "A connected game controller. The selected gimbal joystick pans and tilts. Cross/A records. Circle/B recenters. Square/X is rotate-180. Triangle/Y tracks a face. L1/R1 jump zoom out/in. L2/R2 hold-to-zoom (deeper is faster). D-pad up/down ISO, left/right shutter. Unplug rests the stick. On-screen stick wins while you hold it."
+open class OperatorHelpCopy(private val appName: String, private val context: Context? = null) {
+    val CURRENT_TRANSPORT
+        get() = context?.getString(R.string.help_current_transport) ?: "Pocket uses Bluetooth to pair, then the camera's own Wi-Fi for HEVC. USB-C, hotspot, and HDMI capture are not in this build."
+    val PHASE
+        get() = context?.getString(R.string.help_phase) ?: "Where the BLE → Wi-Fi → datalink handshake is right now."
+    val CAMERA_WIFI
+        get() = context?.getString(R.string.help_camera_wifi) ?: "SSID joined for this session. The password stays in the Android Keystore on this phone."
+    val SAVED_CAMERAS
+        get() = context?.getString(R.string.help_saved_cameras) ?: "Pair from the home list. Settings does not start a new pair \u2014 that stays on Your cameras."
+    val EDIT_VIEW
+        get() = context?.getString(R.string.help_edit_view) ?: "Opens the monitor with an eye on each element you can show or hide."
+    val FRAME_IO
+        get() = context?.getString(R.string.help_frame_io) ?: "Sign in to upload clips from the share popup. Frame.io needs the internet, so the phone hops off the camera Wi‑Fi for the upload."
+    val RECORD_CONFIRMATION
+        get() = context?.getString(R.string.help_record_confirmation) ?: "Ask before starting or stopping recording to prevent mistaps."
+    val SHOOTING_MODE
+        get() = context?.getString(R.string.help_shooting_mode) ?: "Switch the camera between Video, Photo and the time-based modes. The camera reports the mode back, so this follows a change made on the body itself."
+    val HAPTICS
+        get() = context?.getString(R.string.help_haptics) ?: "Short confirmation pulses for switches, settings, and gimbal limits. A connected controller also rumbles at a stop."
+    val JOYSTICK_SENSITIVITY
+        get() = context?.getString(R.string.help_joystick_sensitivity) ?: "How far a stick throw moves the gimbal \u2014 on-screen and a connected game controller. Small throws crawl; full throw is fastest. 4 is the captured feel. 5 reaches full speed sooner; 1 is the slowest."
+    val VIRTUAL_JOYSTICK_SIZE
+        get() = context?.getString(R.string.help_virtual_joystick_size) ?: "How large the on-screen stick is. Medium is the default. Large is easier to grab; Small keeps more of the picture clear."
+    val VIRTUAL_JOYSTICK_INVERT_PAN
+        get() = context?.getString(R.string.help_virtual_joystick_invert_pan) ?: "Reverse left and right on the on-screen stick. Off is the default. A game controller is unchanged."
+    val VIRTUAL_JOYSTICK_INVERT_TILT
+        get() = context?.getString(R.string.help_virtual_joystick_invert_tilt) ?: "Reverse up and down on the on-screen stick. Off is the default. A game controller is unchanged."
+    val VIRTUAL_JOYSTICK_DEADZONE
+        get() = context?.getString(R.string.help_virtual_joystick_deadzone) ?: "Ignore small movements near the center. The default is 8%. Increase it to make the center less sensitive."
+    val VIRTUAL_JOYSTICK_RESPONSE
+        get() = context?.getString(R.string.help_virtual_joystick_response) ?: "Standard keeps the current feel. Linear responds evenly. Fine makes small movements gentler."
+    val GIMBAL_JOYSTICK
+        get() = context?.getString(R.string.help_gimbal_joystick) ?: "Which analog stick pans and tilts. Left is the default. The other stick does not move the gimbal."
+    val GAMEPAD
+        get() = context?.getString(R.string.help_gamepad) ?: "A connected game controller. The selected gimbal joystick pans and tilts. Cross/A records. Circle/B recenters. Square/X is rotate-180. Triangle/Y tracks a face. L1/R1 jump zoom out/in. L2/R2 hold-to-zoom (deeper is faster). D-pad up/down ISO, left/right shutter. Unplug rests the stick. On-screen stick wins while you hold it."
     val KEEP_SCREEN_AWAKE =
         MonitorSettingsCopy.keepScreenAwake
-    val HDR_DISPLAY =
-        "Outdoor panel brightness, not a grade. WAVE, HISTO, PARADE, VECTOR, zebras and false color still read the decoded camera signal \u2014 judge exposure there, not from how bright the picture looks. Screen recording drops back to a normal SDR picture so the file is not HDR-boosted. This is not the camera's HDR/HLG color mode. Off by default."
-    val THEME = "Charcoal field-monitor chrome with Sky Blue accents, tuned for low reflection on set."
-    val SUPPORT = "Connection, live view, controls, and troubleshooting."
-    val REPORT = "Opens a public issue form on GitHub for this project."
-    val REPORT_PROBLEM =
-        "Tell us what happened. Technical details stay off unless you include them. You can attach up to three photos. Sending does not turn on automatic reports."
+    val HDR_DISPLAY
+        get() = context?.getString(R.string.help_hdr_display) ?: "Outdoor panel brightness, not a grade. WAVE, HISTO, PARADE, VECTOR, zebras and false color still read the decoded camera signal \u2014 judge exposure there, not from how bright the picture looks. Screen recording drops back to a normal SDR picture so the file is not HDR-boosted. This is not the camera's HDR/HLG color mode. Off by default."
+    val THEME
+        get() = context?.getString(R.string.help_theme) ?: "Charcoal field-monitor chrome with Sky Blue accents, tuned for low reflection on set."
+    val SUPPORT
+        get() = context?.getString(R.string.help_support) ?: "Connection, live view, controls, and troubleshooting."
+    val REPORT
+        get() = context?.getString(R.string.help_report) ?: "Opens a public issue form on GitHub for this project."
+    val REPORT_PROBLEM
+        get() = context?.getString(R.string.help_report_problem) ?: "Tell us what happened. Technical details stay off unless you include them. You can attach up to three photos. Sending does not turn on automatic reports."
     val RELIABILITY_REPORTS = MonitorSettingsCopy.automaticReports
-    val RELIABILITY_UNAVAILABLE =
-        "This build cannot send automatic reports. You can still share or delete reports stored on this phone."
-    val FEATURE = "Start an idea in this project's feature-request discussion."
-    val SOURCE =
-        "View the $appName project on GitHub. Opening this may leave the camera Wi-Fi if that is the only network."
-    val LINK_HEALTH = "How healthy the camera link is right now \u2014 delivery, not radio RSSI."
-    val CLEAR_CACHE =
-        "Removes cached clips, thumbnails and camera indexes for every camera. Cameras reload their library when connected."
-    val LUT_LOOK = "Looks apply on this phone. The file on the camera is unchanged."
-    val APP_VERSION = "Current $appName build from the native project metadata."
-    val LOCAL_CACHE = "Cached clips, thumbnails and camera indexes for every camera on this phone."
-    val CACHE_FULL_RESOLUTION =
-        "Download the original camera file when you open a clip. Off keeps only the 720p proxy to save space. Share needs the original \u2014 connect the camera if it is not cached."
+    val RELIABILITY_UNAVAILABLE
+        get() = context?.getString(R.string.help_reliability_unavailable) ?: "This build cannot send automatic reports. You can still share or delete reports stored on this phone."
+    val FEATURE
+        get() = context?.getString(R.string.help_feature) ?: "Start an idea in this project's feature-request discussion."
+    val SOURCE
+        get() = context?.getString(R.string.help_source, appName) ?: "View the $appName project on GitHub. Opening this may leave the camera Wi-Fi if that is the only network."
+    val LINK_HEALTH
+        get() = context?.getString(R.string.help_link_health) ?: "How healthy the camera link is right now \u2014 delivery, not radio RSSI."
+    val CLEAR_CACHE
+        get() = context?.getString(R.string.help_clear_cache) ?: "Removes cached clips, thumbnails and camera indexes for every camera. Cameras reload their library when connected."
+    val LUT_LOOK
+        get() = context?.getString(R.string.help_lut_look) ?: "Looks apply on this phone. The file on the camera is unchanged."
+    val APP_VERSION
+        get() = context?.getString(R.string.help_app_version, appName) ?: "Current $appName build from the native project metadata."
+    val LOCAL_CACHE
+        get() = context?.getString(R.string.help_local_cache) ?: "Cached clips, thumbnails and camera indexes for every camera on this phone."
+    val CACHE_FULL_RESOLUTION
+        get() = context?.getString(R.string.help_cache_full_resolution) ?: "Download the original camera file when you open a clip. Off keeps only the 720p proxy to save space. Share needs the original \u2014 connect the camera if it is not cached."
     val FEED_UPSCALER = MonitorSettingsCopy.feedUpscaler
-    val FALSE_COLOR_SCALE =
-        "The camera color mode selects D-Log, D-Log2, Rec.709, or HLG automatically. " +
-            "CineStop paints five stops around 18% gray, read through the " +
-            "camera's log curve: dark green −2, yellow-green −1, gray at 18%, light pink +1 " +
-            "(skin), soft yellow +2 (upper skin limit). Red is clipped and violet is crushed; " +
-            "other shadows are flat dark gray and other highlights flat light gray. " +
-            "Video paints video-level IRE stripes (green 41–48, pink 61–70, red clip) " +
-            "over luminance grayscale. IRE paints six video-level zones over " +
-            "luminance grayscale: purple crush, blue near-black, green 18% gray, pink one " +
-            "stop over, yellow near clip, red clip. On log, Video and IRE read the camera's " +
-            "Rec.709 look (709) or the raw signal (LOG), set under Read. Limits paints only shadow and highlight warnings, leaving other colors untouched."
-    val FALSE_COLOR_REFERENCE =
-        "Show a compact color key over live view while False Color is active."
-    val PEAKING_SENSITIVITY =
-        "Higher sensitivity catches finer edges but can get noisy on detailed scenes."
-    val PEAKING_COLOR = "Choose the edge color that stays readable over your typical scene."
-    val ZEBRA_UNITS =
-        "Switch between native 0-255 encoded codes and a 0-100 monitoring IRE scale."
-    val ZEBRA_HIGHLIGHT =
-        "High zebra warns when bright detail approaches clipping after the active log curve is compensated."
-    val ZEBRA_MIDTONE =
-        "Midtone zebra gives a curve-compensated reference band for faces or key subject exposure."
-    val WAVEFORM_BRIGHTNESS =
-        "Raise trace intensity when the waveform is hard to read in bright light."
-    val PARADE_BRIGHTNESS = "Raise trace intensity when channel separation is hard to see."
-    val VECTORSCOPE_ZOOM =
-        "Magnifies only the chroma trace; the graticule stays at unity. The vectorscope reads the monitor image (your active LUT, or the built-in display tone map), where chroma is meaningful."
-    val VECTORSCOPE_BRIGHTNESS =
-        "Raise trace intensity when the chroma plot is hard to read."
-    val TRAFFIC_LIGHTS_COMPENSATION =
-        "Stops of crush/clip tolerance before a channel indicator glows. Shared with the histogram traffic lights."}
+    val FALSE_COLOR_SCALE
+        get() = context?.getString(R.string.help_false_color_scale) ?: "The camera color mode selects D-Log, D-Log2, Rec.709, or HLG automatically. CineStop paints five stops around 18% gray, read through the camera's log curve: dark green −2, yellow-green −1, gray at 18%, light pink +1 (skin), soft yellow +2 (upper skin limit). Red is clipped and violet is crushed; other shadows are flat dark gray and other highlights flat light gray. Video paints video-level IRE stripes (green 41–48, pink 61–70, red clip) over luminance grayscale. IRE paints six video-level zones over luminance grayscale: purple crush, blue near-black, green 18% gray, pink one stop over, yellow near clip, red clip. On log, Video and IRE read the camera's Rec.709 look (709) or the raw signal (LOG), set under Read. Limits paints only shadow and highlight warnings, leaving other colors untouched."
+    val FALSE_COLOR_REFERENCE
+        get() = context?.getString(R.string.help_false_color_reference) ?: "Show a compact color key over live view while False Color is active."
+    val PEAKING_SENSITIVITY
+        get() = context?.getString(R.string.help_peaking_sensitivity) ?: "Higher sensitivity catches finer edges but can get noisy on detailed scenes."
+    val PEAKING_COLOR
+        get() = context?.getString(R.string.help_peaking_color) ?: "Choose the edge color that stays readable over your typical scene."
+    val ZEBRA_UNITS
+        get() = context?.getString(R.string.help_zebra_units) ?: "Switch between native 0-255 encoded codes and a 0-100 monitoring IRE scale."
+    val ZEBRA_HIGHLIGHT
+        get() = context?.getString(R.string.help_zebra_highlight) ?: "High zebra warns when bright detail approaches clipping after the active log curve is compensated."
+    val ZEBRA_MIDTONE
+        get() = context?.getString(R.string.help_zebra_midtone) ?: "Midtone zebra gives a curve-compensated reference band for faces or key subject exposure."
+    val WAVEFORM_BRIGHTNESS
+        get() = context?.getString(R.string.help_waveform_brightness) ?: "Raise trace intensity when the waveform is hard to read in bright light."
+    val PARADE_BRIGHTNESS
+        get() = context?.getString(R.string.help_parade_brightness) ?: "Raise trace intensity when channel separation is hard to see."
+    val VECTORSCOPE_ZOOM
+        get() = context?.getString(R.string.help_vectorscope_zoom) ?: "Magnifies only the chroma trace; the graticule stays at unity. The vectorscope reads the monitor image (your active LUT, or the built-in display tone map), where chroma is meaningful."
+    val VECTORSCOPE_BRIGHTNESS
+        get() = context?.getString(R.string.help_vectorscope_brightness) ?: "Raise trace intensity when the chroma plot is hard to read."
+    val TRAFFIC_LIGHTS_COMPENSATION
+        get() = context?.getString(R.string.help_traffic_lights_compensation) ?: "Stops of crush/clip tolerance before a channel indicator glows. Shared with the histogram traffic lights."
+}
 
 /**
  * The clip cache directories: the app's [mediaRoots] (per-camera folders, each keeping its `index.json`)
