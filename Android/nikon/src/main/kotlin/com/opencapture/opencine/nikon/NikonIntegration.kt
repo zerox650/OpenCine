@@ -109,6 +109,9 @@ class NikonConnectException(val failure: ConnectionFailure) : Exception(failure.
 
 /**
  * Connecting would drop another device's live session on this camera (Swift `NikonTakeOverPrompt`).
+ *
+ * [context] localizes the operator copy; without one (JVM unit tests) the bundled English copy
+ * keeps behaviour and assertions unchanged off-device.
  */
 data class NikonTakeOverPrompt(
     val camera: String,
@@ -116,18 +119,19 @@ data class NikonTakeOverPrompt(
     override val confirm: () -> Unit,
     override val cancel: () -> Unit,
     private val message: String? = null,
+    private val context: Context? = null,
 ) : ConfirmationPrompt {
     override val confirmationID: String = UUID.randomUUID().toString()
-    override val confirmationTitle: String = "Take over this camera?"
-    override val confirmTitle: String = "Take Over"
-    override val cancelTitle: String = "Cancel"
-    override val fallbackText: String get() = message ?: message(holder)
+    override val confirmationTitle: String = lstr(context, R.string.nikon_takeover_title)
+    override val confirmTitle: String = lstr(context, R.string.nikon_takeover_confirm)
+    override val cancelTitle: String = lstr(context, R.string.nikon_takeover_cancel)
+    override val fallbackText: String get() = message ?: message(holder, context)
 
     companion object {
         /** Names the device whose session would be displaced by this operator action. */
-        fun message(holder: String?): String = holder?.takeIf(String::isNotBlank)?.let {
-            "$it is using this camera. Connecting will disconnect it."
-        } ?: "Another device is using this camera. Connecting will disconnect it."
+        fun message(holder: String?, context: Context? = null): String = holder?.takeIf(String::isNotBlank)?.let {
+            lstr(context, R.string.nikon_takeover_message_holder, it)
+        } ?: lstr(context, R.string.nikon_takeover_message_other)
     }
 }
 
@@ -268,7 +272,8 @@ class NikonIntegration(private val port: NikonConnectPort, private val context: 
                 waitingForConsent = true
                 val decision = CompletableDeferred<Boolean>()
                 val prompt = NikonTakeOverPrompt(
-                    device, holder, confirm = { decision.complete(true) }, cancel = { decision.complete(false) }, message = message,
+                    device, holder, confirm = { decision.complete(true) }, cancel = { decision.complete(false) },
+                    message = message, context = context,
                 )
                 send(ConnectionEvent.Progress(ConnectionProgress(attempt, CorePhase.NEGOTIATING, plan.map { it.first }, 0), ConnectionPrompt.Integration(prompt)))
                 val approved = decision.await()

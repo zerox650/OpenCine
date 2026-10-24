@@ -34,4 +34,11 @@
     <string name="nikon_fail_route_cannot_add">无法添加此连接方式。</string>
     <string name="nikon_fail_not_connected">相机未能连接。</string>
 
+    <!-- 接管确认弹窗（NikonTakeOverPrompt） -->
+    <string name="nikon_takeover_title">要接管这台相机吗？</string>
+    <string name="nikon_takeover_confirm">接管</string>
+    <string name="nikon_takeover_cancel">取消</string>
+    <string name="nikon_takeover_message_holder">%1$s 正在使用这台相机。连接将使其断开。</string>
+    <string name="nikon_takeover_message_other">另一台设备正在使用这台相机。连接将使其断开。</string>
+
 </resources>

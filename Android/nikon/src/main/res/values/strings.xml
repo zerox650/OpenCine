@@ -36,4 +36,11 @@
     <string name="nikon_fail_route_cannot_add">This setup cannot be added.</string>
     <string name="nikon_fail_not_connected">The camera did not connect.</string>
 
+    <!-- Take-over consent prompt (NikonTakeOverPrompt) -->
+    <string name="nikon_takeover_title">Take over this camera?</string>
+    <string name="nikon_takeover_confirm">Take Over</string>
+    <string name="nikon_takeover_cancel">Cancel</string>
+    <string name="nikon_takeover_message_holder">%1$s is using this camera. Connecting will disconnect it.</string>
+    <string name="nikon_takeover_message_other">Another device is using this camera. Connecting will disconnect it.</string>
+
 </resources>

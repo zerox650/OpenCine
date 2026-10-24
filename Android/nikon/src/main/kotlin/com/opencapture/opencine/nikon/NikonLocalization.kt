@@ -38,6 +38,12 @@ private val NIKON_ENGLISH_STRINGS = mapOf(
     R.string.nikon_fail_route_unreachable to "This setup can no longer be reached.",
     R.string.nikon_fail_route_cannot_add to "This setup cannot be added.",
     R.string.nikon_fail_not_connected to "The camera did not connect.",
+
+    R.string.nikon_takeover_title to "Take over this camera?",
+    R.string.nikon_takeover_confirm to "Take Over",
+    R.string.nikon_takeover_cancel to "Cancel",
+    R.string.nikon_takeover_message_holder to "%1\$s is using this camera. Connecting will disconnect it.",
+    R.string.nikon_takeover_message_other to "Another device is using this camera. Connecting will disconnect it.",
 )
 
 internal fun lstr(context: Context?, resId: Int, vararg args: Any): String {
