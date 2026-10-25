@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.CompositionLocalProvider
 import com.opencapture.monitorui.MonitorQuickPreview
 import com.opencapture.monitorui.monitorScrollFade
@@ -130,7 +131,7 @@ private fun RecordingSetupPanel(
     }
     val categories: @Composable () -> Unit = {
         if (tabNames.size > 1) {
-            ModeBar(tabNames, tabNames.indexOf(tab).coerceAtLeast(0), enabled) {
+            ModeBar(tabNames.map { stringResource(sheetTabNameRes(it)) }, tabNames.indexOf(tab).coerceAtLeast(0), enabled) {
                 tab = tabNames[it]
             }
         }
@@ -142,8 +143,10 @@ private fun RecordingSetupPanel(
                 .then(if (chromeless) Modifier else Modifier.pickerPanelGlass(capturePanelShape(fromTop = true, portrait = viewportIsPortrait()))
                     .monitorScrollFade(modeScroll).verticalScroll(modeScroll, enabled = preview == null).padding(14.dp)),
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                androidx.compose.runtime.SideEffect { onHeaderChanged("SHOOTING MODE", "Capture mode") }
-                if (!chromeless) SheetHeader("SHOOTING MODE", "Capture mode", onDismiss)
+                val shootingModeTitle = stringResource(R.string.sheet_shooting_mode)
+                val captureModeSubtitle = stringResource(R.string.sheet_capture_mode)
+                androidx.compose.runtime.SideEffect { onHeaderChanged(shootingModeTitle, captureModeSubtitle) }
+                if (!chromeless) SheetHeader(shootingModeTitle, captureModeSubtitle, onDismiss)
                 val bodyName = host.camera?.name
                 val labels = CaptureLists.shootingModeLabels(bodyName, status.shootingMode, host.labelProfile)
                 CaptureDrumWheel(labels, CameraCommands.shootingModeLabel(status.shootingMode, bodyName, host.labelProfile).orEmpty()
@@ -487,7 +490,7 @@ private fun LiveControlSheetContent(
     val portrait = viewportIsPortrait()
     val topPadding = if (showsHeader) com.opencapture.monitorui.MonitorLayoutPolicy.captureTopPadding(fromTop, portrait, compact) else 0f
     val headerTitle = CaptureLists.headerTitle(sheet, status.expoMode, status.shootingMode)
-    val headerSubtitle = if (compact) "drag to set" else CaptureLists.headerSubtitle(sheet, status.expoMode,
+    val headerSubtitle = if (compact) stringResource(R.string.sheet_drag_to_set) else CaptureLists.headerSubtitle(sheet, status.expoMode,
         selectedMode, prefs.facePriorityExposure, status.shootingMode)
     androidx.compose.runtime.SideEffect { onHeaderChanged(headerTitle, headerSubtitle) }
     // Every drum has the same 86dp viewport; the card hugs its own controls.
@@ -517,7 +520,7 @@ private fun LiveControlSheetContent(
                 title = if (sheet == LiveSheet.COLOR) host.recordingCodecColor(status).title
                     else CaptureLists.headerTitle(sheet, status.expoMode, status.shootingMode),
                 subtitle =
-                    if (compact) "drag to set"
+                    if (compact) stringResource(R.string.sheet_drag_to_set)
                     else
                         CaptureLists.headerSubtitle(
                             sheet,
@@ -724,7 +727,7 @@ private fun LiveControlSheetContent(
                             applyDrum(it)
                         },
                     )
-                    if (status.isRecording) Text("Stop recording to change mode.",
+                    if (status.isRecording) Text(stringResource(R.string.sheet_stop_recording),
                         color = LiveDesign.muted, style = LiveType.text(11f))
                 }
             }
@@ -815,22 +818,24 @@ fun LivePickerHost(
 
 @Composable
 private fun AudioBody(status: CameraStatus, enabled: Boolean, selectedMode: Int, host: CaptureSheetHost) {
+    val audioUnavailableShort = stringResource(R.string.sheet_audio_unavailable_short)
+    val audioRefused = stringResource(R.string.sheet_audio_refused)
     val service = host.audioService
     val sourceID = remember(host) { service?.sourceID }
     var refusal by remember(host) { mutableStateOf<String?>(null) }
     val field = service?.fields?.getOrNull(selectedMode)
-    if (field == null) Text("Audio controls unavailable", color = LiveDesign.faint)
+    if (field == null) Text(stringResource(R.string.sheet_audio_unavailable), color = LiveDesign.faint)
     else CheckedRows(field.choices.map { it.label }, field.observed?.label,
         enabled && field.isEditable && service?.sourceID == sourceID) { label ->
         val current = host.audioService
         val currentField = current?.fields?.firstOrNull { it.id == field.id }
         val value = currentField?.choices?.firstOrNull { it.label == label }
         refusal = if (current == null || current.sourceID != sourceID || currentField?.isEditable != true || value == null)
-            "Audio control unavailable"
+            audioUnavailableShort
         else when (current.commit(value)) {
             CaptureAudioCommitResult.SUBMITTED -> null
-            CaptureAudioCommitResult.UNAVAILABLE -> "Audio control unavailable"
-            CaptureAudioCommitResult.REFUSED -> "Audio control refused"
+            CaptureAudioCommitResult.UNAVAILABLE -> audioUnavailableShort
+            CaptureAudioCommitResult.REFUSED -> audioRefused
         }
     }
     refusal?.let { Text(it, color = LiveDesign.faint) }
@@ -856,3 +861,10 @@ internal fun initialSelectedMode(
         }
         else -> 0
     }
+
+/** The recording-setup tabs keep their English ids for selection; only the labels are read. */
+@Composable
+private fun sheetTabNameRes(name: String): Int =
+    if (name == "Mode") R.string.sheet_tab_mode
+    else if (name == "Color") R.string.sheet_tab_color
+    else R.string.sheet_tab_format

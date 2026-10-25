@@ -14,6 +14,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
@@ -74,6 +75,8 @@ public fun <P> MonitorOperatorPhotoScreen(library: MonitorMediaLibraryModel<P>, 
     val backdrop = rememberMonitorPhotoBackdrop(state.picture, state.presentation)
     val favorite = libraryState.records.firstOrNull { it.asset.id == record.asset.id }?.favorite ?: record.favorite
     val haptics = LocalOperatorHaptics.current
+    val photoPreviewA11y = stringResource(R.string.photo_preview_a11y, displayRecord.asset.filename)
+    val deleteBurstA11y = stringResource(R.string.photo_delete_burst_a11y)
     DisposableEffect(model) { model.activate(); model.load(loaders, policy); onDispose { model.retire() } }
     LaunchedEffect(libraryState.lifetimeToken) { if (!library.isCurrent(admission)) model.sourceChanged() }
     LaunchedEffect(model, rating) { model.readRating(rating) }
@@ -102,7 +105,7 @@ public fun <P> MonitorOperatorPhotoScreen(library: MonitorMediaLibraryModel<P>, 
                             .size(with(density) { fitted.width.toDp() }, with(density) { fitted.height.toDp() }),
                         enabled = model.isCurrent && !coverPresented && !state.optionsPresented && state.deleteRequestID == null,
                         onTransform = { transform = it },
-                        contentDescription = "Photo preview for ${displayRecord.asset.filename}") {
+                        contentDescription = photoPreviewA11y) {
                             Image(image.asImageBitmap(), null, contentScale = ContentScale.FillBounds,
                                 modifier = Modifier.fillMaxSize())
                         }
@@ -111,7 +114,7 @@ public fun <P> MonitorOperatorPhotoScreen(library: MonitorMediaLibraryModel<P>, 
                 Column(Modifier.align(Alignment.Center).clip(MediaCornerShape).mediaGlass(MediaCornerShape).padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator(color = LiveDesign.accent)
-                    Text("Preparing image…", color = LiveDesign.muted, style = LiveType.ui(14f, FontWeight.Medium))
+                    Text(stringResource(R.string.photo_preparing), color = LiveDesign.muted, style = LiveType.ui(14f, FontWeight.Medium))
                 }
             }
             scrims()
@@ -120,23 +123,23 @@ public fun <P> MonitorOperatorPhotoScreen(library: MonitorMediaLibraryModel<P>, 
                 end = (trailing + MonitorPlaybackLayout.PHOTO_HEADER_HORIZONTAL).dp)) {
                 Row(Modifier.fillMaxWidth().padding(top = (top + MonitorPlaybackLayout.PHOTO_HEADER_TOP_EXTRA).dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    MediaCircleIconButton(MonitorIcon.X, "Back to media", { if (!model.back()) model.close(close) },
+                    MediaCircleIconButton(MonitorIcon.X, stringResource(R.string.photo_back_to_media), { if (!model.back()) model.close(close) },
                         enabled = !state.closing, modifier = Modifier.testTag("monitor.photo.back"))
                     Text(displayRecord.asset.filename, color = LiveDesign.text, style = LiveType.ui(14f, FontWeight.SemiBold),
                         maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
                     if (model.variants.size > 1) photoVariantChoices(model.variants, displayRecord.asset.id,
                         !state.variantSwitching && model.isCurrent) { model.selectVariant(it, loaders, policy) }
-                    if (collection.isNotEmpty() && model.canDelete(operations)) Text("Delete all",
+                    if (collection.isNotEmpty() && model.canDelete(operations)) Text(stringResource(R.string.photo_delete_all),
                         style = LiveType.ui(13f, FontWeight.SemiBold), color = Color(0xFFFF5A54),
                         modifier = Modifier
-                            .semantics { contentDescription = "Delete the whole burst series"; role = Role.Button }
+                            .semantics { contentDescription = deleteBurstA11y; role = Role.Button }
                             .chromeClickable { model.requestDelete(operations, collection) }.padding(8.dp))
                     if (model.canDelete(operations))
-                        MediaCircleIconButton(MonitorIcon.TRASH, "Delete photo from the camera card",
+                        MediaCircleIconButton(MonitorIcon.TRASH, stringResource(R.string.photo_delete_from_card),
                             { model.requestDelete(operations) })
                     if (share != null) {
                         if (state.preparingShare) CircularProgressIndicator(color = LiveDesign.accent, modifier = Modifier.size(34.dp))
-                        else MediaCircleIconButton(MonitorIcon.SHARE, "Share photo", { model.share(share, sharing) },
+                        else MediaCircleIconButton(MonitorIcon.SHARE, stringResource(R.string.photo_share), { model.share(share, sharing) },
                             enabled = model.canShare(sharing))
                     }
                 }
@@ -156,7 +159,8 @@ public fun <P> MonitorOperatorPhotoScreen(library: MonitorMediaLibraryModel<P>, 
                     if (rating != null && stars != null && state.status.showsRating) MonitorStarRating(stars,
                         select = { model.setRating(it, rating) }, levels = rating.levels,
                         enabled = model.isCurrent, selectionFeedback = haptics::selection)
-                    else if (rating == null) MediaCircleIconButton(MonitorIcon.STAR, if (favorite) "Remove from favorites" else "Add to favorites",
+                    else if (rating == null) MediaCircleIconButton(MonitorIcon.STAR,
+                        if (favorite) stringResource(R.string.photo_favorite_remove) else stringResource(R.string.photo_favorite_add),
                         { model.toggleFavorite(operations) }, filled = favorite, tint = if (favorite) LiveDesign.accent else LiveDesign.text)
                 }
             }
@@ -177,7 +181,8 @@ public fun <P> MonitorOperatorPhotoScreen(library: MonitorMediaLibraryModel<P>, 
                 }
             }
             val deleteID = state.deleteRequestID
-            if (deleteID != null) MonitorConfirmPopup(title = state.deletionMessage ?: "Delete this photo from the camera?", confirmTitle = "Delete",
+            if (deleteID != null) MonitorConfirmPopup(title = state.deletionMessage ?: stringResource(R.string.photo_delete_confirm),
+                confirmTitle = stringResource(R.string.photo_delete),
                 onClickFeedback = haptics::selection, onDismiss = { model.cancelDelete(deleteID) },
                 cancelDescription = MonitorPlaybackCopy.DELETE_CANCEL_DESCRIPTION,
                 confirmDescription = MonitorPlaybackCopy.DELETE_CONFIRM_DESCRIPTION,
@@ -188,7 +193,7 @@ public fun <P> MonitorOperatorPhotoScreen(library: MonitorMediaLibraryModel<P>, 
                     else if (deletedReturning == null) (deleted ?: close)()
                 } })
             state.failure?.let { message -> AlertDialog(onDismissRequest = model::dismissFailure, text = { Text(message) },
-                confirmButton = { TextButton(model::dismissFailure) { Text("OK") } }) }
+                confirmButton = { TextButton(model::dismissFailure) { Text(stringResource(R.string.photo_ok)) } }) }
         }
     }
 }
@@ -196,9 +201,11 @@ public fun <P> MonitorOperatorPhotoScreen(library: MonitorMediaLibraryModel<P>, 
 @Composable private fun <P> photoVariantChoices(choices: List<MonitorMediaPictureVariant<P>>,
     selected: com.opencapture.opencine.media.MediaAssetID, enabled: Boolean,
     select: (com.opencapture.opencine.media.MediaAssetID) -> Unit) {
+    val photoFormatA11y = stringResource(R.string.photo_format_a11y)
+    val showFormatA11y = stringResource(R.string.photo_show_format)
     Row(Modifier.background(Color.Black.copy(alpha = 0.35f), androidx.compose.foundation.shape.CircleShape).padding(2.dp)
         .semantics {
-            contentDescription = "Photo format"
+            contentDescription = photoFormatA11y
             stateDescription = choices.firstOrNull { it.id == selected }?.label.orEmpty()
         },
         horizontalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -207,7 +214,7 @@ public fun <P> MonitorOperatorPhotoScreen(library: MonitorMediaLibraryModel<P>, 
                 style = LiveType.mono(10f, FontWeight.Bold),
                 modifier = Modifier.background(if (choice.id == selected) LiveDesign.accentDim else Color.Transparent,
                     androidx.compose.foundation.shape.CircleShape)
-                    .semantics { contentDescription = "Show ${choice.label}"; role = Role.Button }
+                    .semantics { contentDescription = showFormatA11y.format(choice.label); role = Role.Button }
                     .chromeClickable(enabled) { select(choice.id) }
                     .padding(horizontal = 10.dp, vertical = 6.dp))
         }

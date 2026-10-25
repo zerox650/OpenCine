@@ -17,6 +17,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,9 +62,11 @@ public interface WatcherBrowseHost {
 public fun WatcherBrowse(
     host: WatcherBrowseHost,
     modifier: Modifier = Modifier,
-    networkInstructions: String = "Join the same camera Wi-Fi as the sharing phone first. On that phone, open Operator Setup → Sharing → Show Wi-Fi code. Scan it with Camera, join the network, then return here.",
-    emptyMessage: String = "No shared feeds on this network. Check that both devices joined the same camera Wi-Fi and Share this feed is on. Allow Local Network if asked.",
+    networkInstructions: String? = null,
+    emptyMessage: String? = null,
 ): Unit {
+    val networkText = networkInstructions ?: stringResource(R.string.watcher_network_instructions)
+    val emptyText = emptyMessage ?: stringResource(R.string.watcher_empty)
     var passcode by remember { mutableStateOf("") }
     val join = { MonitorWatcherPasscodeRule.answer(passcode)?.let(host::retryWatcherPasscode); Unit }
     BackHandler(onBack = host::stopWatching)
@@ -71,31 +74,31 @@ public fun WatcherBrowse(
     Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Watch a feed", style = MonitorTypography.text(22f, FontWeight.Bold), color = MonitorPalette.text)
-            TextButton(onClick = host::stopWatching) { Text("Close") }
+            Text(stringResource(R.string.watcher_title), style = MonitorTypography.text(22f, FontWeight.Bold), color = MonitorPalette.text)
+            TextButton(onClick = host::stopWatching) { Text(stringResource(R.string.watcher_close)) }
         }
-        Text(networkInstructions, style = MonitorTypography.text(13f), color = MonitorPalette.muted)
-        Text("Already joined? Choose the shared feed below. Keep the camera connection inside the app on the sharing phone only.",
+        Text(networkText, style = MonitorTypography.text(13f), color = MonitorPalette.muted)
+        Text(stringResource(R.string.watcher_joined_hint),
             style = MonitorTypography.text(13f), color = MonitorPalette.muted)
-        Button(onClick = host::startWatcherBrowse) { Text("Find shared feeds") }
+        Button(onClick = host::startWatcherBrowse) { Text(stringResource(R.string.watcher_find)) }
         when (val status = host.watcherJoinStatus) {
             WatcherJoinStatus.NeedsPasscode -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("This feed needs a passcode.", style = MonitorTypography.text(14f, FontWeight.Medium), color = MonitorPalette.text)
+                Text(stringResource(R.string.watcher_needs_passcode), style = MonitorTypography.text(14f, FontWeight.Medium), color = MonitorPalette.text)
                 host.watcherPasscodeError?.let { Text(it, color = MonitorPalette.recording) }
                 OutlinedTextField(value = passcode, onValueChange = { passcode = it },
-                    label = { Text("Passcode") }, singleLine = true,
+                    label = { Text(stringResource(R.string.watcher_passcode)) }, singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
                     keyboardActions = KeyboardActions(onGo = { join() }))
-                Button(onClick = join, enabled = MonitorWatcherPasscodeRule.answer(passcode) != null) { Text("Join") }
+                Button(onClick = join, enabled = MonitorWatcherPasscodeRule.answer(passcode) != null) { Text(stringResource(R.string.watcher_join)) }
             }
             is WatcherJoinStatus.Failed -> Text(status.message, color = MonitorPalette.recording)
-            is WatcherJoinStatus.Reconnecting -> Text("Reconnecting… ${status.attempt} of ${status.maximum}", color = MonitorPalette.muted)
-            WatcherJoinStatus.Connecting -> Text("Joining…", color = MonitorPalette.muted)
+            is WatcherJoinStatus.Reconnecting -> Text(stringResource(R.string.watcher_reconnecting, status.attempt, status.maximum), color = MonitorPalette.muted)
+            WatcherJoinStatus.Connecting -> Text(stringResource(R.string.watcher_joining), color = MonitorPalette.muted)
             else -> Unit
         }
         if (host.watcherFeeds.isEmpty()) {
-            Text(host.watcherBrowseError ?: emptyMessage, style = MonitorTypography.text(14f), color = MonitorPalette.muted)
+            Text(host.watcherBrowseError ?: emptyText, style = MonitorTypography.text(14f), color = MonitorPalette.muted)
         } else {
             host.watcherFeeds.forEach { feed ->
                 Column(Modifier.fillMaxWidth().clickable { host.joinWatcherFeed(feed.id) }.padding(vertical = 10.dp)) {

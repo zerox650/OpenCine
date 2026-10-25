@@ -5,6 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -57,17 +58,23 @@ public fun MonitorOperatorCacheSettings(
     source: MonitorSettingsCacheSource,
     cacheOriginals: Boolean? = null,
     onCacheOriginals: ((Boolean) -> Unit)? = null,
-    cacheHelp: String = "Keep originals downloaded for playback.",
-    scopeHelp: String = "Originals and playback proxies downloaded from the camera.",
-    clearHelp: String = "Remove downloaded picture files while keeping the clip list.",
+    cacheHelp: String? = null,
+    scopeHelp: String? = null,
+    clearHelp: String? = null,
     formatBytes: ((Long) -> String)? = null,
     feedback: () -> Unit = {},
-    checkingLabel: String = "Checking…",
-    readFailureLabel: String = "Could not read the cache.",
-    clearFailureLabel: String = "Could not clear the cache. Try again.",
+    checkingLabel: String? = null,
+    readFailureLabel: String? = null,
+    clearFailureLabel: String? = null,
     summaryColor: Color = MonitorPalette.accent,
 ) {
     val scope = rememberCoroutineScope()
+    val cacheHelpText = cacheHelp ?: stringResource(R.string.cache_keep_originals)
+    val scopeHelpText = scopeHelp ?: stringResource(R.string.cache_scope_help)
+    val clearHelpText = clearHelp ?: stringResource(R.string.cache_clear_help)
+    val checkingText = checkingLabel ?: stringResource(R.string.cache_checking)
+    val readFailureText = readFailureLabel ?: stringResource(R.string.cache_read_failure)
+    val clearFailureText = clearFailureLabel ?: stringResource(R.string.cache_clear_failure)
     val model = remember { MonitorSettingsCacheModel(scope) }
     val value by model.state.collectAsState()
     DisposableEffect(model) { onDispose { model.retire() } }
@@ -75,21 +82,21 @@ public fun MonitorOperatorCacheSettings(
     MonitorCacheSettings(cacheOriginals = cacheOriginals,
         sizeLabel = value.bytes?.let { bytes ->
             formatBytes?.invoke(bytes) ?: formatCacheSize(bytes)
-        } ?: checkingLabel,
-        clearing = value.clearing, cacheHelp = cacheHelp, scopeHelp = scopeHelp, clearHelp = clearHelp,
+        } ?: checkingText,
+        clearing = value.clearing, cacheHelp = cacheHelpText, scopeHelp = scopeHelpText, clearHelp = clearHelpText,
         onCacheOriginals = onCacheOriginals, clear = model::requestClear, feedback = feedback)
     value.clearSummary?.let { Text(it, color = summaryColor) }
-    if (value.readFailed || value.clearFailed) Text(value.failure ?: if (value.clearFailed) clearFailureLabel else readFailureLabel,
+    if (value.readFailed || value.clearFailed) Text(value.failure ?: if (value.clearFailed) clearFailureText else readFailureText,
         color = MonitorPalette.accent)
     if (value.confirmationPresented) AlertDialog(
         onDismissRequest = model::cancelConfirmation,
-        title = { Text("Clear cache?", color = LiveDesign.text) },
-        text = { Text(clearHelp, color = LiveDesign.muted) },
-        confirmButton = { TextButton(onClick = model::clear) { Text("Clear", color = MonitorPalette.recording) } },
-        dismissButton = { TextButton(onClick = model::cancelConfirmation) { Text("Cancel", color = LiveDesign.muted) } },
+        title = { Text(stringResource(R.string.cache_clear_title), color = LiveDesign.text) },
+        text = { Text(clearHelpText, color = LiveDesign.muted) },
+        confirmButton = { TextButton(onClick = model::clear) { Text(stringResource(R.string.cache_clear), color = MonitorPalette.recording) } },
+        dismissButton = { TextButton(onClick = model::cancelConfirmation) { Text(stringResource(R.string.cache_cancel), color = LiveDesign.muted) } },
         containerColor = LiveDesign.surface,
     )
     if (value.clearFailed) AlertDialog(onDismissRequest = model::dismissError,
-        title = { Text(value.failure ?: clearFailureLabel) },
-        confirmButton = { TextButton(onClick = model::dismissError) { Text("OK") } })
+        title = { Text(value.failure ?: clearFailureText) },
+        confirmButton = { TextButton(onClick = model::dismissError) { Text(stringResource(R.string.cache_ok)) } })
 }

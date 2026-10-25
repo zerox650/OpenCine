@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -183,20 +184,24 @@ public fun <P, L> MonitorOperatorPlaybackScreen(
     val width = value.metadata.width ?: asset.pixelSize?.width?.toDouble() ?: listed?.width?.toDouble() ?: 16.0
     val height = value.metadata.height ?: asset.pixelSize?.height?.toDouble() ?: listed?.height?.toDouble() ?: 9.0
     val sourceLabel = when (value.item?.role) {
-        MediaRepresentationRole.ORIGINAL -> "ORIGINAL"
-        MediaRepresentationRole.PROXY -> "PROXY"
+        MediaRepresentationRole.ORIGINAL -> stringResource(R.string.playback_source_original)
+        MediaRepresentationRole.PROXY -> stringResource(R.string.playback_source_proxy)
         null -> null
     }
     val favorite = library.records.firstOrNull { it.asset.id == asset.id }?.favorite ?: record.favorite
     val metadata = buildList {
         fun row(label: String, text: String?) { if (!text.isNullOrBlank()) add(MonitorMetadataRow(label, text)) }
-        row("File", asset.filename); row("Format", record.facts.format); row("Resolution", record.facts.resolution)
-        row("Frame rate", asset.frameRate?.let { number(it) + " fps" }); row("Duration", clock(duration))
-        row("Playback source", sourceLabel)
-        row("Size", asset.representations.firstOrNull { it.role == MediaRepresentationRole.ORIGINAL }
+        row(stringResource(R.string.playback_meta_file), asset.filename)
+        row(stringResource(R.string.playback_meta_format), record.facts.format)
+        row(stringResource(R.string.playback_meta_resolution), record.facts.resolution)
+        row(stringResource(R.string.playback_meta_frame_rate), asset.frameRate?.let { number(it) + " fps" })
+        row(stringResource(R.string.playback_meta_duration), clock(duration))
+        row(stringResource(R.string.playback_meta_source), sourceLabel)
+        row(stringResource(R.string.playback_meta_size), asset.representations.firstOrNull { it.role == MediaRepresentationRole.ORIGINAL }
             ?.byteCount?.takeIf { it > 0 }?.let(MediaClipFormatting::byteLabel))
-        row("Created", MonitorPlaybackCapturedAt.label(asset.capturedAt, record.facts.orderKey))
-        row("Favorite", if (favorite) "Yes" else "No")
+        row(stringResource(R.string.playback_meta_created), MonitorPlaybackCapturedAt.label(asset.capturedAt, record.facts.orderKey))
+        row(stringResource(R.string.playback_meta_favorite),
+            if (favorite) stringResource(R.string.playback_value_yes) else stringResource(R.string.playback_value_no))
         facts.metadata.forEach { row(it.title, it.value) }
     }
     val access = operations.access?.invoke(record)
@@ -205,7 +210,7 @@ public fun <P, L> MonitorOperatorPlaybackScreen(
     val presentation = MonitorPlaybackPresentation(value.token, asset.filename,
         facts.headerSubtitle(listOfNotNull(record.facts.resolution, asset.frameRate?.let { number(it) + "p" }, record.facts.format).joinToString(" · ")),
         sourceLabel, metadata, assist?.presentedAspect((width / height).toFloat(), playback = true) ?: (width / height).toFloat(),
-        value.ready, value.error ?: if (value.closed) MediaOperatorCopy.CLIP_NOT_CACHED else null,
+        value.ready, value.error ?: if (value.closed) stringResource(R.string.media_operator_clip_not_cached) else null,
         facts.progress, position.toFloat(), duration.toFloat(), clock(position), clock(duration),
         value.canPause && !value.scrubbing, value.reachedEnd,
         value.scrubbing, value.muted, value.looping, player.canGoPrevious, player.canGoNext, favorite,
@@ -347,16 +352,17 @@ private fun OperatorPlaybackAssistOverlays(
 /** Shared return surface for refused or retired media; Close never borrows source admission. */
 @Composable
 public fun MonitorOperatorMediaUnavailable(closeEnabled: Boolean = true, close: () -> Unit) {
+    val closeLabel = stringResource(R.string.playback_close)
     Column(Modifier.fillMaxSize().background(Color.Black).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Media unavailable", color = LiveDesign.text, style = LiveType.ui(20f, FontWeight.SemiBold),
+        Text(stringResource(R.string.playback_media_unavailable), color = LiveDesign.text, style = LiveType.ui(20f, FontWeight.SemiBold),
             modifier = Modifier.testTag("monitor.media.unavailable"))
-        Text("This media is no longer available.", color = LiveDesign.muted,
+        Text(stringResource(R.string.playback_media_gone), color = LiveDesign.muted,
             style = LiveType.ui(14f, FontWeight.Medium))
         TextButton(onClick = close, enabled = closeEnabled,
-            modifier = Modifier.testTag("monitor.media.unavailable.close").semantics { contentDescription = "Close" }) {
-            Text("Close", color = LiveDesign.text, style = LiveType.ui(14f, FontWeight.SemiBold))
+            modifier = Modifier.testTag("monitor.media.unavailable.close").semantics { contentDescription = closeLabel }) {
+            Text(closeLabel, color = LiveDesign.text, style = LiveType.ui(14f, FontWeight.SemiBold))
         }
     }
 }

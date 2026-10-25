@@ -89,11 +89,11 @@ public class MonitorOperatorCaptureSource(
     private fun angleFrameRate() = (control.state.value.snapshot?.value(SettingKey.FRAME_RATE)?.value as? SettingValue.FrameRate)?.fps
 
     /** The shutter panel's subtitle: the tabs, or what the camera really makes for the held angle. */
-    public fun shutterPanelSubtitle(base: String, status: CameraStatus): String {
+    public fun shutterPanelSubtitle(base: String, status: CameraStatus, context: android.content.Context? = null): String {
         if (!host.capturePreferences.shutterUsesAngle || CameraCommands.isPhotoMode(status.shootingMode)) return base
         val achieved = CaptureNativeReadoutPresentation.shutterAngleAchieved(angleShutter(), angleFrameRate(),
             CaptureLists.shutterDenoms(status), host.capturePreferences.shutterAngleDegrees, shutterAngleSettling) ?: return base
-        return "Angle · actual $achieved"
+        return lstr(context, R.string.capture_angle_actual, achieved)
     }
 
     public fun readout(sheet: LiveSheet, status: CameraStatus, nativeLabel: String): String {

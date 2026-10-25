@@ -33,6 +33,7 @@ public data class MonitorOperatorLegacyCaptureIdentity(public val sheet: LiveShe
     val controls = native.controlCapabilities
     val preferences = source.host.capturePreferences
     val lifetime = rememberMonitorCaptureLifetime(source)
+    val context = androidx.compose.ui.platform.LocalContext.current
     // One rule for the tile and its panel: the common program, else the native report.
     val auto = controlState.snapshot?.exposureProgram?.value == com.opencapture.opencine.core.CameraExposureProgram.AUTOMATIC ||
         status.expoMode == CameraCommands.EXPO_AUTO
@@ -66,7 +67,7 @@ public data class MonitorOperatorLegacyCaptureIdentity(public val sheet: LiveShe
             subtitle = CaptureLists.headerSubtitle(sheet, expoMode,
                 initialSelectedMode(sheet, status, native, preferences, CaptureLists.isEvSheet(sheet, expoMode)),
                 preferences.facePriorityExposure, status.shootingMode).let {
-                if (sheet == LiveSheet.SHUTTER && !auto) source.shutterPanelSubtitle(it, status) else it
+                if (sheet == LiveSheet.SHUTTER && !auto) source.shutterPanelSubtitle(it, status, context) else it
             })
     }
     return MonitorOperatorCaptureInputs(readouts, panel, columns = columns, open = { id ->
