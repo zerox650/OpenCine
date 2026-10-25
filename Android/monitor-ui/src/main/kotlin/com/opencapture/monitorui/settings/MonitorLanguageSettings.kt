@@ -10,6 +10,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,7 +39,11 @@ public data class MonitorSettingsLanguageChoice(
  * The app language row. [selection] is the stored language tag, or null/blank to follow the
  * device. The host owns both the list and what it does with a choice: the shared settings only
  * draw the menu.
+ *
+ * Read-only once built, which is how the host builds it (once per language, not per frame), so
+ * the row it feeds can skip recomposition instead of redrawing on every settings tick.
  */
+@Immutable
 public class MonitorSettingsLanguageSource(
     public val selection: String?,
     public val choices: List<MonitorSettingsLanguageChoice>,
@@ -87,7 +92,13 @@ public fun MonitorLanguageSettings(source: MonitorSettingsLanguageSource) {
                     .testTag(MONITOR_LANGUAGE_ROW_TAG)
                     .semantics { contentDescription = rowName },
             )
-            MonitorLanguageMenu(expanded, source) { expanded = false }
+            // The menu hangs from the row's trailing edge, under the value it changes. A popup
+            // places itself against its parent's bounds, so the parent has to be a box pinned to
+            // that corner — anchored to the whole row it dropped out of the left edge, under the
+            // label, nowhere near the value the operator tapped.
+            Box(Modifier.align(Alignment.BottomEnd).size(1.dp)) {
+                MonitorLanguageMenu(expanded, source) { expanded = false }
+            }
         }
     }
 }
