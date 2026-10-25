@@ -42,7 +42,9 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -305,6 +307,9 @@ private fun AssistPalette(
     horizontal: Boolean, fixed: Boolean, maxExpandedHeight: Float?, presentation: MultiviewStageState,
 ) {
     val services = LocalMultiviewStageServices.current
+    val ctx = LocalContext.current
+    val onLabel = lstr(ctx, R.string.appkit_multiview_on)
+    val offLabel = lstr(ctx, R.string.appkit_multiview_off)
     val occupied = tiles.indices.filter { tiles[it] != null }.toSet()
     val offered = services?.availability?.offeredTools(tools, occupied) ?: tools
     val cameras = occupied.isNotEmpty()
@@ -321,10 +326,12 @@ private fun AssistPalette(
         }
     }
     fun title(tool: MultiviewTool) = when (tool) {
-        MultiviewTool.LUT -> if (services?.automaticLUT == false) "Toggle LUT for all cameras" else "Toggle Auto LUT for all cameras"
-        MultiviewTool.FIT -> if (fill) "Fit feed in frame" else "Fill frame with feed"
-        MultiviewTool.LAYOUT -> if (grid) "Show Focused stage" else "Show Grid"
-        MultiviewTool.CAMERA -> "Camera settings"
+        MultiviewTool.LUT ->
+            if (services?.automaticLUT == false) lstr(ctx, R.string.appkit_multiview_toggle_lut)
+            else lstr(ctx, R.string.appkit_multiview_toggle_auto_lut)
+        MultiviewTool.FIT -> if (fill) lstr(ctx, R.string.appkit_multiview_fit_feed) else lstr(ctx, R.string.appkit_multiview_fill_feed)
+        MultiviewTool.LAYOUT -> if (grid) lstr(ctx, R.string.appkit_multiview_show_focused) else lstr(ctx, R.string.appkit_multiview_show_grid)
+        MultiviewTool.CAMERA -> lstr(ctx, R.string.appkit_multiview_camera_settings)
     }
     fun isOn(tool: MultiviewTool) = tool == MultiviewTool.LUT && lut
     fun isAvailable(tool: MultiviewTool) = (tool != MultiviewTool.LUT && tool != MultiviewTool.CAMERA) || cameras
@@ -379,7 +386,7 @@ private fun AssistPalette(
                         .testTag(identifier(tool))
                         .semantics {
                             contentDescription = title(tool)
-                            if (tool == MultiviewTool.LUT) stateDescription = if (isOn(tool)) "On" else "Off"
+                            if (tool == MultiviewTool.LUT) stateDescription = if (isOn(tool)) onLabel else offLabel
                             role = Role.Button
                         }
                         .monitorChromeClickable(enabled = available, onClickFeedback = actions.feedback,
@@ -411,8 +418,8 @@ private fun AssistPalette(
             isAvailable = ::isAvailable,
             accessibilityLabel = ::title,
             accessibilityIdentifier = ::identifier,
-            accessibilityValue = { if (it == MultiviewTool.LUT) { if (lut) "On" else "Off" } else null },
-            expansionAccessibilityName = "Multiview tools", expansionAccessibilityIdentifier = "multiview.tools.expand",
+            accessibilityValue = { if (it == MultiviewTool.LUT) { if (lut) onLabel else offLabel } else null },
+            expansionAccessibilityName = lstr(ctx, R.string.appkit_multiview_tools), expansionAccessibilityIdentifier = "multiview.tools.expand",
             cellSize = cell, maxExpandedHeight = maxExpandedHeight,
             idOf = { it.name }, usage = presentation.toolUsage, onUsageChange = { presentation.toolUsage = it },
             onToggle = ::toggle,
@@ -429,11 +436,13 @@ private fun AssistPalette(
 
 @Composable
 private fun DisplayButton(clean: Boolean, modifier: Modifier, feedback: () -> Unit, onClick: () -> Unit) {
+    val displayLabel = stringResource(R.string.appkit_multiview_change_display)
+    val stateLabel = stringResource(if (clean) R.string.appkit_multiview_clean else R.string.appkit_multiview_live)
     Column(
         modifier.glass(ControlShape).monitorChromeClickable(onClickFeedback = feedback, onClick = onClick)
             .semantics {
-                contentDescription = "Change display mode"
-                stateDescription = if (clean) "Clean" else "Live"
+                contentDescription = displayLabel
+                stateDescription = stateLabel
                 role = Role.Button
             },
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -470,6 +479,8 @@ private fun RecordAllButton(
     val enabled = context.canConfirm
     val visible = LocalMultiviewStageVisible.current
     val latestVisible by rememberUpdatedState(visible)
+    val recordAllLabel = stringResource(
+        if (recording) R.string.appkit_multiview_stop_all else R.string.appkit_multiview_record_all)
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     var pending by remember { mutableStateOf<GroupRecordApproval?>(null) }
     LaunchedEffect(plan, enabled, visible) { pending = null }
@@ -504,7 +515,7 @@ private fun RecordAllButton(
                 }
             }
             .semantics {
-                contentDescription = if (recording) "Stop all recording" else "Record all"
+                contentDescription = recordAllLabel
                 if (refusal != null) stateDescription = refusal
                 role = Role.Button
             }.testTag("multiview.recordAll"),
@@ -533,17 +544,20 @@ public fun MultiviewRecordConfirmation(
                     .padding(18.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(prompt ?: if (stopping) "Stop recording?" else "Start recording?", color = MonitorPalette.text,
+                Text(prompt ?: stringResource(
+                    if (stopping) R.string.appkit_multiview_stop_recording_q
+                    else R.string.appkit_multiview_start_recording_q,
+                ), color = MonitorPalette.text,
                     style = MonitorTypography.text(16f, FontWeight.SemiBold))
-                (single ?: "All connected cameras".takeIf { prompt == null })?.let {
+                (single ?: stringResource(R.string.appkit_multiview_all_connected).takeIf { prompt == null })?.let {
                     Text(it, color = MonitorPalette.muted, style = MonitorTypography.text(13f))
                 }
                 TextButton(onClick = onConfirm, modifier = Modifier.fillMaxWidth()) {
-                    Text(if (stopping) "Stop" else "Start",
+                    Text(stringResource(if (stopping) R.string.appkit_action_stop else R.string.appkit_action_start),
                         color = if (stopping) MonitorPalette.recording else MonitorPalette.accent)
                 }
                 TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                    Text("Cancel", color = MonitorPalette.muted)
+                    Text(stringResource(R.string.appkit_cancel), color = MonitorPalette.muted)
                 }
             }
         }
@@ -579,6 +593,11 @@ private fun TileView(
         if (!enabled || tile == null) confirmRecord = null
     }
     LaunchedEffect(context?.plan, context?.closing) { confirmRecord = null }
+    val selectLabel = stringResource(
+        R.string.appkit_multiview_select_camera, MultiviewTile.letter(index), tile?.name.orEmpty())
+    val selectionStateLabel = stringResource(
+        if (focused) R.string.appkit_multiview_selected else R.string.appkit_multiview_not_selected)
+    val addCameraLabel = stringResource(R.string.appkit_multiview_add_camera)
     Box(Modifier.fillMaxSize().background(MonitorPalette.surface, TileShape)) {
         if (tile != null) {
             picture(index)
@@ -591,8 +610,8 @@ private fun TileView(
                         onTap = { current.select(index) },
                     )
                 }.semantics {
-                    contentDescription = "Select camera ${MultiviewTile.letter(index)}, ${tile.name}"
-                    stateDescription = if (focused) "Selected" else "Not selected"
+                    contentDescription = selectLabel
+                    stateDescription = selectionStateLabel
                     role = Role.Button
                     if (enabled) onClick { actions.select(index); true }
                 },
@@ -651,12 +670,12 @@ private fun TileView(
                         .monitorChromeClickable(
                             enabled = enabled && !busy && !groupBusy, onClickFeedback = actions.feedback,
                         ) { actions.add(index) }
-                        .semantics { contentDescription = "Add camera"; role = Role.Button },
+                        .semantics { contentDescription = addCameraLabel; role = Role.Button },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically),
                 ) {
                     MonitorIcon(MonitorIcon.PLUS, null, Modifier.size(if (compact) 24.dp else 34.dp), MonitorPalette.muted)
-                    Text("Add camera", color = MonitorPalette.muted,
+                    Text(addCameraLabel, color = MonitorPalette.muted,
                         style = MonitorTypography.text(if (compact) 10f else 14f, FontWeight.SemiBold))
                 }
             } else if (!clean) {
@@ -779,12 +798,14 @@ private fun TileOverlay(
         }
         val status = tile.status
         if (status != null && (compact || clean)) {
+            val statusOptionsLabel = stringResource(
+                R.string.appkit_multiview_status_camera_options, status.text, MultiviewTile.letter(index))
             Box(
                 Modifier.align(Alignment.Center).heightIn(min = 44.dp)
                     .background(Color.Black.copy(alpha = 0.8f), RoundedCornerShape(8.dp))
                     .monitorChromeClickable(enabled = enabled, onClickFeedback = feedback, onClick = onOptions)
                     .semantics {
-                        contentDescription = "${status.text} Camera ${MultiviewTile.letter(index)} options"
+                        contentDescription = statusOptionsLabel
                         role = Role.Button
                     }
                     .padding(horizontal = 8.dp),
@@ -818,6 +839,8 @@ private fun TileChrome(
         val small = if (narrow) 7f else if (compact) 8f else 10f
         val edge = if (narrow) 4.dp else 6.dp
         val letter = MultiviewTile.letter(index)
+        val optionsLabel = stringResource(R.string.appkit_multiview_camera_options, letter)
+        val storageLabel = stringResource(R.string.appkit_multiview_storage, tile.storage)
         Row(
             Modifier.fillMaxWidth().align(Alignment.TopCenter)
                 .padding(start = edge, top = edge, end = if (narrow) 28.dp else 50.dp, bottom = edge),
@@ -839,10 +862,11 @@ private fun TileChrome(
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
                 if (!short) {
                     val timecode = tile.timecode ?: MultiviewTally.UNAVAILABLE
+                    val timecodeLabel = stringResource(R.string.appkit_multiview_timecode, timecode)
                     Text(tile.model, color = Color.White.copy(alpha = 0.7f), style = MonitorTypography.text(small),
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text("TC $timecode", color = Color.White, style = MonitorTypography.readout(small),
-                        maxLines = 1, modifier = Modifier.semantics { contentDescription = "Timecode $timecode" })
+                        maxLines = 1, modifier = Modifier.semantics { contentDescription = timecodeLabel })
                 }
             }
         }
@@ -850,7 +874,7 @@ private fun TileChrome(
         Box(
             Modifier.align(Alignment.TopEnd).size(44.dp)
                 .monitorChromeClickable(enabled = enabled, onClickFeedback = actions.feedback, onClick = onOptions)
-                .semantics { contentDescription = "Camera $letter options"; role = Role.Button },
+                .semantics { contentDescription = optionsLabel; role = Role.Button },
             contentAlignment = Alignment.TopEnd,
         ) {
             MonitorIcon(MonitorIcon.ELLIPSIS, null, Modifier.padding(top = edge, end = edge).size(20.dp), Color.White)
@@ -871,7 +895,7 @@ private fun TileChrome(
                 BatteryPill(tile.battery, tile.batteryBars, tile.batteryBarCount)
                 Text(tile.storage, color = Color.White, style = MonitorTypography.readout(small), maxLines = 1,
                     modifier = (if (values == null) Modifier.weight(1f) else Modifier)
-                        .semantics { contentDescription = "Storage ${tile.storage}" })
+                        .semantics { contentDescription = storageLabel })
                 if (values != null) {
                     // Inline with both sides; the values take what is left over.
                     Row(Modifier.weight(1f),
@@ -921,12 +945,12 @@ private fun BatteryPill(percent: Int?, bars: Int?, barCount: Int) {
         level <= 40 -> Amber
         else -> Good
     }
+    val batteryLabel = bars?.let { stringResource(R.string.appkit_multiview_battery_bars, it, barCount) }
+        ?: percent?.let { stringResource(R.string.appkit_multiview_battery_percent, it) }
+        ?: stringResource(R.string.appkit_multiview_battery_unavailable)
     Row(
         Modifier.size(40.dp, 20.dp).glass(RoundedCornerShape(7.dp)).padding(horizontal = 6.dp)
-            .semantics {
-                contentDescription = bars?.let { "Camera battery $it of $barCount bars" }
-                    ?: percent?.let { "Camera battery $it percent" } ?: "Camera battery unavailable"
-            },
+            .semantics { contentDescription = batteryLabel },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (bars != null) MonitorGaugeBars(bars.toFloat() / barCount.coerceAtLeast(1), barCount, tint)
@@ -946,18 +970,19 @@ public fun MultiviewCameraPicker(
     rows: List<MultiviewPickerRow>,
     onCancel: () -> Unit,
     onPick: (String) -> Unit,
-    searching: String = "Looking for nearby cameras…",
+    searching: String? = null,
     empty: String? = null,
     footer: String? = null,
     feedback: () -> Unit = {},
 ) {
     val cardHeight = (maxOf(1, minOf(4, rows.size)) * 60 + 140).toFloat()
+    val searchingText = searching ?: stringResource(R.string.appkit_looking_for_cameras)
     ModalCard(maxHeight = cardHeight, tag = "multiview.cameraPicker") {
         Row(
             Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Add camera", color = MonitorPalette.text, style = MonitorTypography.text(20f, FontWeight.SemiBold),
+            Text(stringResource(R.string.appkit_multiview_add_camera), color = MonitorPalette.text, style = MonitorTypography.text(20f, FontWeight.SemiBold),
                 modifier = Modifier.weight(1f))
             Box(
                 Modifier.heightIn(min = 44.dp).widthIn(min = 64.dp)
@@ -965,7 +990,7 @@ public fun MultiviewCameraPicker(
                     .semantics { role = Role.Button },
                 contentAlignment = Alignment.CenterStart,
             ) {
-                Text("Cancel", color = MonitorPalette.accent, style = MonitorTypography.text(16f))
+                Text(stringResource(R.string.appkit_cancel), color = MonitorPalette.accent, style = MonitorTypography.text(16f))
             }
         }
         val pickerScroll = rememberScrollState()
@@ -1004,7 +1029,7 @@ public fun MultiviewCameraPicker(
                     if (empty == null) {
                         CircularProgressIndicator(Modifier.size(20.dp), color = MonitorPalette.text, strokeWidth = 2.dp)
                     }
-                    Text(empty ?: searching, color = MonitorPalette.text, style = MonitorTypography.text(16f))
+                    Text(empty ?: searchingText, color = MonitorPalette.text, style = MonitorTypography.text(16f))
                 }
             }
             footer?.let {
