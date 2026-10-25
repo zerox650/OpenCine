@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.MeasurePolicy
@@ -89,9 +90,12 @@ public fun MonitorTelemetry(signalBars: Int?, fps: String?, power: List<MonitorT
         if (showsPower) power.forEach { reading ->
             val percent = reading.percent?.takeIf { it in 0..100 }
             val tint = batteryTint(MonitorBatteryUrgency.of(percent, reading.bars, reading.barCount, reading.warning, reading.exhausted))
-            val label = "${if (reading.camera) "Camera" else "Phone"} battery " +
+            val source = stringResource(if (reading.camera) R.string.monitor_telemetry_camera
+                else R.string.monitor_telemetry_phone)
+            val unavailable = stringResource(R.string.monitor_telemetry_unavailable)
+            val label = "${stringResource(R.string.monitor_telemetry_source_battery, source)} " +
                 (MonitorTelemetryValues.batterySpokenValue(percent, reading.bars, reading.barCount, reading.charging,
-                    reading.externalPower, reading.exhausted) ?: "unavailable")
+                    reading.externalPower, reading.exhausted) ?: unavailable)
             val opacity = if (reading.exhausted && (reading.bars != null || percent != null)) {
                 val transition = rememberInfiniteTransition(label = "reportedLiveBatteryExhaustion")
                 val alpha by transition.animateFloat(initialValue = 1f, targetValue = 0.35f,
@@ -142,7 +146,8 @@ private fun batteryTint(urgency: MonitorBatteryUrgency?): Color = when (urgency)
 @Composable
 private fun MonitorCameraBatteryGauge(percent: Int, stacked: Boolean = false, showsIcon: Boolean = true) {
     TelemetryGauge(MonitorIcon.CAMERA.takeIf { showsIcon }, batteryTint(percent), if (percent in 0..100) percent / 100f else 0f,
-        if (percent in 0..100) "Camera battery $percent percent" else "Camera battery unavailable",
+        if (percent in 0..100) stringResource(R.string.monitor_telemetry_camera_battery_percent, percent)
+        else stringResource(R.string.monitor_telemetry_camera_battery_unavailable),
         stacked, percent.takeIf { it in 0..100 }?.let { "$it%" } ?: "\u2014")
 }
 
@@ -233,9 +238,10 @@ internal fun monitorGaugeReadoutWidth(filled: Int, count: Int, minimum: Float, i
 
 @Composable
 private fun MonitorGaugeStepText(filled: Int, count: Int, tint: Color) {
+    val spoken = stringResource(R.string.monitor_telemetry_bars_of, filled, count)
     MonitorScaleToFit(minScale = 0.5f) {
         Text("$filled/$count", color = tint, style = MonitorTypography.readout(10f, FontWeight.Bold),
-            maxLines = 1, softWrap = false, modifier = Modifier.semantics { contentDescription = "$filled of $count bars" })
+            maxLines = 1, softWrap = false, modifier = Modifier.semantics { contentDescription = spoken })
     }
 }
 

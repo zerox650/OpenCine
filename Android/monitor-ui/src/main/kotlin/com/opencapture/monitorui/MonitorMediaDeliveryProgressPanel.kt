@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.onClick
@@ -55,17 +56,17 @@ fun MonitorMediaDeliveryProgressPanel(
         details.filename?.let { filename ->
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier.testTag("monitor.share.progress.filename")) {
-                Text("File", style = MonitorTypography.text(10f, FontWeight.SemiBold), color = MonitorPalette.muted)
+                Text(stringResource(R.string.monitor_media_delivery_file), style = MonitorTypography.text(10f, FontWeight.SemiBold), color = MonitorPalette.muted)
                 Text(filename, Modifier.weight(1f), style = MonitorTypography.readout(11f),
                     color = MonitorPalette.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         details.destination?.let { destination ->
-            Text("Destination: $destination", style = MonitorTypography.text(11f), color = MonitorPalette.muted,
+            Text(stringResource(R.string.monitor_media_delivery_destination, destination), style = MonitorTypography.text(11f), color = MonitorPalette.muted,
                 modifier = Modifier.testTag("monitor.share.progress.destination"))
         }
         onCollapse?.let { collapse ->
-            Text("Collapse", style = MonitorTypography.text(12f, FontWeight.SemiBold), color = MonitorPalette.accent,
+            Text(stringResource(R.string.monitor_media_delivery_collapse), style = MonitorTypography.text(12f, FontWeight.SemiBold), color = MonitorPalette.accent,
                 modifier = Modifier.align(Alignment.End).monitorChromeClickable(onClick = collapse)
                     .testTag("monitor.share.progress.collapse"))
         }
@@ -85,13 +86,14 @@ internal fun MonitorMediaDeliveryProgressContent(
         if (onExpand == null) {
             ProgressStatus(value, showsInlineProgress, Modifier.weight(1f), destinationIcon)
         } else {
+            val expandLabel = stringResource(R.string.monitor_media_delivery_expand_a11y)
             ProgressStatus(value, showsInlineProgress,
                 Modifier.weight(1f).monitorChromeClickable(onClick = onExpand)
-                    .semantics { onClick(label = "Expand delivery progress") { onExpand(); true } }
+                    .semantics { onClick(label = expandLabel) { onExpand(); true } }
                     .testTag("monitor.share.progress.expand"), destinationIcon)
         }
         onCancel?.let {
-            Text("Cancel", style = MonitorTypography.text(11f, FontWeight.SemiBold), color = MonitorPalette.muted,
+            Text(stringResource(R.string.monitor_media_delivery_cancel), style = MonitorTypography.text(11f, FontWeight.SemiBold), color = MonitorPalette.muted,
                 modifier = Modifier.monitorChromeClickable(onClick = it))
         }
     }

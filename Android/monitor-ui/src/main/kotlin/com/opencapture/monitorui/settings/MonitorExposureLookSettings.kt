@@ -1,13 +1,15 @@
 package com.opencapture.monitorui.settings
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.opencapture.monitorui.R
 
 /** Local exposure-meter presentation. The host supplies its exercised reading policy and action. */
 @Composable
 fun MonitorExposureMeterSettings(isOn: Boolean, help: String, onToggle: () -> Unit): Unit {
-    MonitorSettingsRowCard(title = "EV Meter") {
-        MonitorSettingsSwitchInlineRow(title = "Enabled", isOn = isOn, help = help,
-            showTopDivider = false, onToggle = onToggle)
+    MonitorSettingsRowCard(title = stringResource(R.string.monitor_assist_ev_meter)) {
+        MonitorSettingsSwitchInlineRow(title = stringResource(R.string.monitor_settings_enabled),
+            isOn = isOn, help = help, showTopDivider = false, onToggle = onToggle)
     }
 }
 

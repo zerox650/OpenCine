@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -113,6 +114,12 @@ internal fun MonitorSetupChips(
     onForgetSetup: ((MonitorSetupChip) -> Unit)?,
     onRenameSetup: ((MonitorSetupChip) -> Unit)? = null,
 ) {
+    val setupOptionsLabel = stringResource(R.string.monitor_setup_options)
+    val addSetupLabel = stringResource(R.string.monitor_setup_add)
+    val renameSetupLabel = stringResource(R.string.monitor_setup_rename)
+    val forgetSetupLabel = stringResource(R.string.monitor_setup_forget)
+    val connectOverLabel = stringResource(R.string.monitor_setup_connect_over)
+    val addSetupForLabel = stringResource(R.string.monitor_setup_add_for)
     val scroll = rememberScrollState()
     Row(
         Modifier.fillMaxWidth().monitorScrollFade(scroll, vertical = false).horizontalScroll(scroll),
@@ -122,15 +129,16 @@ internal fun MonitorSetupChips(
         setups.forEach { setup ->
             var menu by remember { mutableStateOf(false) }
             val shape = RoundedCornerShape(9.dp)
+            val connectLabel = connectOverLabel.format(cameraName, setup.title)
             // 34 dp chip, 44 dp tap target.
             Box(
                 Modifier.heightIn(min = 44.dp)
                     .combinedClickable(
                         enabled = enabled, role = Role.Button, onClick = { onSetup(setup) },
-                        onLongClickLabel = "Setup options",
+                        onLongClickLabel = setupOptionsLabel,
                         onLongClick = if (onRenameSetup != null || setup.canForget && onForgetSetup != null) ({ menu = true }) else null,
                     )
-                    .semantics { contentDescription = "Connect $cameraName over ${setup.title}" }
+                    .semantics { contentDescription = connectLabel }
                     .testTag("cameras.setup.${setup.kind ?: setup.id}"),
                 contentAlignment = Alignment.Center,
             ) {
@@ -147,13 +155,14 @@ internal fun MonitorSetupChips(
                 DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                     if (onRenameSetup != null) {
                         DropdownMenuItem(
-                            text = { Text("Rename setup") }, enabled = enabled,
+                            text = { Text(renameSetupLabel) }, enabled = enabled,
                             onClick = { menu = false; if (enabled) onRenameSetup(setup) },
                         )
                     }
                     if (setup.canForget && onForgetSetup != null) {
                         DropdownMenuItem(
-                            text = { Text("Forget ${setup.title} setup", color = MonitorPalette.recording) }, enabled = enabled,
+                            text = { Text(forgetSetupLabel.format(setup.title), color = MonitorPalette.recording) },
+                            enabled = enabled,
                             onClick = { menu = false; if (enabled) onForgetSetup(setup) },
                         )
                     }
@@ -165,7 +174,7 @@ internal fun MonitorSetupChips(
             Row(
                 Modifier.heightIn(min = 44.dp)
                     .clickable(enabled = enabled, role = Role.Button, onClick = onAddSetup)
-                    .semantics { contentDescription = "Add a setup for $cameraName" }
+                    .semantics { contentDescription = addSetupForLabel.format(cameraName) }
                     .testTag("cameras.addSetup"),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -182,7 +191,7 @@ internal fun MonitorSetupChips(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     MonitorIcon(MonitorIcon.PLUS, null, Modifier.size(11.dp), tint = MonitorPalette.muted)
-                    Text("Add setup", color = MonitorPalette.muted, style = MonitorTypography.text(11f, FontWeight.SemiBold))
+                    Text(addSetupLabel, color = MonitorPalette.muted, style = MonitorTypography.text(11f, FontWeight.SemiBold))
                 }
             }
         }

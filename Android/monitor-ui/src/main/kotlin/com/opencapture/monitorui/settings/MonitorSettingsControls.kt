@@ -33,7 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.testTag
+import com.opencapture.monitorui.R
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -88,7 +90,7 @@ fun MonitorSettingsRowCard(
 
 @Composable
 fun MonitorSettingsResetButton(onClick: () -> Unit) {
-    val description = "Reset to defaults"
+    val description = stringResource(R.string.monitor_settings_reset_a11y)
     Box(
         Modifier.size(28.dp)
             .background(MonitorPalette.background.copy(alpha = 0.42f), CircleShape)

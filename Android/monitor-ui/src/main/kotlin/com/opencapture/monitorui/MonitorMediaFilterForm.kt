@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.clickable
@@ -101,39 +102,39 @@ fun MonitorMediaFilterForm(
         colorSelection.isNotEmpty() || dateStartLabel != null || dateEndLabel != null ||
         !photoSizes?.selectedIds.isNullOrEmpty() || dateWindows?.selectedId != null || storage?.selectedId != null)
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        if (formats.isNotEmpty()) FilterChips("FORMAT", formats, formatSelection, chipLayout, onToggleFormat)
-        if (resolutions.isNotEmpty()) FilterChips("RESOLUTION", resolutions, resolutionSelection, chipLayout, onToggleResolution)
+        if (formats.isNotEmpty()) FilterChips(stringResource(R.string.monitor_media_filter_format), formats, formatSelection, chipLayout, onToggleFormat)
+        if (resolutions.isNotEmpty()) FilterChips(stringResource(R.string.monitor_media_filter_resolution), resolutions, resolutionSelection, chipLayout, onToggleResolution)
         photoSizes?.takeIf { it.options.isNotEmpty() }?.let {
-            FilterChoices("SIZE", it.options, it.selectedIds, chipLayout, it.onToggle)
+            FilterChoices(stringResource(R.string.monitor_media_filter_size), it.options, it.selectedIds, chipLayout, it.onToggle)
         }
         dateWindows?.takeIf { it.options.isNotEmpty() }?.let {
-            FilterChoices("DATE", it.options, setOfNotNull(it.selectedId), chipLayout, it.onToggle)
+            FilterChoices(stringResource(R.string.monitor_media_filter_date), it.options, setOfNotNull(it.selectedId), chipLayout, it.onToggle)
         }
         if (hasDates) {
-            FilterHeading("DATE")
+            FilterHeading(stringResource(R.string.monitor_media_filter_date))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                FilterDateChip("Start", dateStartLabel, Modifier.weight(1f), onPickStart)
+                FilterDateChip(stringResource(R.string.monitor_media_filter_start), dateStartLabel, Modifier.weight(1f), onPickStart)
                 Text("–", color = MonitorPalette.muted, style = MonitorTypography.text(10.5f, FontWeight.SemiBold))
-                FilterDateChip("End", dateEndLabel, Modifier.weight(1f), onPickEnd)
+                FilterDateChip(stringResource(R.string.monitor_media_filter_end), dateEndLabel, Modifier.weight(1f), onPickEnd)
             }
         }
         if (colors.isNotEmpty()) {
-            FilterChips("COLOUR", colors.map { it.label }, colors.filter { it.id in colorSelection }.map { it.label }.toSet(), chipLayout) { title ->
+            FilterChips(stringResource(R.string.monitor_media_filter_colour), colors.map { it.label }, colors.filter { it.id in colorSelection }.map { it.label }.toSet(), chipLayout) { title ->
                 colors.firstOrNull { it.label == title }?.let { onToggleColor(it.id) }
             }
         }
         storage?.takeIf { it.options.isNotEmpty() }?.let {
-            FilterChoices("STORAGE", it.options, setOfNotNull(it.selectedId), chipLayout, it.onToggle)
+            FilterChoices(stringResource(R.string.monitor_media_filter_storage), it.options, setOfNotNull(it.selectedId), chipLayout, it.onToggle)
         }
         if (empty) {
-            Text("Nothing in this tab to filter by.", color = MonitorPalette.faint, style = MonitorTypography.text(11f))
+            Text(stringResource(R.string.monitor_media_filter_nothing), color = MonitorPalette.faint, style = MonitorTypography.text(11f))
         }
         if (showsInlineClear && active) {
             Text(
-                "Clear all filters",
+                stringResource(R.string.monitor_media_filter_clear_all),
                 color = MonitorPalette.accent,
                 style = MonitorTypography.text(11f, FontWeight.SemiBold),
                 modifier = Modifier.padding(top = 2.dp).clickable(onClick = onClear).testTag("monitor.media.filter.clear"),
@@ -173,6 +174,7 @@ private fun FilterChoices(title: String, choices: List<MonitorMediaFilterChoice>
 
 @Composable
 private fun FilterChoice(group: String, choice: MonitorMediaFilterChoice, active: Boolean, horizontal: Boolean, onToggle: (String) -> Unit) {
+    val choiceA11y = stringResource(R.string.monitor_media_filter_choice_a11y, choice.label)
     Text(
         choice.label,
         color = if (active) MonitorPalette.accent else MonitorPalette.muted,
@@ -184,7 +186,7 @@ private fun FilterChoice(group: String, choice: MonitorMediaFilterChoice, active
             .semantics {
                 selected = active
                 if (horizontal) {
-                    contentDescription = "${choice.label} filter"
+                    contentDescription = choiceA11y
                     role = Role.Checkbox
                 }
             }
