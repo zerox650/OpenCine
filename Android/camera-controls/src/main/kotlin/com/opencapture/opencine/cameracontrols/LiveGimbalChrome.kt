@@ -1,5 +1,6 @@
 package com.opencapture.opencine.cameracontrols
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -55,6 +56,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -93,7 +95,6 @@ import com.opencapture.opencine.motion.GimbalWaypointSlot
 import com.opencapture.opencine.vocabulary.CameraLabelProfile
 import com.opencapture.opencine.vocabulary.CameraStatus
 import com.opencapture.opencine.vocabulary.GimbalDoubleTap
-import com.opencapture.opencine.vocabulary.GimbalHudCopy
 import com.opencapture.opencine.vocabulary.GimbalMode
 import com.opencapture.opencine.vocabulary.GimbalRamp
 import com.opencapture.opencine.vocabulary.GimbalSpeed
@@ -168,11 +169,12 @@ fun LiveGimbalButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val controlsLabel = stringResource(R.string.gimbal_a11y_controls)
     Box(
         modifier
             .size(LiveChromeMetrics.ZOOM_CHIP_DP.dp)
             .chromeClickable(enabled = !locked, onClick = onClick)
-            .semantics { contentDescription = "Gimbal controls" },
+            .semantics { contentDescription = controlsLabel },
         contentAlignment = Alignment.Center,
     ) {
         MonitorIcon(
@@ -237,8 +239,9 @@ fun LiveGimbalSheetHost(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text("Motion Control", style = LiveType.ui(11.5f, FontWeight.SemiBold))
-                    Text("${program.summary} · Experimental", color = LiveDesign.muted, style = LiveType.ui(9f))
+                    Text(stringResource(R.string.gimbal_motion_control), style = LiveType.ui(11.5f, FontWeight.SemiBold))
+                    Text(stringResource(R.string.gimbal_experimental_suffix, program.summary),
+                        color = LiveDesign.muted, style = LiveType.ui(9f))
                 }
                 MonitorIcon(MonitorIcon.CHEVRON_RIGHT, null, Modifier.size(15.dp), LiveDesign.accent)
             }
@@ -246,7 +249,7 @@ fun LiveGimbalSheetHost(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
             MonitorDrawerTabs(
-                tabs = GimbalSettingsTab.entries.map { tab -> tab.title },
+                tabs = GimbalSettingsTab.entries.map { tab -> stringResource(tab.titleRes) },
                 selected = selectedTab.ordinal,
                 onSelect = { selectedTab = GimbalSettingsTab.entries[it] },
             )
@@ -520,8 +523,11 @@ fun GimbalFloatMove(
     }
 }
 
-private enum class GimbalSettingsTab(val title: String) {
-    MODE("Mode"), SPEED("Speed"), RAMP("Ramp"), DOUBLE_TAP("Double-tap")
+private enum class GimbalSettingsTab(@StringRes val titleRes: Int) {
+    MODE(R.string.gimbal_tab_mode),
+    SPEED(R.string.gimbal_tab_speed),
+    RAMP(R.string.gimbal_tab_ramp),
+    DOUBLE_TAP(R.string.gimbal_tab_double_tap),
 }
 
 private data class GimbalInteractionContext(
@@ -565,7 +571,7 @@ private fun LiveGimbalEditor(model: GimbalChromeHost, program: GimbalProgram, ru
     ) {
         Row(Modifier.fillMaxWidth().height(48.dp).padding(horizontal = 12.dp).testTag("motion.header"),
             verticalAlignment = Alignment.CenterVertically) {
-            Text("MOTION CONTROL", color = LiveDesign.text,
+            Text(stringResource(R.string.gimbal_motion_control_title), color = LiveDesign.text,
                 style = LiveType.ui(9f, FontWeight.SemiBold).copy(letterSpacing = 1.6.sp),
                 modifier = Modifier.weight(1f))
             Box(
@@ -576,7 +582,7 @@ private fun LiveGimbalEditor(model: GimbalChromeHost, program: GimbalProgram, ru
             ) {
                 MonitorIcon(
                     MonitorIcon.MINIMIZE,
-                    contentDescription = "Minimize",
+                    contentDescription = stringResource(R.string.gimbal_a11y_minimize),
                     modifier = Modifier.size(16.dp),
                     tint = LiveDesign.text,
                 )
@@ -589,10 +595,11 @@ private fun LiveGimbalEditor(model: GimbalChromeHost, program: GimbalProgram, ru
                 modifier = Modifier.testTag("motion.close"),
             )
         }
+        val moreBelowDescription = stringResource(R.string.gimbal_a11y_more_below)
         Column(
             Modifier.weight(1f).fillMaxWidth()
                 .testTag("motion.settings")
-                .semantics { if (moreBelow) stateDescription = "More settings below" }
+                .semantics { if (moreBelow) stateDescription = moreBelowDescription }
                 .monitorScrollFade(scroll)
                 .verticalScroll(scroll)
                 .padding(horizontal = 12.dp, vertical = 7.dp),
@@ -604,7 +611,7 @@ private fun LiveGimbalEditor(model: GimbalChromeHost, program: GimbalProgram, ru
             waypointRow(model, program, GimbalWaypointSlot.C, duration = program.durationBC,
                 floor = GimbalProgram.minTravelDuration(program.b, program.c), running, cameraId, phase)
             if (program.b != null && program.c != null) {
-                Text(String.format(java.util.Locale.US, "Smoothness %.2f", program.smoothness),
+                Text(String.format(java.util.Locale.US, stringResource(R.string.gimbal_smoothness), program.smoothness),
                     color = LiveDesign.text, style = LiveType.ui(13f, FontWeight.SemiBold))
                 Slider(value = program.smoothness.toFloat(),
                     onValueChange = { model.setGimbalSmoothness(it.toDouble()) },
@@ -620,8 +627,8 @@ private fun LiveGimbalEditor(model: GimbalChromeHost, program: GimbalProgram, ru
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text("Loop", color = LiveDesign.text, style = LiveType.ui(13f, FontWeight.SemiBold))
-                    Text("Repeat back and forth until Stop.", color = LiveDesign.secondary, style = LiveType.ui(9.5f))
+                    Text(stringResource(R.string.gimbal_loop), color = LiveDesign.text, style = LiveType.ui(13f, FontWeight.SemiBold))
+                    Text(stringResource(R.string.gimbal_loop_hint), color = LiveDesign.secondary, style = LiveType.ui(9.5f))
                 }
                 MonitorSwitchGraphic(program.loop)
             }
@@ -633,26 +640,29 @@ private fun LiveGimbalEditor(model: GimbalChromeHost, program: GimbalProgram, ru
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp).testTag("motion.actions"),
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (!running) {
-                Chip("Clear", selected = false, modifier = Modifier.weight(1f).height(44.dp).testTag("motion.clear")) {
+                Chip(stringResource(R.string.gimbal_action_clear), selected = false, modifier = Modifier.weight(1f).height(44.dp).testTag("motion.clear")) {
                     model.clearGimbalProgram()
                 }
-                Chip(GimbalHudCopy.RUN, selected = model.canRunProgrammedMove,
+                Chip(stringResource(R.string.gimbal_action_start), selected = model.canRunProgrammedMove,
                     modifier = Modifier.weight(1f).height(44.dp).testTag("motion.startStop"),
                     enabled = model.canRunProgrammedMove) { model.runProgrammedMove() }
             } else {
                 if (countdown == null) {
                     if (paused) {
-                        Chip("Restart", selected = false,
+                        Chip(stringResource(R.string.gimbal_action_restart), selected = false,
                             modifier = Modifier.weight(1f).height(44.dp).testTag("motion.restart")) {
                             model.restartProgrammedMove()
                         }
                     }
-                    Chip(if (paused) "Resume" else "Pause", selected = true,
+                    Chip(
+                        if (paused) stringResource(R.string.gimbal_action_resume) else stringResource(R.string.gimbal_action_pause),
+                        selected = true,
                         modifier = Modifier.weight(1f).height(44.dp).testTag("motion.pauseResume")) {
                         if (paused) model.resumeProgrammedMove() else model.pauseProgrammedMove()
                     }
                 }
-                Chip(countdown?.let { "Stop · $it" } ?: "Stop", selected = true,
+                Chip(countdown?.let { stringResource(R.string.gimbal_stop_with_countdown, it) }
+                        ?: stringResource(R.string.gimbal_action_stop), selected = true,
                     modifier = Modifier.weight(1f).height(44.dp).testTag("motion.startStop")) { model.cancelProgrammedMove() }
             }
         }
@@ -673,8 +683,13 @@ private fun waypointRow(
     val point = program.point(slot)
     val set = point != null
     val readout = point?.takeIf { it.yawDeg.isFinite() && it.pitchDeg.isFinite() && it.zoom.isFinite() }?.let {
-        String.format(java.util.Locale.US, "PAN %+.0f°  TILT %+.0f°  %.1f×", it.yawDeg, it.pitchDeg, it.zoom)
-    } ?: "Not set"
+        String.format(java.util.Locale.US, stringResource(R.string.gimbal_waypoint_readout), it.yawDeg, it.pitchDeg, it.zoom)
+    } ?: stringResource(R.string.gimbal_waypoint_not_set)
+    val waypointAction = if (set) {
+        stringResource(R.string.gimbal_a11y_reset_waypoint, slot.letter)
+    } else {
+        stringResource(R.string.gimbal_a11y_set_waypoint, slot.letter)
+    }
     MonitorOptionGroup {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Box(Modifier.size(22.dp).background(
@@ -690,10 +705,10 @@ private fun waypointRow(
                 .testTag("motion.waypoint.${slot.letter}")
                 .chromeClickable(onClick = { model.setGimbalWaypoint(slot) })
                 .semantics {
-                    contentDescription = if (set) "Reset waypoint ${slot.letter}" else "Set waypoint ${slot.letter}"
+                    contentDescription = waypointAction
                     role = Role.Button
                 }, contentAlignment = Alignment.Center) {
-                Text(if (set) "RESET" else "SET",
+                Text(if (set) stringResource(R.string.gimbal_upper_reset) else stringResource(R.string.gimbal_upper_set),
                     color = if (set) androidx.compose.ui.graphics.Color(0xFFDFE4E4)
                         else androidx.compose.ui.graphics.Color(0xFF08191F),
                     style = LiveType.ui(10f, FontWeight.Bold).copy(letterSpacing = .6.sp),
@@ -705,7 +720,7 @@ private fun waypointRow(
             if (set) {
                 Box(Modifier.size(44.dp).chromeClickable(onClick = { model.clearGimbalWaypoint(slot) }),
                     contentAlignment = Alignment.Center) {
-                    MonitorIcon(MonitorIcon.X, contentDescription = "Clear ${slot.letter}",
+                    MonitorIcon(MonitorIcon.X, contentDescription = stringResource(R.string.gimbal_a11y_clear_waypoint, slot.letter),
                         modifier = Modifier.size(12.dp), tint = LiveDesign.muted)
                 }
             }
@@ -750,14 +765,17 @@ private fun LiveGimbalRunPill(model: GimbalChromeHost, program: GimbalProgram, r
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (running && countdown == null) {
-            Text(if (paused) "RESUME" else "PAUSE", color = LiveDesign.text,
+            Text(if (paused) stringResource(R.string.gimbal_upper_resume) else stringResource(R.string.gimbal_upper_pause),
+                color = LiveDesign.text,
                 style = LiveType.ui(13f, FontWeight.Bold),
                 modifier = Modifier.testTag("motion.pauseResume")
                     .chromeClickable(onClick = {
                         if (paused) model.resumeProgrammedMove() else model.pauseProgrammedMove()
                     }).padding(horizontal = 14.dp, vertical = 12.dp))
         }
-        Text(countdown?.let { "STOP · $it" } ?: if (running) "STOP" else GimbalHudCopy.RUN.uppercase(),
+        Text(
+            countdown?.let { stringResource(R.string.gimbal_upper_stop_with_countdown, it) }
+                ?: if (running) stringResource(R.string.gimbal_upper_stop) else stringResource(R.string.gimbal_upper_start),
             color = LiveDesign.text, style = LiveType.ui(13f, FontWeight.Bold),
             modifier = Modifier.testTag("motion.startStop")
                 .chromeClickable(enabled = model.canRunProgrammedMove || running,
@@ -772,7 +790,7 @@ private fun LiveGimbalRunPill(model: GimbalChromeHost, program: GimbalProgram, r
         ) {
             MonitorIcon(
                 MonitorIcon.MAXIMIZE,
-                contentDescription = "Expand Motion Control",
+                contentDescription = stringResource(R.string.gimbal_a11y_expand),
                 modifier = Modifier.size(16.dp),
                 tint = LiveDesign.text,
             )
