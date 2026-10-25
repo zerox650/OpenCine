@@ -70,6 +70,17 @@ fun MonitorValueDrum(options: List<String>, selection: String, modifier: Modifie
     val cell = with(density) { metrics.cellWidth.dp.toPx() }
     val textMeasurer = rememberTextMeasurer()
     val star = painterResource(R.drawable.opc_lucide_star_fill)
+    // Both label styles, measured once per option list: the drum redraws on every drag frame, and
+    // text layout in the draw phase is work the frame does not need to repeat (a measured label is
+    // a cached TextLayoutResult, not a fresh Skia paragraph per frame).
+    val measured = remember(options, density.density, density.fontScale) {
+        val resting = MonitorTypography.readout(15f, FontWeight.Normal)
+        val accented = MonitorTypography.readout(15f, FontWeight.SemiBold)
+        options.map { option ->
+            textMeasurer.measure(option, resting, maxLines = 1) to
+                textMeasurer.measure(option, accented, maxLines = 1)
+        }
+    }
     // A sheet seats its current value just after the drum appears. That first
     // seat must land in place, not slide in from the first option.
     var seated by remember { mutableStateOf(selection in options) }
@@ -159,7 +170,7 @@ fun MonitorValueDrum(options: List<String>, selection: String, modifier: Modifie
             val edgeAlpha = (minOf(x, size.width - x) / (size.width * .14f)).coerceIn(0f, 1f)
             val tint = Color.White.copy(alpha = (.45f + .55f * emphasis) * edgeAlpha)
             val text = options[index]
-            val layout = textMeasurer.measure(text, MonitorTypography.readout(15f, if (index == base) FontWeight.SemiBold else FontWeight.Normal), maxLines = 1)
+            val layout = if (index == base) measured[index].second else measured[index].first
             val baseline = 44.dp.toPx()
             // iOS: a filled 8pt star 3pt after the value, centered with it and in the value's tint.
             val marked = options[index] in markedValues

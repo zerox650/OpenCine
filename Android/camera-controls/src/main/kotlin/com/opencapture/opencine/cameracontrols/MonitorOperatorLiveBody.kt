@@ -481,7 +481,11 @@ internal fun <K, S, M, N> MonitorOperatorLiveComposition(
                             caption = audio.caption, unavailableLabel = audio.unavailable, provenance = audio.provenance, spokenValue = audio.spokenValue)
                     }
                 }
-                if (sections.assists in mounted && !inspecting) MonitorAssistPalette(palette,
+                // A presented capture panel owns the screen, so the palette steps aside while one
+                // is open: its plate then covers the corner instead of the palette peeking past it
+                // and covering the panel's own header (the inspector hides the palette for the
+                // same reason).
+                if (sections.assists in mounted && !inspecting && panel == null) MonitorAssistPalette(palette,
                     layout.portrait, !interactive, { it.isOn }, { it.tool?.title ?: it.title },
                     { it.tool?.chipLabel ?: it.label }, hasOptions,
                     onToggle = { if (interactive && currentSource()) it.toggle() },
