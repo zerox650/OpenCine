@@ -1,5 +1,6 @@
 package com.opencapture.monitorui
 
+import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
 
 /** Dash-scale bands shared by Operator Setup Link Health and the live signal gauge. */
@@ -8,7 +9,12 @@ object MonitorLinkHealth {
     val watch = Color(0.96f, 0.52f, 0.12f)
     val poor = MonitorPalette.recording
 
-    enum class Band(val label: String) { POOR("Poor"), WATCH("Watch"), STABLE("Stable") }
+    /** [label] stays the untranslated band name; operator copy reads [labelRes]. */
+    enum class Band(val label: String, @StringRes val labelRes: Int) {
+        POOR("Poor", R.string.monitor_link_poor),
+        WATCH("Watch", R.string.monitor_link_watch),
+        STABLE("Stable", R.string.monitor_link_stable),
+    }
 
     fun score(bars: Int): Int = bars.coerceIn(0, 4) * 25
 

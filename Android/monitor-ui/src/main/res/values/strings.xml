@@ -102,4 +102,24 @@
     <string name="monitor_settings_input_orientation">Input &amp; orientation</string>
     <string name="monitor_settings_remote_shutter">Remote shutter</string>
     <string name="monitor_settings_auto_rotate">Auto-Rotate Feed</string>
+
+    <!-- View Assist menus -->
+    <string name="monitor_settings_sensitivity">Sensitivity</string>
+    <string name="monitor_settings_color">Color</string>
+    <string name="monitor_settings_scale">Scale</string>
+    <string name="monitor_settings_read">Read</string>
+    <string name="monitor_settings_reference_key">REFERENCE KEY</string>
+    <string name="monitor_settings_reference_display">Reference Display</string>
+    <string name="monitor_settings_units">Units</string>
+    <string name="monitor_settings_highlight">Highlight</string>
+    <string name="monitor_settings_midtone">Midtone</string>
+    <string name="monitor_settings_threshold">Threshold</string>
+    <string name="monitor_settings_threshold_a11y">%1$s threshold</string>
+    <string name="monitor_settings_on">On</string>
+    <string name="monitor_settings_off">Off</string>
+
+    <!-- Link health bands -->
+    <string name="monitor_link_poor">Poor</string>
+    <string name="monitor_link_watch">Watch</string>
+    <string name="monitor_link_stable">Stable</string>
 </resources>

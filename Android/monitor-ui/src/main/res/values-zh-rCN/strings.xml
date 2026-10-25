@@ -102,4 +102,24 @@
     <string name="monitor_settings_input_orientation">输入与方向</string>
     <string name="monitor_settings_remote_shutter">遥控快门</string>
     <string name="monitor_settings_auto_rotate">画面自动旋转</string>
+
+    <!-- 监看辅助菜单 -->
+    <string name="monitor_settings_sensitivity">灵敏度</string>
+    <string name="monitor_settings_color">颜色</string>
+    <string name="monitor_settings_scale">刻度</string>
+    <string name="monitor_settings_read">读取</string>
+    <string name="monitor_settings_reference_key">参考色键</string>
+    <string name="monitor_settings_reference_display">参考显示</string>
+    <string name="monitor_settings_units">单位</string>
+    <string name="monitor_settings_highlight">高光</string>
+    <string name="monitor_settings_midtone">中间调</string>
+    <string name="monitor_settings_threshold">阈值</string>
+    <string name="monitor_settings_threshold_a11y">%1$s 阈值</string>
+    <string name="monitor_settings_on">开</string>
+    <string name="monitor_settings_off">关</string>
+
+    <!-- 链路健康档位 -->
+    <string name="monitor_link_poor">较差</string>
+    <string name="monitor_link_watch">注意</string>
+    <string name="monitor_link_stable">稳定</string>
 </resources>

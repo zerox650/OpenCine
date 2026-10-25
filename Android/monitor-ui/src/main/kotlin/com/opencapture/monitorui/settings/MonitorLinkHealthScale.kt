@@ -18,12 +18,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opencapture.monitorui.MonitorLinkHealth
 import com.opencapture.monitorui.MonitorPalette
+import com.opencapture.monitorui.R
 import com.opencapture.monitorui.MonitorTypography
 
 private fun linkHealthText(size: Float, weight: FontWeight, mono: Boolean = false): TextStyle =
@@ -49,12 +51,7 @@ fun MonitorLinkHealthScale(title: String, caption: String, score: Int) {
             MonitorLinkHealth.Band.WATCH -> 1
             MonitorLinkHealth.Band.STABLE -> 2
         }
-    val bandLabel =
-        when (band) {
-            MonitorLinkHealth.Band.POOR -> "POOR"
-            MonitorLinkHealth.Band.WATCH -> "WATCH"
-            MonitorLinkHealth.Band.STABLE -> "STABLE"
-        }
+    val bandLabel = stringResource(band.labelRes).uppercase()
     Column(
         Modifier.fillMaxWidth()
             .linkHealthSurface()
@@ -106,9 +103,9 @@ fun MonitorLinkHealthScale(title: String, caption: String, score: Int) {
             }
         }
         Row(Modifier.fillMaxWidth()) {
-            DashLegend(MonitorLinkHealth.Band.POOR.label, "<50", Modifier.weight(1f), Alignment.Start)
-            DashLegend(MonitorLinkHealth.Band.WATCH.label, "50-79", Modifier.weight(1f), Alignment.CenterHorizontally)
-            DashLegend(MonitorLinkHealth.Band.STABLE.label, "80+", Modifier.weight(1f), Alignment.End)
+            DashLegend(stringResource(MonitorLinkHealth.Band.POOR.labelRes), "<50", Modifier.weight(1f), Alignment.Start)
+            DashLegend(stringResource(MonitorLinkHealth.Band.WATCH.labelRes), "50-79", Modifier.weight(1f), Alignment.CenterHorizontally)
+            DashLegend(stringResource(MonitorLinkHealth.Band.STABLE.labelRes), "80+", Modifier.weight(1f), Alignment.End)
         }
     }
 }
