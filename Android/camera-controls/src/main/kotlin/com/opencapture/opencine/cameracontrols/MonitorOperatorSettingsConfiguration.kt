@@ -286,6 +286,8 @@ public class MonitorOperatorSettingsConfiguration(
     public val assistSections: List<MonitorAssistSettingsSection> = emptyList(),
     public val assist: MonitorOperatorAssistSettingsSource? = null,
     public val gyro: MonitorSettingsGyroSource? = null,
+    /** The app language, where the host offers one; the System tab draws it above Help. */
+    public val language: MonitorSettingsLanguageSource? = null,
 ) {
     /** Explicit tab lists keep their order; the default includes each supplied optional domain. */
     public val tabs: List<MonitorSettingsTab> = tabs ?: monitorSettingsTabs(sharing, cache, account, unconfiguredAccount, gyro)
@@ -580,6 +582,7 @@ internal fun SettingsSystem(configuration: MonitorOperatorSettingsConfiguration,
     val context = LocalContext.current
     val support = configuration.support
     val legal = configuration.legal
+    configuration.language?.let { MonitorLanguageSettings(it) }
     MonitorSupportSettings(support.automaticReports, support.available, support.automaticHelp, support.unavailableHelp,
         support.setAutomaticReports, support.report, legal?.let { { openLegal(MonitorLegalPage.PRIVACY) } } ?: support.legacyPrivacy,
         support.status, support.discard, configuration.feedback, support.reportTitle, support.reportHelp,

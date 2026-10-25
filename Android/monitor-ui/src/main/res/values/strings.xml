@@ -187,6 +187,10 @@
     <string name="monitor_storage_clear_cache">Clear Cache</string>
     <string name="monitor_storage_clearing">Clearing…</string>
     <string name="monitor_storage_clear">Clear</string>
+    <string name="monitor_language_title">Language</string>
+    <string name="monitor_language_picker">App language</string>
+    <string name="monitor_language_help">Overrides the language this phone is set to. The app restarts to apply it.</string>
+    <string name="monitor_language_a11y">App language</string>
     <string name="monitor_info_title">App Information</string>
     <string name="monitor_info_theme">Theme</string>
     <string name="monitor_info_protocol">Protocol Implementation</string>

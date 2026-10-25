@@ -187,6 +187,10 @@
     <string name="monitor_storage_clear_cache">清除缓存</string>
     <string name="monitor_storage_clearing">正在清除…</string>
     <string name="monitor_storage_clear">清除</string>
+    <string name="monitor_language_title">语言</string>
+    <string name="monitor_language_picker">应用语言</string>
+    <string name="monitor_language_help">覆盖本手机的系统语言。应用将重启以生效。</string>
+    <string name="monitor_language_a11y">应用语言</string>
     <string name="monitor_info_title">应用信息</string>
     <string name="monitor_info_theme">主题</string>
     <string name="monitor_info_protocol">协议实现</string>
