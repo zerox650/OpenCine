@@ -170,7 +170,7 @@
     <string name="settings_gyro_mount_help">Mount this phone firmly to the camera. Synchronize exported logs in Gyroflow.</string>
     <string name="settings_status">Status</string>
     <string name="settings_phone_mount">Phone mount</string>
-    <string name="settings_phone_mount_help">Choose the phone&apos;s position relative to the camera. Keep the mount unchanged during a take; rotating the whole rig needs no new selection.</string>
+    <string name="settings_phone_mount_help">Choose the phone\'s position relative to the camera. Keep the mount unchanged during a take; rotating the whole rig needs no new selection.</string>
     <string name="settings_configure">Configure</string>
 
     <string name="settings_remote_shutter">Remote shutter</string>
