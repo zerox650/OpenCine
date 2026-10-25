@@ -115,4 +115,12 @@
     <string name="appkit_action_stop">停止</string>
     <string name="appkit_chrome_edit_title">正在编辑 %1$s</string>
     <string name="appkit_chrome_edit_hint">点击眼睛图标可显示或隐藏对应元素</string>
+    <string name="appkit_take_photo">拍摄照片</string>
+    <string name="appkit_stopping_recording">正在停止录制</string>
+    <string name="appkit_stop_recording">停止录制</string>
+    <string name="appkit_recording_state_unknown">录制状态未知</string>
+    <string name="appkit_start_recording">开始录制</string>
+    <string name="appkit_shooting_mode">拍摄模式</string>
+    <string name="appkit_recording">正在录制</string>
+    <string name="appkit_standby">待机</string>
 </resources>

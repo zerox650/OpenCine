@@ -1,5 +1,7 @@
 package com.opencapture.opencine.appkit
 
+import androidx.annotation.StringRes
+
 /**
  * The common capture control's press, hold, look and spoken state, as values. [MonitorCaptureButton]
  * and its SwiftUI twin draw it (Swift `MonitorCapturePolicy`, same names).
@@ -51,8 +53,26 @@ public data class MonitorCapturePolicy(
         else -> "Start recording"
     }
 
+    /**
+     * [accessibilityLabel] as a resource, so the monitor can speak the localized line. The English
+     * string above stays the off-device (no Context) copy.
+     */
+    @get:StringRes
+    public val accessibilityLabelRes: Int
+        get() = when {
+            photo -> R.string.appkit_take_photo
+            recording == true && pending -> R.string.appkit_stopping_recording
+            recording == true -> R.string.appkit_stop_recording
+            recording == null -> R.string.appkit_recording_state_unknown
+            else -> R.string.appkit_start_recording
+        }
+
     /** What a hold does, for the screen reader; null where a hold is a press. */
     public val holdAccessibilityLabel: String? get() = if (offersMode) "Shooting mode" else null
+
+    /** [holdAccessibilityLabel] as a resource. */
+    @get:StringRes
+    public val holdAccessibilityLabelRes: Int? get() = if (offersMode) R.string.appkit_shooting_mode else null
 
     /** Spoken beside the action, like the pre-shared Android record disc. */
     public val stateDescription: String? get() = when {
@@ -61,6 +81,16 @@ public data class MonitorCapturePolicy(
         recording == false -> "Standby"
         else -> null
     }
+
+    /** [stateDescription] as a resource. */
+    @get:StringRes
+    public val stateDescriptionRes: Int?
+        get() = when {
+            photo -> null
+            recording == true -> R.string.appkit_recording
+            recording == false -> R.string.appkit_standby
+            else -> null
+        }
 
     /** One tap: the selection tick, then the action, if admitted. */
     public fun tap(haptics: OperatorHaptics, press: () -> Unit) {

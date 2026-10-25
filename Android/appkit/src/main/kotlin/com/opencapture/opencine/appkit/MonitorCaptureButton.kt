@@ -114,16 +114,19 @@ public fun MonitorCaptureButton(
         }
     }
     // Without a mode sheet Compose reads a held press as a tap, so any press length records.
+    val spokenAction = stringResource(policy.accessibilityLabelRes)
+    val spokenHold = policy.holdAccessibilityLabelRes?.let { stringResource(it) }
+    val spokenState = policy.stateDescriptionRes?.let { stringResource(it) }
     Box(modifier.size(diameter.dp)
         .alpha(policy.alpha)
-        .then(if (policy.interactive) Modifier.combinedClickable(onClickLabel = policy.accessibilityLabel,
-            onLongClickLabel = policy.holdAccessibilityLabel,
+        .then(if (policy.interactive) Modifier.combinedClickable(onClickLabel = spokenAction,
+            onLongClickLabel = spokenHold,
             onClick = { policy.tap(haptics, ::press) },
             onLongClick = openMode?.let { mode -> { policy.hold(haptics, ::press, mode) } })
             else Modifier.semantics { disabled() })
         .semantics {
-            contentDescription = policy.accessibilityLabel
-            policy.stateDescription?.let { stateDescription = it }
+            contentDescription = spokenAction
+            spokenState?.let { stateDescription = it }
             role = Role.Button
         }, contentAlignment = Alignment.Center) {
         MonitorRecordLamp(recording = control.isRecording == true, photo = photo, modifier = Modifier.fillMaxSize())

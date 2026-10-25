@@ -117,4 +117,12 @@
     <string name="appkit_action_stop">Stop</string>
     <string name="appkit_chrome_edit_title">Editing %1$s</string>
     <string name="appkit_chrome_edit_hint">Tap an eye to show or hide it</string>
+    <string name="appkit_take_photo">Take photo</string>
+    <string name="appkit_stopping_recording">Stopping recording</string>
+    <string name="appkit_stop_recording">Stop recording</string>
+    <string name="appkit_recording_state_unknown">Recording state unknown</string>
+    <string name="appkit_start_recording">Start recording</string>
+    <string name="appkit_shooting_mode">Shooting mode</string>
+    <string name="appkit_recording">Recording</string>
+    <string name="appkit_standby">Standby</string>
 </resources>
