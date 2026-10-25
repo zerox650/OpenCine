@@ -48,6 +48,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
@@ -84,6 +85,10 @@ data class LutPickerCopy(
     val officialCubeCaption: String,
     /** Anything else on the camera tab. */
     val cameraLooksCaption: String,
+    /** The Creative library tab; a localized app overrides it. */
+    val creativeTab: String = "Creative",
+    /** The Custom library tab; a localized app overrides it. */
+    val customTab: String = "Custom",
 )
 
 /** One look in a [LutPickerLibrary]; [title] is what its drum or file row shows. */
@@ -161,13 +166,13 @@ internal fun lutPickerLibraries(
             caption = cameraCaption(copy, selection, colorMode, profile, isPhoto),
         ),
         LutPickerLibrary(
-            title = "Creative", entries = creativeEntries.map(::entry),
+            title = copy.creativeTab, entries = creativeEntries.map(::entry),
             isCurrent = category == LutCategory.CREATIVE, selectedId = selected(creativeEntries),
             onSelect = pick, representative = representative(creativeEntries, "creativeMono"),
             caption = creativeCaption(copy, selection, colorMode, profile, isPhoto),
         ),
         LutPickerLibrary(
-            title = "Custom", entries = customEntries.map(::entry), layout = LutPickerLayout.FILES,
+            title = copy.customTab, entries = customEntries.map(::entry), layout = LutPickerLayout.FILES,
             isCurrent = category == LutCategory.CUSTOM, selectedId = selected(customEntries),
             onSelect = pick, empty = LutPickerEmpty(hint = copy.customHint), onImport = onImport,
             onDelete = { look -> customEntries.firstOrNull { it.id == look.id }?.let(onClear) },
@@ -342,9 +347,9 @@ fun LUTPicker(
     if (deletionError != null) {
         AlertDialog(
             onDismissRequest = { deletionError = null },
-            title = { Text("Couldn’t Delete LUT") },
-            text = { Text(deletionError ?: "The LUT could not be deleted.") },
-            confirmButton = { TextButton(onClick = { deletionError = null }) { Text("OK") } },
+            title = { Text(stringResource(R.string.lut_delete_failed_title)) },
+            text = { Text(deletionError ?: stringResource(R.string.lut_delete_failed_body)) },
+            confirmButton = { TextButton(onClick = { deletionError = null }) { Text(stringResource(R.string.lut_dialog_ok)) } },
         )
     }
 }
@@ -435,17 +440,17 @@ fun LUTPicker(
     pendingDeletion?.let { (library, look) ->
         AlertDialog(
             onDismissRequest = { pendingDeletion = null },
-            title = { Text("Clear ${look.title}?") },
-            text = { Text("This removes the stored LUT from this device. This action cannot be undone.") },
+            title = { Text(stringResource(R.string.lut_clear_title, look.title)) },
+            text = { Text(stringResource(R.string.lut_clear_body)) },
             confirmButton = {
                 TextButton(
                     onClick = {
                         pendingDeletion = null
                         libraries.firstOrNull { it.title == library }?.onDelete?.invoke(look)
                     }
-                ) { Text("Clear LUT", color = LiveDesign.destructive) }
+                ) { Text(stringResource(R.string.lut_clear_confirm), color = LiveDesign.destructive) }
             },
-            dismissButton = { TextButton(onClick = { pendingDeletion = null }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { pendingDeletion = null }) { Text(stringResource(R.string.lut_cancel)) } },
         )
     }
 }
@@ -558,7 +563,7 @@ private fun FilesTab(library: LutPickerLibrary, onDelete: (LutPickerEntry) -> Un
                     .padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("Import .cube", color = LiveDesign.text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.lut_import_cube), color = LiveDesign.text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
             }
             Spacer(Modifier.height(6.dp))
         }
@@ -603,7 +608,7 @@ private fun FilesTab(library: LutPickerLibrary, onDelete: (LutPickerEntry) -> Un
                                     .clickable { onDelete(entry) }
                                     .padding(horizontal = 8.dp, vertical = 6.dp),
                             ) {
-                                Text("Clear", color = LiveDesign.destructive, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                Text(stringResource(R.string.lut_clear_short), color = LiveDesign.destructive, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                             }
                         }
                     }
@@ -620,13 +625,14 @@ fun LUTExposureCompensationBar(stops: Double, onChange: (Double) -> Unit,
     modifier: Modifier = Modifier) {
     Column(modifier.fillMaxWidth()) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("Exposure", style = LiveType.ui(11f, FontWeight.Medium), color = LiveDesign.text)
+            Text(stringResource(R.string.lut_exposure), style = LiveType.ui(11f, FontWeight.Medium), color = LiveDesign.text)
             Spacer(Modifier.weight(1f))
-            Text(MonitorLUTExposureCompensation.label(stops) + " EV", style = LiveType.ui(11f, FontWeight.Medium),
-                color = LiveDesign.muted)
+            Text(stringResource(R.string.lut_exposure_ev, MonitorLUTExposureCompensation.label(stops)),
+                style = LiveType.ui(11f, FontWeight.Medium), color = LiveDesign.muted)
         }
+        val exposureLabel = stringResource(R.string.lut_exposure_a11y)
         com.opencapture.monitorui.MonitorSlider(stops.toFloat(), -3f..3f,
-            Modifier.semantics { contentDescription = "Exposure compensation in stops" }) {
+            Modifier.semantics { contentDescription = exposureLabel }) {
             val next = MonitorLUTExposureCompensation.snap(it.toDouble())
             if (next != stops) onChange(next)
         }
@@ -651,7 +657,7 @@ fun LUTSplitComparisonBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text("Split comparison", style = LiveType.ui(11f, FontWeight.Medium), color = LiveDesign.text)
+            Text(stringResource(R.string.lut_split_comparison), style = LiveType.ui(11f, FontWeight.Medium), color = LiveDesign.text)
             Spacer(Modifier.weight(1f))
             Row(
                 Modifier.clip(RoundedCornerShape(50))
@@ -678,11 +684,13 @@ fun LUTSplitComparisonBar(
             }
         }
         if (splitComparison) {
+            val leftRight = stringResource(R.string.lut_split_left_right)
+            val topBottom = stringResource(R.string.lut_split_top_bottom)
             LutSegmentedButtons(
-                items = listOf("Left / Right", "Top / Bottom"),
-                selected = if (splitVertical) "Left / Right" else "Top / Bottom",
+                items = listOf(leftRight, topBottom),
+                selected = if (splitVertical) leftRight else topBottom,
             ) { label ->
-                onSplitVertical(label == "Left / Right")
+                onSplitVertical(label == leftRight)
             }
         }
     }
