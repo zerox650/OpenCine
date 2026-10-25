@@ -112,4 +112,71 @@
     <string name="gimbal_tab_speed">速度</string>
     <string name="gimbal_tab_ramp">缓变</string>
     <string name="gimbal_tab_double_tap">双击</string>
+
+    <!-- 操作员设置：链路 -->
+    <string name="settings_transport_live">BLE + Wi-Fi 已连接</string>
+    <string name="settings_transport_off">未连接</string>
+    <string name="settings_link_health">链路健康</string>
+    <string name="settings_processing">处理</string>
+    <string name="settings_feed_upscaler">画面超分</string>
+    <string name="settings_controller_connected">已连接</string>
+
+    <!-- 操作员设置：监看辅助 -->
+    <string name="settings_anamorphic_desqueeze">变形宽银幕解压</string>
+    <string name="settings_enabled">启用</string>
+    <string name="settings_look">风格</string>
+    <string name="settings_choose_look">选择风格</string>
+    <string name="settings_open">打开</string>
+    <string name="settings_assist_ev_meter_help">在 DISP 1 下把相机的曝光表显示在画面左边缘。自动与手动模式直接采用相机的读数，不改变曝光设置。</string>
+
+    <string name="settings_false_color">伪色</string>
+    <string name="settings_scale">刻度</string>
+    <string name="settings_reference_key">参考色键</string>
+    <string name="settings_reference_display">参考显示</string>
+
+    <string name="settings_peaking">峰值对焦</string>
+    <string name="settings_sensitivity">灵敏度</string>
+    <string name="settings_color">颜色</string>
+
+    <string name="settings_zebra">斑马纹</string>
+    <string name="settings_units">单位</string>
+    <string name="settings_highlight">高光</string>
+    <string name="settings_midtone">中间调</string>
+    <string name="settings_threshold">阈值</string>
+    <string name="settings_threshold_a11y">%1$s 阈值</string>
+    <string name="settings_colour">颜色</string>
+
+    <string name="settings_waveform">波形图</string>
+    <string name="settings_parade">分量图</string>
+    <string name="settings_histogram">直方图</string>
+    <string name="settings_vectorscope">矢量示波器</string>
+    <string name="settings_trace_zoom">轨迹缩放</string>
+    <string name="settings_mode">模式</string>
+    <string name="settings_brightness">亮度</string>
+
+    <string name="settings_traffic_lights">红绿灯</string>
+    <string name="settings_safe_border_clip">安全框削波</string>
+    <string name="settings_safe_border_crush">安全框暗部截断</string>
+    <string name="settings_middle_gray">中灰</string>
+
+    <string name="settings_panel">面板</string>
+    <string name="settings_hdr_display">HDR 显示</string>
+
+    <string name="settings_picture">画面</string>
+    <string name="settings_coming_soon">即将推出…</string>
+    <string name="settings_gyro_logging">陀螺仪记录</string>
+    <string name="settings_gyro_log_with_recordings">随相机录制记录陀螺仪</string>
+    <string name="settings_gyro_mount_help">把手机牢固固定在相机上。导出的日志可在 Gyroflow 中同步。</string>
+    <string name="settings_status">状态</string>
+    <string name="settings_phone_mount">手机安装位</string>
+    <string name="settings_phone_mount_help">选择手机相对相机的安装位置。拍摄过程中请勿改动安装位置；整体旋转机位无需重新选择。</string>
+    <string name="settings_configure">配置</string>
+
+    <string name="settings_remote_shutter">遥控快门</string>
+    <string name="settings_remote_shutter_caption">已配对的蓝牙快门遥控器按键可在实时取景处于前台时开始或停止录制。Android 无法可靠区分蓝牙与手机自身的硬件按键，因此音量加/减与播放/暂停也会切换录制。遥控器按键会跳过录制确认。</string>
+    <string name="settings_auto_rotate">画面自动旋转</string>
+    <string name="settings_gyro_logs">陀螺仪日志</string>
+    <string name="settings_saved_motion_logs">已保存的运动日志</string>
+    <string name="settings_gyro_share_with_mount">把日志与对应的相机视频一起分享，然后在 Gyroflow 中选择镜头。已配置的手机安装位会写入每条新日志。</string>
+    <string name="settings_gyro_share">把日志与对应的相机视频一起分享，然后在 Gyroflow 中选择镜头与安装方向。</string>
 </resources>

@@ -113,4 +113,71 @@
     <string name="gimbal_tab_speed">Speed</string>
     <string name="gimbal_tab_ramp">Ramp</string>
     <string name="gimbal_tab_double_tap">Double-tap</string>
+
+    <!-- Operator Setup: Link -->
+    <string name="settings_transport_live">BLE + Wi-Fi active</string>
+    <string name="settings_transport_off">Not connected</string>
+    <string name="settings_link_health">Link Health</string>
+    <string name="settings_processing">Processing</string>
+    <string name="settings_feed_upscaler">Feed Upscaler</string>
+    <string name="settings_controller_connected">Connected</string>
+
+    <!-- Operator Setup: View Assist -->
+    <string name="settings_anamorphic_desqueeze">Anamorphic Desqueeze</string>
+    <string name="settings_enabled">Enabled</string>
+    <string name="settings_look">Look</string>
+    <string name="settings_choose_look">Choose look</string>
+    <string name="settings_open">Open</string>
+    <string name="settings_assist_ev_meter_help">Show the camera\'s exposure meter at the picture\'s left edge in DISP 1. Auto and Manual use the camera reading without changing exposure settings.</string>
+
+    <string name="settings_false_color">False Color</string>
+    <string name="settings_scale">Scale</string>
+    <string name="settings_reference_key">Reference key</string>
+    <string name="settings_reference_display">Reference Display</string>
+
+    <string name="settings_peaking">Peaking</string>
+    <string name="settings_sensitivity">Sensitivity</string>
+    <string name="settings_color">Color</string>
+
+    <string name="settings_zebra">Zebra</string>
+    <string name="settings_units">Units</string>
+    <string name="settings_highlight">Highlight</string>
+    <string name="settings_midtone">Midtone</string>
+    <string name="settings_threshold">Threshold</string>
+    <string name="settings_threshold_a11y">%1$s threshold</string>
+    <string name="settings_colour">Colour</string>
+
+    <string name="settings_waveform">Waveform</string>
+    <string name="settings_parade">Parade</string>
+    <string name="settings_histogram">Histogram</string>
+    <string name="settings_vectorscope">Vectorscope</string>
+    <string name="settings_trace_zoom">Trace Zoom</string>
+    <string name="settings_mode">Mode</string>
+    <string name="settings_brightness">Brightness</string>
+
+    <string name="settings_traffic_lights">Traffic Lights</string>
+    <string name="settings_safe_border_clip">Safe Border Clip</string>
+    <string name="settings_safe_border_crush">Safe Border Crush</string>
+    <string name="settings_middle_gray">Middle Gray</string>
+
+    <string name="settings_panel">Panel</string>
+    <string name="settings_hdr_display">HDR display</string>
+
+    <string name="settings_picture">Picture</string>
+    <string name="settings_coming_soon">Coming soon…</string>
+    <string name="settings_gyro_logging">Gyro logging</string>
+    <string name="settings_gyro_log_with_recordings">Log gyro with camera recordings</string>
+    <string name="settings_gyro_mount_help">Mount this phone firmly to the camera. Synchronize exported logs in Gyroflow.</string>
+    <string name="settings_status">Status</string>
+    <string name="settings_phone_mount">Phone mount</string>
+    <string name="settings_phone_mount_help">Choose the phone&apos;s position relative to the camera. Keep the mount unchanged during a take; rotating the whole rig needs no new selection.</string>
+    <string name="settings_configure">Configure</string>
+
+    <string name="settings_remote_shutter">Remote shutter</string>
+    <string name="settings_remote_shutter_caption">A paired Bluetooth shutter remote\'s button press starts or stops recording while the live view is up front. Android cannot reliably distinguish Bluetooth from phone hardware keys, so Volume Up/Down and Play/Pause also toggle recording. Record Confirmation is skipped for remote presses.</string>
+    <string name="settings_auto_rotate">Auto-Rotate Feed</string>
+    <string name="settings_gyro_logs">Gyro logs</string>
+    <string name="settings_saved_motion_logs">Saved motion logs</string>
+    <string name="settings_gyro_share_with_mount">Share a log with the matching camera video, then select its lens in Gyroflow. A configured phone mount is included in each new log.</string>
+    <string name="settings_gyro_share">Share a log with the matching camera video, then select its lens and mount orientation in Gyroflow.</string>
 </resources>

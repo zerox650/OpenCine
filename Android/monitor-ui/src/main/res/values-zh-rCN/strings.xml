@@ -37,4 +37,69 @@
     <string name="monitor_share_export">导出</string>
     <string name="monitor_share_hop_internet">切换到互联网</string>
     <string name="monitor_share_loading_projects">正在加载项目…</string>
+
+    <!-- 操作员设置页骨架与页签 -->
+    <string name="monitor_settings_title">操作员设置</string>
+    <string name="monitor_settings_back">返回</string>
+    <string name="monitor_settings_disconnect">断开连接</string>
+    <string name="monitor_settings_link_active">链路已连接</string>
+    <string name="monitor_settings_no_camera">未连接相机</string>
+
+    <string name="monitor_settings_tab_link">链路</string>
+    <string name="monitor_settings_sub_link">连接状态与链路行为。</string>
+    <string name="monitor_settings_pill_link">实时</string>
+    <string name="monitor_settings_rail_link">连接</string>
+
+    <string name="monitor_settings_tab_sharing">共享</string>
+    <string name="monitor_settings_sub_sharing">即将推出。</string>
+    <string name="monitor_settings_pill_sharing">共享</string>
+    <string name="monitor_settings_rail_sharing">即将推出</string>
+
+    <string name="monitor_settings_tab_assist">监看辅助</string>
+    <string name="monitor_settings_sub_assist">实时取景工具的行为。</string>
+    <string name="monitor_settings_pill_assist">辅助</string>
+    <string name="monitor_settings_rail_assist">示波器与叠加</string>
+
+    <string name="monitor_settings_tab_controls">控制</string>
+    <string name="monitor_settings_sub_controls">触控行为与安全。</string>
+    <string name="monitor_settings_pill_controls">触控</string>
+    <string name="monitor_settings_rail_controls">旋钮与安全</string>
+
+    <string name="monitor_settings_tab_display">显示</string>
+    <string name="monitor_settings_sub_display">实时取景的按钮与控件。</string>
+    <string name="monitor_settings_pill_display">显示</string>
+    <string name="monitor_settings_rail_display">实时取景</string>
+
+    <string name="monitor_settings_tab_storage">存储</string>
+    <string name="monitor_settings_sub_storage">本地缓存与集成。</string>
+    <string name="monitor_settings_pill_storage">数据</string>
+    <string name="monitor_settings_rail_storage">缓存与账户</string>
+
+    <string name="monitor_settings_tab_system">系统</string>
+    <string name="monitor_settings_sub_system">应用级行为。</string>
+    <string name="monitor_settings_pill_system">应用</string>
+    <string name="monitor_settings_rail_system">应用行为</string>
+
+    <!-- 连接信息与已保存相机 -->
+    <string name="monitor_settings_connection">连接</string>
+    <string name="monitor_settings_current_transport">当前传输方式</string>
+    <string name="monitor_settings_phase">阶段</string>
+    <string name="monitor_settings_camera_wifi">相机 Wi-Fi</string>
+    <string name="monitor_settings_your_cameras">你的相机</string>
+    <string name="monitor_settings_saved">已保存</string>
+    <string name="monitor_settings_none">无</string>
+
+    <!-- 控制页 -->
+    <string name="monitor_settings_touch_safety">触控与安全</string>
+    <string name="monitor_settings_record_confirmation">录制确认</string>
+    <string name="monitor_settings_record_confirmation_help">开始或停止录制前先确认，避免误触。</string>
+    <string name="monitor_settings_haptics">触感反馈</string>
+    <string name="monitor_settings_haptics_help">开关、设置与控件操作时给出短促的确认振动。</string>
+    <string name="monitor_settings_keep_awake">保持屏幕常亮</string>
+    <string name="monitor_settings_keep_awake_help">本应用打开时禁止自动锁屏。监看屏应保持点亮。</string>
+    <string name="monitor_settings_panel">面板</string>
+    <string name="monitor_settings_hdr_display">HDR 显示</string>
+    <string name="monitor_settings_input_orientation">输入与方向</string>
+    <string name="monitor_settings_remote_shutter">遥控快门</string>
+    <string name="monitor_settings_auto_rotate">画面自动旋转</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.opencapture.monitorui.settings
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -39,6 +40,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -51,20 +53,37 @@ import com.opencapture.monitorui.MonitorPageScaffold
 import com.opencapture.monitorui.MonitorPalette
 import com.opencapture.monitorui.MonitorTab
 import com.opencapture.monitorui.MonitorTypography
+import com.opencapture.monitorui.R
 import com.opencapture.monitorui.monitorScrollFade
 import com.opencapture.monitorui.monitorTabStrip
 
-/** Stable operator navigation. Android sharing remains an optional integration section. */
+/**
+ * Stable operator navigation. Android sharing remains an optional integration section.
+ *
+ * [key] is the non-localized identifier kept stable for automation test tags; every
+ * operator-visible label lives in resources so the strip follows the device language.
+ */
 public enum class MonitorSettingsTab(
-    public val title: String, public val subtitle: String, public val pill: String, public val rail: String,
+    public val key: String,
+    @StringRes public val titleRes: Int,
+    @StringRes public val subtitleRes: Int,
+    @StringRes public val pillRes: Int,
+    @StringRes public val railRes: Int,
 ) {
-    LINK("Link", "Connection state and link behavior.", "LIVE", "Connection"),
-    SHARING("Sharing", "Coming soon.", "SHARE", "Coming soon"),
-    ASSIST("View Assist", "Behavior for live-view tools.", "ASSIST", "Scopes & overlays"),
-    CONTROLS("Controls", "Touch behavior and safety.", "TOUCH", "Dials and safety"),
-    DISPLAY("Display", "Live view buttons and chrome.", "VISIBILITY", "Live view"),
-    STORAGE("Storage", "Local cache and integrations.", "DATA", "Cache & accounts"),
-    SYSTEM("System", "App-level behavior.", "APP", "App behavior"),
+    LINK("Link", R.string.monitor_settings_tab_link, R.string.monitor_settings_sub_link,
+        R.string.monitor_settings_pill_link, R.string.monitor_settings_rail_link),
+    SHARING("Sharing", R.string.monitor_settings_tab_sharing, R.string.monitor_settings_sub_sharing,
+        R.string.monitor_settings_pill_sharing, R.string.monitor_settings_rail_sharing),
+    ASSIST("View Assist", R.string.monitor_settings_tab_assist, R.string.monitor_settings_sub_assist,
+        R.string.monitor_settings_pill_assist, R.string.monitor_settings_rail_assist),
+    CONTROLS("Controls", R.string.monitor_settings_tab_controls, R.string.monitor_settings_sub_controls,
+        R.string.monitor_settings_pill_controls, R.string.monitor_settings_rail_controls),
+    DISPLAY("Display", R.string.monitor_settings_tab_display, R.string.monitor_settings_sub_display,
+        R.string.monitor_settings_pill_display, R.string.monitor_settings_rail_display),
+    STORAGE("Storage", R.string.monitor_settings_tab_storage, R.string.monitor_settings_sub_storage,
+        R.string.monitor_settings_pill_storage, R.string.monitor_settings_rail_storage),
+    SYSTEM("System", R.string.monitor_settings_tab_system, R.string.monitor_settings_sub_system,
+        R.string.monitor_settings_pill_system, R.string.monitor_settings_rail_system),
 }
 
 /** Actual operator page navigation, session actions and content scroll ownership. */
@@ -93,7 +112,7 @@ public fun MonitorSettingsPage(
     MonitorPageScaffold(
         modifier = modifier,
         navigationWidth = 190f,
-        heading = { MonitorPageHeading("Operator Setup", brand) },
+        heading = { MonitorPageHeading(stringResource(R.string.monitor_settings_title), brand) },
         navigation = { portrait ->
             Column(
                 if (portrait) Modifier.fillMaxWidth() else Modifier.fillMaxSize(),
@@ -138,16 +157,20 @@ public fun MonitorSettingsPage(
         Column(Modifier.fillMaxSize()) {
             Row(verticalAlignment = Alignment.Top) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Text(selection.title, style = MonitorTypography.text(17f, FontWeight.SemiBold), color = MonitorPalette.text)
-                    Text(if (selection == MonitorSettingsTab.SHARING) sharingSubtitle ?: selection.subtitle else selection.subtitle, style = MonitorTypography.text(10.5f), color = MonitorPalette.muted, maxLines = 2)
+                    Text(stringResource(selection.titleRes), style = MonitorTypography.text(17f, FontWeight.SemiBold), color = MonitorPalette.text)
+                    Text(
+                        if (selection == MonitorSettingsTab.SHARING) sharingSubtitle ?: stringResource(selection.subtitleRes)
+                        else stringResource(selection.subtitleRes),
+                        style = MonitorTypography.text(10.5f), color = MonitorPalette.muted, maxLines = 2)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(selection.pill.uppercase(),
+                    Text(stringResource(selection.pillRes).uppercase(),
                         style = MonitorTypography.readout(10f, FontWeight.Bold).copy(letterSpacing = 0.6.sp, color = MonitorPalette.accent),
                         modifier = Modifier.border(1.dp, MonitorPalette.accent.copy(alpha = 0.16f), CircleShape)
                             .padding(horizontal = 10.dp, vertical = 6.dp))
                     back?.let { action ->
-                        MonitorSettingsActionPill("Back", modifier = Modifier.testTag("monitor.page.back"), onClick = action)
+                        MonitorSettingsActionPill(stringResource(R.string.monitor_settings_back),
+                            modifier = Modifier.testTag("monitor.page.back"), onClick = action)
                     }
                 }
             }
@@ -180,25 +203,27 @@ private fun SettingsTab(
     val selected = selection == tab
     val bringIntoView = remember { BringIntoViewRequester() }
     LaunchedEffect(selected) { if (selected) bringIntoView.bringIntoView() }
+    val title = stringResource(tab.titleRes)
     MonitorTab(selected, onClick = {
         if (!selected) feedback()
         onSelect(tab)
     }, modifier = modifier.height(44.dp).bringIntoViewRequester(bringIntoView)
-        .testTag("monitor.settings.tab.${tab.title}"), vertical = vertical,
-        separator = separator, accessibilityLabel = tab.title) {
+        .testTag("monitor.settings.tab.${tab.key}"), vertical = vertical,
+        separator = separator, accessibilityLabel = title) {
         Column(Modifier.then(if (vertical) Modifier.fillMaxWidth() else Modifier),
             verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(tab.title, style = MonitorTypography.text(12.5f, FontWeight.SemiBold),
+            Text(title, style = MonitorTypography.text(12.5f, FontWeight.SemiBold),
                 color = if (selected) MonitorPalette.accent else MonitorPalette.muted, maxLines = 1)
-            Text(subtitle ?: tab.rail, style = MonitorTypography.text(10f), color = MonitorPalette.faint, maxLines = 1)
+            Text(subtitle ?: stringResource(tab.railRes), style = MonitorTypography.text(10f), color = MonitorPalette.faint, maxLines = 1)
         }
     }
 }
 
 @Composable
 private fun SettingsDisconnect(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val label = stringResource(R.string.monitor_settings_disconnect)
     MonitorCameraAction(
-        text = "Disconnect", primary = false, enabled = true, contentDescription = "Disconnect",
+        text = label, primary = false, enabled = true, contentDescription = label,
         onClick = onClick, modifier = modifier, destructive = true,
         icon = { tint -> MonitorIcon(MonitorIcon.LINK_2_OFF, null, Modifier.size(14.dp), tint) },
     )
@@ -210,7 +235,8 @@ private fun SettingsSessionStatus(isLive: Boolean, phaseLabel: String, modifier:
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Box(Modifier.size(7.dp).background(if (isLive) Color(0.18f, 0.78f, 0.42f) else MonitorPalette.faint, CircleShape))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(if (isLive) "Active link" else "No camera connected",
+            Text(if (isLive) stringResource(R.string.monitor_settings_link_active)
+                else stringResource(R.string.monitor_settings_no_camera),
                 style = MonitorTypography.text(11.5f, FontWeight.SemiBold), color = MonitorPalette.text, maxLines = 1)
             Text(phaseLabel, style = MonitorTypography.text(9f), color = MonitorPalette.muted,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)

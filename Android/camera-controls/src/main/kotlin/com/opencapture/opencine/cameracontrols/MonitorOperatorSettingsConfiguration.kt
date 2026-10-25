@@ -1,5 +1,6 @@
 package com.opencapture.opencine.cameracontrols
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -145,11 +147,16 @@ public class MonitorSettingsMotionSource(
 public class MonitorSettingsRemoteShutter(
     public val enabled: Boolean, public val setEnabled: (Boolean) -> Unit,
     public val title: String = "Remote shutter", public val caption: String? = null,
+    /** Set when this row ships its own localized copy; [title]/[caption] stay the English fallback. */
+    @StringRes public val titleRes: Int? = null, @StringRes public val captionRes: Int? = null,
 ) {
     public companion object {
         /** The media-button shutter [com.opencapture.opencine.appkit.MonitorRemoteShutter] runs, over the host's stored choice. */
         public fun mediaButtons(enabled: Boolean, setEnabled: (Boolean) -> Unit): MonitorSettingsRemoteShutter =
-            MonitorSettingsRemoteShutter(enabled, setEnabled, MonitorRemoteShutter.TITLE, MonitorRemoteShutter.CAPTION)
+            MonitorSettingsRemoteShutter(
+                enabled, setEnabled, MonitorRemoteShutter.TITLE, MonitorRemoteShutter.CAPTION,
+                titleRes = R.string.settings_remote_shutter, captionRes = R.string.settings_remote_shutter_caption,
+            )
     }
 }
 
@@ -403,7 +410,7 @@ internal fun SettingsLink(source: MonitorSettingsLinkSource) {
     MonitorLinkHealthScale(source.healthTitle, source.healthCaption, source.score ?: 0)
     MonitorConnectionSettings(source.transport, source.transportHelp, source.phase, source.phaseHelp,
         source.network?.takeIf { it.isNotEmpty() }, source.networkHelp)
-    if (source.choices.isNotEmpty() || source.controlHolder != null) MonitorSettingsRowCard("Picture") {
+    if (source.choices.isNotEmpty() || source.controlHolder != null) MonitorSettingsRowCard(stringResource(R.string.settings_picture)) {
         source.controlHolder?.let { SettingsReadout(it) }
         source.choices.forEach { SettingsChoice(it) }
     }
@@ -429,7 +436,7 @@ internal fun SettingsLink(source: MonitorSettingsLinkSource) {
 internal fun SettingsSharing(source: MonitorSettingsSharingSource?, feedback: () -> Unit) {
     if (source == null) {
         MonitorSettingsRowCard {
-            Text("Coming soon...", style = LiveType.ui(15f, FontWeight.Medium), color = LiveDesign.muted,
+            Text(stringResource(R.string.settings_coming_soon), style = LiveType.ui(15f, FontWeight.Medium), color = LiveDesign.muted,
                 modifier = Modifier.fillMaxWidth().padding(vertical = 18.dp, horizontal = 2.dp))
         }
         return
@@ -481,22 +488,22 @@ internal fun SettingsSharing(source: MonitorSettingsSharingSource?, feedback: ()
 @Composable
 internal fun SettingsGyro(source: MonitorSettingsGyroSource?, feedback: () -> Unit) {
     source?.let { gyro ->
-        MonitorSettingsRowCard("Gyro logging") {
-            MonitorSettingsSwitchInlineRow("Log gyro with camera recordings", gyro.enabled,
-                help = "Mount this phone firmly to the camera. Synchronize exported logs in Gyroflow.",
+        MonitorSettingsRowCard(stringResource(R.string.settings_gyro_logging)) {
+            MonitorSettingsSwitchInlineRow(stringResource(R.string.settings_gyro_log_with_recordings), gyro.enabled,
+                help = stringResource(R.string.settings_gyro_mount_help),
                 showTopDivider = false) {
                 if (gyro.available) { feedback(); gyro.setEnabled(!gyro.enabled) }
             }
-            MonitorSettingsInlineRow("Status", null) {
+            MonitorSettingsInlineRow(stringResource(R.string.settings_status), null) {
                 MonitorSettingsValueText(gyro.status)
             }
             gyro.configureMount?.let { configureMount ->
-                MonitorSettingsInlineRow("Phone mount",
-                    "Choose the phone's position relative to the camera. Keep the mount unchanged during a take; rotating the whole rig needs no new selection.") {
+                MonitorSettingsInlineRow(stringResource(R.string.settings_phone_mount),
+                    stringResource(R.string.settings_phone_mount_help)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically) {
                         gyro.mountName?.let { MonitorSettingsValueText(it) }
-                        MonitorSettingsActionPill("Configure", onClick = configureMount)
+                        MonitorSettingsActionPill(stringResource(R.string.settings_configure), onClick = configureMount)
                     }
                 }
             }
@@ -518,9 +525,11 @@ internal fun SettingsControls(source: MonitorSettingsControlsSource, feedback: (
     val shutter = source.shutter
     val rotation = source.autoRotateRow
     MonitorInputOrientationSettings(shutter?.enabled, shutter?.setEnabled,
-        remoteTitle = shutter?.title ?: "Remote shutter", remoteCaption = shutter?.caption,
+        remoteTitle = shutter?.titleRes?.let { stringResource(it) } ?: shutter?.title,
+        remoteCaption = shutter?.captionRes?.let { stringResource(it) } ?: shutter?.caption,
         autoRotateFeed = rotation?.enabled, onAutoRotateFeed = rotation?.setEnabled,
-        rotationTitle = rotation?.title ?: "Auto-Rotate Feed", rotationHelp = rotation?.help.orEmpty(),
+        rotationTitle = rotation?.title ?: stringResource(R.string.settings_auto_rotate),
+        rotationHelp = rotation?.help.orEmpty(),
         feedback = feedback)
     val motion = source.motion ?: return
     motion.sensitivity?.let { MonitorGimbalSettings(it) }
@@ -534,13 +543,13 @@ internal fun SettingsControls(source: MonitorSettingsControlsSource, feedback: (
 @Composable
 internal fun SettingsStorage(configuration: MonitorOperatorSettingsConfiguration) {
     configuration.gyro?.let { gyro ->
-        MonitorSettingsRowCard("Gyro logs") {
-            MonitorSettingsInlineRow("Saved motion logs",
+        MonitorSettingsRowCard(stringResource(R.string.settings_gyro_logs)) {
+            MonitorSettingsInlineRow(stringResource(R.string.settings_saved_motion_logs),
                 if (gyro.configureMount == null)
-                    "Share a log with the matching camera video, then select its lens and mount orientation in Gyroflow."
-                else "Share a log with the matching camera video, then select its lens in Gyroflow. A configured phone mount is included in each new log.",
+                    stringResource(R.string.settings_gyro_share)
+                else stringResource(R.string.settings_gyro_share_with_mount),
                 showTopDivider = false) {
-                MonitorSettingsActionPill("Open", onClick = gyro.openLogs)
+                MonitorSettingsActionPill(stringResource(R.string.settings_open), onClick = gyro.openLogs)
             }
         }
     }

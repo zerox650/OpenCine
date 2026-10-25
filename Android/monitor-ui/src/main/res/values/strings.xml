@@ -38,4 +38,68 @@
     <string name="monitor_share_export">EXPORT</string>
     <string name="monitor_share_hop_internet">Hop to internet</string>
     <string name="monitor_share_loading_projects">Loading projects…</string>
+
+    <!-- Operator Setup page chrome and tab strip -->
+    <string name="monitor_settings_title">Operator Setup</string>
+    <string name="monitor_settings_back">Back</string>    <string name="monitor_settings_disconnect">Disconnect</string>
+    <string name="monitor_settings_link_active">Active link</string>
+    <string name="monitor_settings_no_camera">No camera connected</string>
+
+    <string name="monitor_settings_tab_link">Link</string>
+    <string name="monitor_settings_sub_link">Connection state and link behavior.</string>
+    <string name="monitor_settings_pill_link">LIVE</string>
+    <string name="monitor_settings_rail_link">Connection</string>
+
+    <string name="monitor_settings_tab_sharing">Sharing</string>
+    <string name="monitor_settings_sub_sharing">Coming soon.</string>
+    <string name="monitor_settings_pill_sharing">SHARE</string>
+    <string name="monitor_settings_rail_sharing">Coming soon</string>
+
+    <string name="monitor_settings_tab_assist">View Assist</string>
+    <string name="monitor_settings_sub_assist">Behavior for live-view tools.</string>
+    <string name="monitor_settings_pill_assist">ASSIST</string>
+    <string name="monitor_settings_rail_assist">Scopes &amp; overlays</string>
+
+    <string name="monitor_settings_tab_controls">Controls</string>
+    <string name="monitor_settings_sub_controls">Touch behavior and safety.</string>
+    <string name="monitor_settings_pill_controls">TOUCH</string>
+    <string name="monitor_settings_rail_controls">Dials and safety</string>
+
+    <string name="monitor_settings_tab_display">Display</string>
+    <string name="monitor_settings_sub_display">Live view buttons and chrome.</string>
+    <string name="monitor_settings_pill_display">VISIBILITY</string>
+    <string name="monitor_settings_rail_display">Live view</string>
+
+    <string name="monitor_settings_tab_storage">Storage</string>
+    <string name="monitor_settings_sub_storage">Local cache and integrations.</string>
+    <string name="monitor_settings_pill_storage">DATA</string>
+    <string name="monitor_settings_rail_storage">Cache &amp; accounts</string>
+
+    <string name="monitor_settings_tab_system">System</string>
+    <string name="monitor_settings_sub_system">App-level behavior.</string>
+    <string name="monitor_settings_pill_system">APP</string>
+    <string name="monitor_settings_rail_system">App behavior</string>
+
+    <!-- Connection facts and saved-camera summary -->
+    <string name="monitor_settings_connection">Connection</string>
+    <string name="monitor_settings_current_transport">Current Transport</string>
+    <string name="monitor_settings_phase">Phase</string>
+    <string name="monitor_settings_camera_wifi">Camera Wi-Fi</string>
+    <string name="monitor_settings_your_cameras">Your cameras</string>
+    <string name="monitor_settings_saved">Saved</string>
+    <string name="monitor_settings_none">None</string>
+
+    <!-- Controls tab -->
+    <string name="monitor_settings_touch_safety">Touch &amp; safety</string>
+    <string name="monitor_settings_record_confirmation">Record confirmation</string>
+    <string name="monitor_settings_record_confirmation_help">Ask before starting or stopping recording to prevent mistaps.</string>
+    <string name="monitor_settings_haptics">Haptics</string>
+    <string name="monitor_settings_haptics_help">Short confirmation pulses for switches, settings and controls.</string>
+    <string name="monitor_settings_keep_awake">Keep screen awake</string>
+    <string name="monitor_settings_keep_awake_help">Prevents auto-lock while this app is open. A monitor should stay lit.</string>
+    <string name="monitor_settings_panel">Panel</string>
+    <string name="monitor_settings_hdr_display">HDR display</string>
+    <string name="monitor_settings_input_orientation">Input &amp; orientation</string>
+    <string name="monitor_settings_remote_shutter">Remote shutter</string>
+    <string name="monitor_settings_auto_rotate">Auto-Rotate Feed</string>
 </resources>

@@ -1,6 +1,8 @@
 package com.opencapture.monitorui.settings
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.opencapture.monitorui.R
 
 /** Common touch safety choices with storage and optional domain copy supplied by the host. */
 @Composable
@@ -8,19 +10,26 @@ public fun MonitorOperatorSafetySettings(
     recordConfirmation: Boolean, haptics: Boolean, keepScreenAwake: Boolean,
     onRecordConfirmation: (Boolean) -> Unit, onHaptics: (Boolean) -> Unit,
     onKeepScreenAwake: (Boolean) -> Unit,
-    hapticsHelp: String = "Short confirmation pulses for switches, settings and controls.",
-    keepScreenAwakeHelp: String = "Prevents auto-lock while this app is open. A monitor should stay lit.",
+    hapticsHelp: String? = null,
+    keepScreenAwakeHelp: String? = null,
     feedback: () -> Unit = {},
 ) {
-    MonitorSettingsRowCard(title = "Touch & safety") {
+    MonitorSettingsRowCard(title = stringResource(R.string.monitor_settings_touch_safety)) {
         MonitorSettingsSwitchInlineRow(
-            title = "Record confirmation", help = "Ask before starting or stopping recording to prevent mistaps.",
+            title = stringResource(R.string.monitor_settings_record_confirmation),
+            help = stringResource(R.string.monitor_settings_record_confirmation_help),
             showTopDivider = false, isOn = recordConfirmation,
         ) { feedback(); onRecordConfirmation(!recordConfirmation) }
-        MonitorSettingsSwitchInlineRow(title = "Haptics", help = hapticsHelp, isOn = haptics) {
+        MonitorSettingsSwitchInlineRow(
+            title = stringResource(R.string.monitor_settings_haptics),
+            help = hapticsHelp ?: stringResource(R.string.monitor_settings_haptics_help), isOn = haptics,
+        ) {
             feedback(); onHaptics(!haptics)
         }
-        MonitorSettingsSwitchInlineRow(title = "Keep screen awake", help = keepScreenAwakeHelp, isOn = keepScreenAwake) {
+        MonitorSettingsSwitchInlineRow(
+            title = stringResource(R.string.monitor_settings_keep_awake),
+            help = keepScreenAwakeHelp ?: stringResource(R.string.monitor_settings_keep_awake_help), isOn = keepScreenAwake,
+        ) {
             feedback(); onKeepScreenAwake(!keepScreenAwake)
         }
     }
@@ -30,8 +39,11 @@ public fun MonitorOperatorSafetySettings(
 @Composable
 public fun MonitorPanelSettings(hdrDisplay: Boolean, help: String,
     onChange: (Boolean) -> Unit, feedback: () -> Unit = {}) {
-    MonitorSettingsRowCard(title = "Panel") {
-        MonitorSettingsSwitchInlineRow(title = "HDR display", help = help, showTopDivider = false, isOn = hdrDisplay) {
+    MonitorSettingsRowCard(title = stringResource(R.string.monitor_settings_panel)) {
+        MonitorSettingsSwitchInlineRow(
+            title = stringResource(R.string.monitor_settings_hdr_display),
+            help = help, showTopDivider = false, isOn = hdrDisplay,
+        ) {
             feedback(); onChange(!hdrDisplay)
         }
     }
