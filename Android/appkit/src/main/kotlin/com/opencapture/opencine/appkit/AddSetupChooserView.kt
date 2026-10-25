@@ -13,6 +13,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,7 +76,7 @@ public class AddSetupFlow(
     public val onDismiss: () -> Unit = {},
     public val onNoticeAction: (String) -> Unit = {},
     public val onCancel: () -> Unit = {},
-    public val cancelTitle: String? = "Cancel",
+    public val cancelTitle: String? = null,
 )
 
 /** Renders the shared choice before an optional integration destination; dismissal sends no command itself. */
@@ -92,7 +93,8 @@ public fun AddSetupFlowView(flow: AddSetupFlow, modifier: Modifier = Modifier) {
             AddSetupChooserView(flow.chooser, onSelect = {
                 if (destination != null) selected = it.id else flow.onSelect(it)
             }, onNoticeAction = flow.onNoticeAction)
-            flow.cancelTitle?.let { TextButton(onClick = flow.onCancel, colors = chooserButtonColors()) { Text(it) } }
+            val cancelTitle = flow.cancelTitle ?: stringResource(R.string.appkit_cancel)
+            TextButton(onClick = flow.onCancel, colors = chooserButtonColors()) { Text(cancelTitle) }
         }
     }
 }
