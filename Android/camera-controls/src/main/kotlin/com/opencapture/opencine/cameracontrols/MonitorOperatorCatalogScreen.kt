@@ -17,6 +17,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -309,9 +310,9 @@ private fun <P> MonitorOperatorCatalogGallery(
                     records.isEmpty() && value.fetching -> MediaScrollablePlaceholder { MediaListingState(value.fetchedCount) }
                     records.isEmpty() -> MediaScrollablePlaceholder {
                         val filtered = presentation?.activeFilterCount ?: value.activeFilterCount
-                        MediaEmptyState(value.fetching, value.note ?: MediaLibraryCopy.emptySubtitle(connected,
+                        MediaEmptyState(value.fetching, value.note ?: mediaLibraryEmptySubtitle(connected,
                             value.records.isNotEmpty(), filtered, MediaLibraryTab.valueOf(value.category.name)),
-                            title = MediaLibraryCopy.emptyTitle(value.fetching, connected, value.records.isNotEmpty(), filtered))
+                            title = mediaLibraryEmptyTitle(value.fetching, connected, value.records.isNotEmpty(), filtered))
                     }
                     list -> LazyColumn(Modifier.fillMaxSize().testTag(GALLERY_TAG).monitorScrollFade(listState), state = listState,
                         verticalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(bottom = 24.dp)) {

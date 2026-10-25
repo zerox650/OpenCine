@@ -41,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -123,14 +124,14 @@ fun MediaCategoryTab(tab: MediaLibraryTab, active: Boolean, fill: Boolean = fals
     val haptics = LocalOperatorHaptics.current
     val label =
         when (tab) {
-            MediaLibraryTab.ALL -> "All"
-            MediaLibraryTab.VIDEOS -> "Videos"
-            MediaLibraryTab.PHOTOS -> "Photos"
-            MediaLibraryTab.FAVORITES -> "Favorites"
+            MediaLibraryTab.ALL -> stringResource(R.string.media_tab_all)
+            MediaLibraryTab.VIDEOS -> stringResource(R.string.media_tab_videos)
+            MediaLibraryTab.PHOTOS -> stringResource(R.string.media_tab_photos)
+            MediaLibraryTab.FAVORITES -> stringResource(R.string.media_tab_favorites)
         }
     MonitorTab(active, { haptics.selection(); onClick() }, Modifier.then(if (fill) Modifier.fillMaxWidth() else Modifier),
         vertical = fill, separator = tab != MediaLibraryTab.entries.first(),
-        accessibilityLabel = "Show $label media") {
+        accessibilityLabel = stringResource(R.string.media_tab_show_a11y, label)) {
         Row(Modifier.then(if (fill) Modifier.fillMaxWidth() else Modifier),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             // iOS category tabs carry no glyph.
@@ -148,7 +149,7 @@ fun MediaCatalogHeaderRow(
 ) {
     com.opencapture.monitorui.MonitorCatalogHeader(
         title = "$headerTitle · $headerCount",
-        subtitle = MediaLibraryCopy.galleryHint(fetchInProgress, isSelecting, isLive),
+        subtitle = mediaLibraryGalleryHint(fetchInProgress, isSelecting, isLive),
         compact = compact, sort = sortOrder.menuLabel,
         filterActive = filterOpen || activeFilterCount > 0,
         filterCount = activeFilterCount,
@@ -156,25 +157,31 @@ fun MediaCatalogHeaderRow(
 }
 
 /** Selection actions name how many items they act on and where deletion happens (ZAB-440). */
-internal fun selectionDeleteDescription(count: Int, enabled: Boolean): String =
-    if (enabled) "Delete $count selected ${if (count == 1) "item" else "items"} from the camera card"
-    else "Delete selected media"
+internal fun selectionDeleteDescription(count: Int, enabled: Boolean, context: android.content.Context? = null): String =
+    when {
+        !enabled -> lstr(context, R.string.media_selection_delete)
+        count == 1 -> lstr(context, R.string.media_selection_delete_one, count)
+        else -> lstr(context, R.string.media_selection_delete_many, count)
+    }
 
-internal fun selectionShareDescription(count: Int): String =
-    "Share $count selected ${if (count == 1) "item" else "items"}"
+internal fun selectionShareDescription(count: Int, context: android.content.Context? = null): String =
+    lstr(context, if (count == 1) R.string.media_selection_share_one else R.string.media_selection_share_many, count)
 
 @Composable
 fun MediaSelectionTray(count: Int, cacheEnabled: Boolean, deleteEnabled: Boolean,
     onAll: () -> Unit, onClear: () -> Unit, onCache: () -> Unit, onStar: () -> Unit,
     onDelete: () -> Unit, onShare: () -> Unit, shareEnabled: Boolean = true) {
     com.opencapture.monitorui.MonitorSelectionTray(count) {
-        TrayTextChip(MonitorIcon.CIRCLE_CHECK, "All", "Select all", LiveDesign.accent, onAll)
-        TrayTextChip(MonitorIcon.X, "Clear", "Clear selection", LiveDesign.muted, onClear)
-        MediaCircleIconButton(MonitorIcon.DOWNLOAD, "Cache selected clips", onCache, enabled = cacheEnabled, size = 34.dp)
-        MediaCircleIconButton(MonitorIcon.STAR, "Favorite selected clips", onStar, enabled = count > 0, size = 34.dp)
-        MediaCircleIconButton(MonitorIcon.TRASH, selectionDeleteDescription(count, deleteEnabled), onDelete,
+        TrayTextChip(MonitorIcon.CIRCLE_CHECK, stringResource(R.string.media_tray_all),
+            stringResource(R.string.media_tray_select_all_a11y), LiveDesign.accent, onAll)
+        TrayTextChip(MonitorIcon.X, stringResource(R.string.media_tray_clear),
+            stringResource(R.string.media_tray_clear_selection_a11y), LiveDesign.muted, onClear)
+        MediaCircleIconButton(MonitorIcon.DOWNLOAD, stringResource(R.string.media_tray_cache_clips_a11y), onCache, enabled = cacheEnabled, size = 34.dp)
+        MediaCircleIconButton(MonitorIcon.STAR, stringResource(R.string.media_tray_favorite_clips_a11y), onStar, enabled = count > 0, size = 34.dp)
+        val context = androidx.compose.ui.platform.LocalContext.current
+        MediaCircleIconButton(MonitorIcon.TRASH, selectionDeleteDescription(count, deleteEnabled, context), onDelete,
             enabled = deleteEnabled, size = 34.dp)
-        if (shareEnabled) MediaCircleIconButton(MonitorIcon.SHARE, selectionShareDescription(count), onShare,
+        if (shareEnabled) MediaCircleIconButton(MonitorIcon.SHARE, selectionShareDescription(count, context), onShare,
             enabled = count > 0, size = 34.dp)
     }
 }
@@ -211,7 +218,7 @@ fun MediaCacheBar(filename: String, progress: Double) {
     ) {
         com.opencapture.monitorui.MonitorMediaProgressTrack(progress.toFloat(), trackWidth = 120.dp)
         Text(
-            "CACHING $filename ${(progress * 100).toInt()}%",
+            stringResource(R.string.media_caching, filename, (progress * 100).toInt()),
             color = LiveDesign.muted,
             fontSize = 10.sp,
             fontFamily = MonitorTypography.fontFamily,
@@ -250,7 +257,7 @@ fun MediaEmptyState(listing: Boolean, subtitle: String, title: String? = null, r
             )
         }
         Text(
-            title ?: if (listing) MediaLibraryCopy.LISTING_TITLE else MediaLibraryCopy.EMPTY_TITLE,
+            title ?: stringResource(if (listing) R.string.media_library_listing_title else R.string.media_library_empty_title),
             color = LiveDesign.muted,
             style = LiveType.ui(15f, FontWeight.Medium),
             modifier = Modifier.padding(top = 12.dp),
@@ -274,10 +281,10 @@ fun MediaListingState(listed: Int) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CircularProgressIndicator(color = LiveDesign.muted)
-        Text("Listing clips on camera…", color = LiveDesign.muted, style = LiveType.ui(15f, FontWeight.Medium), modifier = Modifier.padding(top = 12.dp))
+        Text(stringResource(R.string.media_library_listing_title), color = LiveDesign.muted, style = LiveType.ui(15f, FontWeight.Medium), modifier = Modifier.padding(top = 12.dp))
         Text(
-            if (listed == 0) "Querying card storage…"
-            else "$listed clip${if (listed == 1) "" else "s"} found so far",
+            if (listed == 0) stringResource(R.string.media_querying_card)
+            else stringResource(R.string.media_clips_found, listed),
             color = LiveDesign.faint,
             style = LiveType.ui(12f),
         )
@@ -346,14 +353,14 @@ fun MediaFilterPopup(
                 Column(Modifier.padding(top = 72.dp, start = 20.dp, end = 20.dp).widthIn(max = 400.dp).fillMaxWidth()
                     .mediaPanelGlass(MediaCornerShape).chromeClickable(onClick = {}).padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Filters", style = LiveType.ui(16f, FontWeight.SemiBold), color = LiveDesign.text)
+                    Text(stringResource(R.string.media_filters_title), style = LiveType.ui(16f, FontWeight.SemiBold), color = LiveDesign.text)
                     val scroll = rememberScrollState()
                     Column(Modifier.fillMaxWidth().weight(1f, fill = false).heightIn(max = 290.dp).verticalScroll(scroll)) { form() }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Clear all", style = LiveType.ui(13f, FontWeight.Medium),
+                        Text(stringResource(R.string.media_filters_clear_all), style = LiveType.ui(13f, FontWeight.Medium),
                             color = if (hasActiveFilters) LiveDesign.accent else LiveDesign.faint,
                             modifier = Modifier.chromeClickable(enabled = hasActiveFilters, onClick = onClear))
-                        Text("Done", style = LiveType.ui(13f, FontWeight.SemiBold), color = LiveDesign.accent,
+                        Text(stringResource(R.string.media_filters_done), style = LiveType.ui(13f, FontWeight.SemiBold), color = LiveDesign.accent,
                             modifier = Modifier.chromeClickable(onClick = onClose))
                     }
                 }
@@ -628,7 +635,7 @@ fun MediaLibraryPage(
             ) {
                 Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     MediaCatalogHeaderRow(
-                        headerTitle = MediaLibraryCopy.headerTitle(state.category), headerCount = state.headerCount,
+                        headerTitle = mediaLibraryHeaderTitle(state.category), headerCount = state.headerCount,
                         fetchInProgress = state.fetchInProgress, isLive = state.isLive,
                         isSelecting = state.isSelecting,
                         sortOrder = state.sortOrder, filterOpen = state.filterOpen, activeFilterCount = state.activeFilterCount,

@@ -1,5 +1,7 @@
 package com.opencapture.opencine.cameracontrols
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import com.opencapture.opencine.vocabulary.MediaClipFormatting
 import com.opencapture.opencine.vocabulary.MediaFile
 import com.opencapture.opencine.vocabulary.MediaKind
@@ -167,3 +169,49 @@ object MediaOperatorCopy {
     const val CLIP_LOADING = "Loading clip from camera…"
     const val CLIP_NOT_CACHED = "This clip is not cached on the phone."
 }
+
+/**
+ * The same media-browser copy, resolved from resources so it reads in the operator's language.
+ * The constants above stay the verbatim English a JVM test can assert against.
+ */
+@Composable
+public fun mediaLibraryGalleryHint(fetching: Boolean, selecting: Boolean, isLive: Boolean): String =
+    when {
+        fetching -> stringResource(R.string.media_library_reading_hint)
+        selecting -> stringResource(R.string.media_library_selecting_hint)
+        isLive -> stringResource(R.string.media_library_browse_hint)
+        else -> stringResource(R.string.media_library_disconnected_cached_only)
+    }
+
+@Composable
+public fun mediaLibraryEmptyTitle(listing: Boolean, isLive: Boolean, hasListedClips: Boolean,
+    activeFilterCount: Int): String =
+    when {
+        listing -> stringResource(R.string.media_library_listing_title)
+        !isLive && !hasListedClips -> stringResource(R.string.media_library_disconnected_title)
+        activeFilterCount > 0 -> stringResource(R.string.media_library_filter_empty_title)
+        !isLive -> stringResource(R.string.media_library_no_cached_title)
+        else -> stringResource(R.string.media_library_empty_title)
+    }
+
+@Composable
+public fun mediaLibraryEmptySubtitle(isLive: Boolean, hasListedClips: Boolean, activeFilterCount: Int,
+    category: MediaLibraryTab): String =
+    when {
+        !isLive && !hasListedClips -> stringResource(R.string.media_library_disconnected)
+        activeFilterCount > 0 -> stringResource(R.string.media_library_filter_empty)
+        !isLive -> stringResource(R.string.media_library_disconnected_empty_cache)
+        category == MediaLibraryTab.FAVORITES -> stringResource(R.string.media_library_empty_favorites)
+        category == MediaLibraryTab.VIDEOS -> stringResource(R.string.media_library_empty_videos)
+        category == MediaLibraryTab.PHOTOS -> stringResource(R.string.media_library_empty_photos)
+        else -> stringResource(R.string.media_library_empty_all)
+    }
+
+@Composable
+public fun mediaLibraryHeaderTitle(category: MediaLibraryTab): String =
+    when (category) {
+        MediaLibraryTab.ALL -> stringResource(R.string.media_library_header_all)
+        MediaLibraryTab.VIDEOS -> stringResource(R.string.media_library_header_videos)
+        MediaLibraryTab.PHOTOS -> stringResource(R.string.media_library_header_photos)
+        MediaLibraryTab.FAVORITES -> stringResource(R.string.media_library_header_favorites)
+    }
