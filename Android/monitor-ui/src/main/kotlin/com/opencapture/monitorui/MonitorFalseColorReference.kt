@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,7 +51,7 @@ fun MonitorFalseColorReference(values: MonitorFalseColorReferenceValues, modifie
             }
         }
         Text(
-            "False Color",
+            stringResource(R.string.monitor_assist_false_color),
             color = MonitorPalette.text,
             fontSize = 8.5.sp,
             lineHeight = 10.sp,

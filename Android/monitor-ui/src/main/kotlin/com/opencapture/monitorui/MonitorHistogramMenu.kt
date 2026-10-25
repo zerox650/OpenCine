@@ -1,6 +1,7 @@
 package com.opencapture.monitorui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import com.opencapture.opencine.media.MonitorCrushClipCompensation
 import com.opencapture.monitorui.settings.MonitorSettingsCrushClipSegmented
 import com.opencapture.monitorui.settings.MonitorSettingsInlineRow
@@ -10,7 +11,7 @@ import com.opencapture.monitorui.settings.MonitorSettingsSwitchInlineRow
 fun MonitorHistogramMenu(trafficLights: Boolean, onTrafficLights: () -> Unit,
     compensation: MonitorCrushClipCompensation, onCompensation: (MonitorCrushClipCompensation) -> Unit,
     trafficHelp: String, compensationHelp: String) {
-    MonitorSettingsSwitchInlineRow("Traffic Lights", isOn = trafficLights, help = trafficHelp,
+    MonitorSettingsSwitchInlineRow(stringResource(R.string.monitor_assist_traffic_lights), isOn = trafficLights, help = trafficHelp,
         showTopDivider = false, onToggle = onTrafficLights)
     MonitorCrushClipMenu(compensation, onCompensation, compensationHelp)
 }

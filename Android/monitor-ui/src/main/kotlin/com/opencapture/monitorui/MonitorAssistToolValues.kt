@@ -1,5 +1,7 @@
 package com.opencapture.monitorui
 
+import androidx.annotation.StringRes
+
 /** Current monitor-assist identities. Sources provide availability and choose their tool ordering. */
 enum class MonitorAssistTool {
     LUT,
@@ -35,6 +37,31 @@ enum class MonitorAssistTool {
             ND -> "ND"
             else -> title
         }
+
+    /** Operator copy for the settings card; [title] stays the untranslated token. */
+    @get:StringRes
+    val titleRes: Int?
+        get() =
+            when (this) {
+                LUT -> null
+                PEAK -> R.string.monitor_assist_peaking
+                FALSE -> R.string.monitor_assist_false_color
+                ZEBRA -> R.string.monitor_assist_zebra
+                WAVE -> R.string.monitor_assist_waveform
+                PARADE -> R.string.monitor_assist_parade
+                HISTO -> R.string.monitor_assist_histogram
+                VECTOR -> R.string.monitor_assist_vectorscope
+                LIGHTS -> R.string.monitor_assist_traffic_lights
+                ND -> R.string.monitor_assist_nd
+                EV -> R.string.monitor_assist_ev_meter
+                AUDIO -> R.string.monitor_assist_audio
+                GUIDES -> R.string.monitor_assist_guides
+                GRID -> R.string.monitor_assist_grid
+                CROSS -> R.string.monitor_assist_crosshair
+                LEVEL -> R.string.monitor_assist_level
+                DESQ -> R.string.monitor_assist_desqueeze
+                MIRROR -> R.string.monitor_assist_mirror
+            }
 
     val title: String
         get() =

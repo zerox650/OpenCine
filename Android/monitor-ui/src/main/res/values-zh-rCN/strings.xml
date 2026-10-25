@@ -122,4 +122,87 @@
     <string name="monitor_link_poor">较差</string>
     <string name="monitor_link_watch">注意</string>
     <string name="monitor_link_stable">稳定</string>
+
+    <string name="monitor_settings_mode">模式</string>
+    <string name="monitor_settings_brightness">亮度</string>
+
+    <!-- 示波器菜单 -->
+    <string name="monitor_scope_brightness_help">在强光环境下提高描迹亮度。</string>
+    <string name="monitor_scope_brightness_chroma_help">色度图不易辨认时提高描迹亮度。</string>
+    <string name="monitor_scope_encoded_hint">按编码值百分比显示。源校准不可用。</string>
+    <string name="monitor_scope_guide_lines">参考线</string>
+    <string name="monitor_scope_safe_clip">安全削波</string>
+    <string name="monitor_scope_safe_crush">安全暗部</string>
+    <string name="monitor_scope_middle_gray">中灰</string>
+    <string name="monitor_scope_trace_zoom">轨迹缩放</string>
+    <string name="monitor_scope_trace_zoom_help">仅放大色度描迹，刻度网保持 1:1。</string>
+
+    <!-- 监看辅助卡片标题 -->
+    <string name="monitor_assist_peaking">峰值对焦</string>
+    <string name="monitor_assist_false_color">伪色</string>
+    <string name="monitor_assist_zebra">斑马纹</string>
+    <string name="monitor_assist_waveform">波形图</string>
+    <string name="monitor_assist_parade">RGB 分量图</string>
+    <string name="monitor_assist_parade_card">分量图</string>
+    <string name="monitor_assist_histogram">直方图</string>
+    <string name="monitor_assist_vectorscope">矢量示波器</string>
+    <string name="monitor_assist_traffic_lights">红绿灯</string>
+    <string name="monitor_assist_nd">ND 建议</string>
+    <string name="monitor_assist_ev_meter">EV 测光表</string>
+    <string name="monitor_assist_audio">音量电平</string>
+    <string name="monitor_assist_guides">参考线</string>
+    <string name="monitor_assist_grid">网格</string>
+    <string name="monitor_assist_crosshair">十字线</string>
+    <string name="monitor_assist_level">水平仪</string>
+    <string name="monitor_assist_desqueeze">变形宽银幕解压</string>
+    <string name="monitor_assist_mirror">镜像</string>
+
+    <!-- 系统页：反馈与支持 -->
+    <string name="monitor_action_open">打开</string>
+    <string name="monitor_support_help_feedback">帮助与反馈</string>
+    <string name="monitor_support_report_problem">报告问题</string>
+    <string name="monitor_support_report_problem_help">告诉我们应用里发生了什么。你可以选择是否附上技术细节与用于回复的邮箱。</string>
+    <string name="monitor_support_report_status">报告状态</string>
+    <string name="monitor_support_report_id">报告 ID</string>
+    <string name="monitor_support_report_id_help">后续跟进时请提供此 ID。</string>
+    <string name="monitor_support_queued_report">待发送报告</string>
+    <string name="monitor_support_queued_report_help">从本机移除尚未发送的报告。</string>
+    <string name="monitor_support_discard">丢弃</string>
+    <string name="monitor_support_automatic_reports">自动错误报告</string>
+    <string name="monitor_support_off">关闭</string>
+    <string name="monitor_support_reporting_privacy">报告隐私</string>
+    <string name="monitor_support_reporting_privacy_help">报告包含哪些内容、保留期限，以及如何申请删除。</string>
+    <string name="monitor_support_read">查看</string>
+    <string name="monitor_support_diagnostic_options">诊断选项</string>
+    <string name="monitor_support_diagnostic_caption">在本机保存或删除报告</string>
+    <string name="monitor_support_save_report">保存诊断报告</string>
+    <string name="monitor_support_save_report_help">保留一份副本，或分享给支持团队。</string>
+    <string name="monitor_support_save">保存</string>
+    <string name="monitor_support_delete_reports">删除已保存的画质报告</string>
+    <string name="monitor_support_delete">删除</string>
+
+    <!-- 存储与系统页 -->
+    <string name="monitor_storage_full_resolution">全分辨率缓存</string>
+    <string name="monitor_storage_local_cache">本地媒体缓存</string>
+    <string name="monitor_storage_clear_cache">清除缓存</string>
+    <string name="monitor_storage_clearing">正在清除…</string>
+    <string name="monitor_storage_clear">清除</string>
+    <string name="monitor_info_title">应用信息</string>
+    <string name="monitor_info_theme">主题</string>
+    <string name="monitor_info_protocol">协议实现</string>
+    <string name="monitor_info_version">应用版本</string>
+    <string name="monitor_legal_title">项目与法律</string>
+    <string name="monitor_legal_source">源代码</string>
+    <string name="monitor_legal_source_a11y">打开源代码</string>
+    <string name="monitor_legal_privacy">隐私</string>
+    <string name="monitor_legal_privacy_help">本应用在本机保存哪些数据。</string>
+    <string name="monitor_legal_privacy_a11y">打开隐私政策</string>
+    <string name="monitor_legal_terms">条款</string>
+    <string name="monitor_legal_terms_a11y">打开使用条款</string>
+    <string name="monitor_legal_licenses">许可证</string>
+    <string name="monitor_legal_licenses_help">Apache 2.0 与第三方声明。</string>
+    <string name="monitor_legal_licenses_a11y">打开许可证</string>
+    <string name="monitor_legal_notice">NOTICE</string>
+    <string name="monitor_legal_notice_help">随应用一同提供的署名信息。</string>
+    <string name="monitor_legal_notice_a11y">打开 NOTICE</string>
 </resources>

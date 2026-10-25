@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.opencapture.monitorui.*
@@ -177,7 +178,8 @@ private fun AssistSettingsCard(section: MonitorAssistSettingsSection): Unit {
         else -> error("No settings menu for ${section.tool}")
     }
     Column(Modifier.testTag("settings.assist.$tag")) {
-        MonitorSettingsRowCard(title = if (section.tool == MonitorAssistTool.PARADE) "Parade" else section.tool.title,
-            onReset = section.reset) { section.Menu() }
+        val title = if (section.tool == MonitorAssistTool.PARADE) stringResource(R.string.monitor_assist_parade_card)
+            else section.tool.titleRes?.let { stringResource(it) } ?: section.tool.title
+        MonitorSettingsRowCard(title = title, onReset = section.reset) { section.Menu() }
     }
 }

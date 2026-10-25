@@ -122,4 +122,87 @@
     <string name="monitor_link_poor">Poor</string>
     <string name="monitor_link_watch">Watch</string>
     <string name="monitor_link_stable">Stable</string>
+
+    <string name="monitor_settings_mode">Mode</string>
+    <string name="monitor_settings_brightness">Brightness</string>
+
+    <!-- Scope trace menus -->
+    <string name="monitor_scope_brightness_help">Raise trace intensity in bright light.</string>
+    <string name="monitor_scope_brightness_chroma_help">Raise trace intensity when the chroma plot is hard to read.</string>
+    <string name="monitor_scope_encoded_hint">Encoded code percentage. Source calibration unavailable.</string>
+    <string name="monitor_scope_guide_lines">GUIDE LINES</string>
+    <string name="monitor_scope_safe_clip">Safe clip</string>
+    <string name="monitor_scope_safe_crush">Safe crush</string>
+    <string name="monitor_scope_middle_gray">Middle gray</string>
+    <string name="monitor_scope_trace_zoom">Trace Zoom</string>
+    <string name="monitor_scope_trace_zoom_help">Magnifies only the chroma trace; the graticule stays at unity.</string>
+
+    <!-- Monitor-assist card titles -->
+    <string name="monitor_assist_peaking">Peaking</string>
+    <string name="monitor_assist_false_color">False Color</string>
+    <string name="monitor_assist_zebra">Zebra</string>
+    <string name="monitor_assist_waveform">Waveform</string>
+    <string name="monitor_assist_parade">RGB Parade</string>
+    <string name="monitor_assist_parade_card">Parade</string>
+    <string name="monitor_assist_histogram">Histogram</string>
+    <string name="monitor_assist_vectorscope">Vectorscope</string>
+    <string name="monitor_assist_traffic_lights">Traffic Lights</string>
+    <string name="monitor_assist_nd">ND Suggestion</string>
+    <string name="monitor_assist_ev_meter">EV Meter</string>
+    <string name="monitor_assist_audio">Audio Levels</string>
+    <string name="monitor_assist_guides">Guides</string>
+    <string name="monitor_assist_grid">Grid</string>
+    <string name="monitor_assist_crosshair">Crosshair</string>
+    <string name="monitor_assist_level">Level</string>
+    <string name="monitor_assist_desqueeze">Anamorphic Desqueeze</string>
+    <string name="monitor_assist_mirror">Mirror</string>
+
+    <!-- System tab: support -->
+    <string name="monitor_action_open">Open</string>
+    <string name="monitor_support_help_feedback">Help &amp; Feedback</string>
+    <string name="monitor_support_report_problem">Report a problem</string>
+    <string name="monitor_support_report_problem_help">Tell us what happened in the app. Choose whether to include technical details and an email for a reply.</string>
+    <string name="monitor_support_report_status">Report status</string>
+    <string name="monitor_support_report_id">Report ID</string>
+    <string name="monitor_support_report_id_help">Use this ID if you follow up.</string>
+    <string name="monitor_support_queued_report">Queued report</string>
+    <string name="monitor_support_queued_report_help">Remove the unsent report from this phone.</string>
+    <string name="monitor_support_discard">Discard</string>
+    <string name="monitor_support_automatic_reports">Automatic error reports</string>
+    <string name="monitor_support_off">Off</string>
+    <string name="monitor_support_reporting_privacy">Reporting Privacy</string>
+    <string name="monitor_support_reporting_privacy_help">What reports contain, retention, and how to request deletion.</string>
+    <string name="monitor_support_read">Read</string>
+    <string name="monitor_support_diagnostic_options">Diagnostic options</string>
+    <string name="monitor_support_diagnostic_caption">Save or remove reports on this phone</string>
+    <string name="monitor_support_save_report">Save diagnostic report</string>
+    <string name="monitor_support_save_report_help">Keep a copy or share it with support.</string>
+    <string name="monitor_support_save">Save</string>
+    <string name="monitor_support_delete_reports">Delete saved feed reports</string>
+    <string name="monitor_support_delete">Delete</string>
+
+    <!-- Storage and System tabs -->
+    <string name="monitor_storage_full_resolution">Full Resolution Caching</string>
+    <string name="monitor_storage_local_cache">Local Media Cache</string>
+    <string name="monitor_storage_clear_cache">Clear Cache</string>
+    <string name="monitor_storage_clearing">Clearing…</string>
+    <string name="monitor_storage_clear">Clear</string>
+    <string name="monitor_info_title">App Information</string>
+    <string name="monitor_info_theme">Theme</string>
+    <string name="monitor_info_protocol">Protocol Implementation</string>
+    <string name="monitor_info_version">App Version</string>
+    <string name="monitor_legal_title">Project &amp; Legal</string>
+    <string name="monitor_legal_source">Source Code</string>
+    <string name="monitor_legal_source_a11y">Open Source Code</string>
+    <string name="monitor_legal_privacy">Privacy</string>
+    <string name="monitor_legal_privacy_help">What this app stores on this phone.</string>
+    <string name="monitor_legal_privacy_a11y">Open Privacy Policy</string>
+    <string name="monitor_legal_terms">Terms</string>
+    <string name="monitor_legal_terms_a11y">Open Terms of Use</string>
+    <string name="monitor_legal_licenses">Licenses</string>
+    <string name="monitor_legal_licenses_help">Apache 2.0 and third-party notices.</string>
+    <string name="monitor_legal_licenses_a11y">Open Licenses</string>
+    <string name="monitor_legal_notice">NOTICE</string>
+    <string name="monitor_legal_notice_help">Attribution shipped with the app.</string>
+    <string name="monitor_legal_notice_a11y">Open NOTICE</string>
 </resources>
