@@ -209,4 +209,18 @@
     <string name="monitor_legal_notice">NOTICE</string>
     <string name="monitor_legal_notice_help">随应用一同提供的署名信息。</string>
     <string name="monitor_legal_notice_a11y">打开 NOTICE</string>
+
+    <!-- 运动控制设置（云台、屏幕摇杆与控制器） -->
+    <string name="monitor_motion_gimbal">云台</string>
+    <string name="monitor_motion_joystick_sensitivity">摇杆灵敏度</string>
+    <string name="monitor_motion_head_tracking">头部追踪（实验性）</string>
+    <string name="monitor_motion_on_screen_joystick">屏幕摇杆</string>
+    <string name="monitor_motion_size">尺寸</string>
+    <string name="monitor_motion_invert_pan">反转平移</string>
+    <string name="monitor_motion_invert_tilt">反转俯仰</string>
+    <string name="monitor_motion_dead_zone">死区</string>
+    <string name="monitor_motion_response_curve">响应曲线</string>
+    <string name="monitor_motion_controller">控制器</string>
+    <string name="monitor_motion_gimbal_joystick">云台摇杆</string>
+    <string name="monitor_motion_gamepad">游戏手柄</string>
 </resources>

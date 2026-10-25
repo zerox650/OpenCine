@@ -209,4 +209,18 @@
     <string name="monitor_legal_notice">NOTICE</string>
     <string name="monitor_legal_notice_help">Attribution shipped with the app.</string>
     <string name="monitor_legal_notice_a11y">Open NOTICE</string>
+
+    <!-- Motion control settings (the gimbal, the on-screen joystick and the controller). -->
+    <string name="monitor_motion_gimbal">Gimbal</string>
+    <string name="monitor_motion_joystick_sensitivity">Joystick sensitivity</string>
+    <string name="monitor_motion_head_tracking">Head Tracking (Experimental)</string>
+    <string name="monitor_motion_on_screen_joystick">On-screen joystick</string>
+    <string name="monitor_motion_size">Size</string>
+    <string name="monitor_motion_invert_pan">Invert pan</string>
+    <string name="monitor_motion_invert_tilt">Invert tilt</string>
+    <string name="monitor_motion_dead_zone">Dead zone</string>
+    <string name="monitor_motion_response_curve">Response curve</string>
+    <string name="monitor_motion_controller">Controller</string>
+    <string name="monitor_motion_gimbal_joystick">Gimbal joystick</string>
+    <string name="monitor_motion_gamepad">Gamepad</string>
 </resources>
