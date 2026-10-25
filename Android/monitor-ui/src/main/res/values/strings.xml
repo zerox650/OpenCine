@@ -22,4 +22,20 @@
     <string name="monitor_signal_bars">Signal %1$d of 4</string>
     <string name="monitor_action_cancel">Cancel</string>
     <string name="monitor_cancel_connecting">Cancel connecting to %1$s</string>
+    <string name="monitor_share_title">SHARE</string>
+    <string name="monitor_share_coming_soon">Coming soon</string>
+    <string name="monitor_share_coming_soon_a11y">%1$s, Coming soon</string>
+    <string name="monitor_share_back">Back</string>
+    <string name="monitor_share_options">Options</string>
+    <string name="monitor_share_close">Close</string>
+    <string name="monitor_share_project">Project</string>
+    <string name="monitor_share_retry">Retry</string>
+    <string name="monitor_share_select_project">Select a project</string>
+    <string name="monitor_share_no_projects">No projects</string>
+    <string name="monitor_share_create_project">Create new project</string>
+    <string name="monitor_share_filename">Filename</string>
+    <string name="monitor_share_destination">DESTINATION</string>
+    <string name="monitor_share_export">EXPORT</string>
+    <string name="monitor_share_hop_internet">Hop to internet</string>
+    <string name="monitor_share_loading_projects">Loading projects…</string>
 </resources>

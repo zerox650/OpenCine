@@ -21,4 +21,20 @@
     <string name="monitor_signal_bars">信号 %1$d / 4</string>
     <string name="monitor_action_cancel">取消</string>
     <string name="monitor_cancel_connecting">正在取消连接 %1$s</string>
+    <string name="monitor_share_title">分享</string>
+    <string name="monitor_share_coming_soon">即将推出</string>
+    <string name="monitor_share_coming_soon_a11y">%1$s，即将推出</string>
+    <string name="monitor_share_back">返回</string>
+    <string name="monitor_share_options">选项</string>
+    <string name="monitor_share_close">关闭</string>
+    <string name="monitor_share_project">项目</string>
+    <string name="monitor_share_retry">重试</string>
+    <string name="monitor_share_select_project">选择项目</string>
+    <string name="monitor_share_no_projects">暂无项目</string>
+    <string name="monitor_share_create_project">新建项目</string>
+    <string name="monitor_share_filename">文件名</string>
+    <string name="monitor_share_destination">目标位置</string>
+    <string name="monitor_share_export">导出</string>
+    <string name="monitor_share_hop_internet">切换到互联网</string>
+    <string name="monitor_share_loading_projects">正在加载项目…</string>
 </resources>
