@@ -20,4 +20,6 @@
     <string name="monitor_step_x_title_status">Step %1$d: %2$s, %3$s</string>
     <string name="monitor_connect_device">Connect %1$s</string>
     <string name="monitor_signal_bars">Signal %1$d of 4</string>
+    <string name="monitor_action_cancel">Cancel</string>
+    <string name="monitor_cancel_connecting">Cancel connecting to %1$s</string>
 </resources>

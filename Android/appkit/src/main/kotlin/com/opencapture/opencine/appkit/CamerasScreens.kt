@@ -116,6 +116,8 @@ public fun CamerasScreen(
         ),
         key = { it.id },
         emptyMessage = stringResource(R.string.appkit_empty_pair_new),
+        title = stringResource(R.string.appkit_cameras_title),
+        emptyTitle = stringResource(R.string.appkit_no_cameras_saved_yet),
         modifier = modifier,
         scanning = state.scanning,
         actions = {

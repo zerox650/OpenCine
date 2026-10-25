@@ -1,5 +1,6 @@
 package com.opencapture.monitorui
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -342,10 +343,10 @@ fun MonitorCameraCard(
                 }
             } else {
                 MonitorCameraAction(
-                    text = if (busy) "Cancel" else actionTitle,
+                    text = if (busy) stringResource(R.string.monitor_action_cancel) else actionTitle,
                     primary = primary && !busy,
                     enabled = if (busy) onCancel != null else enabled,
-                    contentDescription = if (busy) "Cancel connecting to $title" else "$actionTitle $title",
+                    contentDescription = if (busy) stringResource(R.string.monitor_cancel_connecting, title) else "$actionTitle $title",
                     onClick = { if (busy) onCancel?.invoke() else onOpen() },
                 )
             }

@@ -125,4 +125,6 @@
     <string name="appkit_shooting_mode">Shooting mode</string>
     <string name="appkit_recording">Recording</string>
     <string name="appkit_standby">Standby</string>
+    <string name="appkit_cameras_title">Your cameras</string>
+    <string name="appkit_no_cameras_saved_yet">No cameras saved yet</string>
 </resources>

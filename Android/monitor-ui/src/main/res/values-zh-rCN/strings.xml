@@ -19,4 +19,6 @@
     <string name="monitor_step_x_title_status">第 %1$d 步：%2$s，%3$s</string>
     <string name="monitor_connect_device">连接 %1$s</string>
     <string name="monitor_signal_bars">信号 %1$d / 4</string>
+    <string name="monitor_action_cancel">取消</string>
+    <string name="monitor_cancel_connecting">正在取消连接 %1$s</string>
 </resources>

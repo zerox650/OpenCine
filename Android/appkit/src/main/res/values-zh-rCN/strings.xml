@@ -123,4 +123,6 @@
     <string name="appkit_shooting_mode">拍摄模式</string>
     <string name="appkit_recording">正在录制</string>
     <string name="appkit_standby">待机</string>
+    <string name="appkit_cameras_title">你的相机</string>
+    <string name="appkit_no_cameras_saved_yet">尚未保存任何相机</string>
 </resources>
