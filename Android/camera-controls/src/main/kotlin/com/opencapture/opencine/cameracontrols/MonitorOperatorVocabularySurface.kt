@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.opencapture.monitorui.LiveMonitorLayout
@@ -184,7 +185,9 @@ public fun <Host> MonitorOperatorLiveSurface(chrome: MonitorOperatorLiveChromeSo
     MonitorOperatorRemoteShutterArming(chrome.remoteShutterEnabled,
         monitorIsFront = shell.monitor != null && shell.cover == null, photo = status.isPhoto,
         recordConfirming = state.recordConfirming, control = chrome.capture.control)
-    val palette = tools.map { tool -> MonitorOperatorPaletteItem(tool.name, tool.title, tool.chipLabel,
+    val palette = tools.map { tool -> MonitorOperatorPaletteItem(tool.name,
+        tool.titleRes?.let { stringResource(it) } ?: tool.title,
+        tool.chipLabelRes?.let { stringResource(it) } ?: tool.chipLabel,
         tool, assist.isOn(tool), { assist.toggle(tool) }, tool.hasConfiguration) }
     val native = MonitorOperatorBodyViews(
         focusMarks = {

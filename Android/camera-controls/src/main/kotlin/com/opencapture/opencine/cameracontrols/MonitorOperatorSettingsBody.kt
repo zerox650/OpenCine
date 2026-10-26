@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.opencapture.monitorui.MonitorAssistTool
 import com.opencapture.monitorui.MonitorPalette
@@ -182,10 +183,10 @@ private fun MonitorOperatorSettingsRows(
 @Composable
 private fun SessionAssistSettings(source: MonitorOperatorPictureSettings.Session) {
     val assist = source.assist
-    MonitorSettingsRowCard("View Assist") {
+    MonitorSettingsRowCard(stringResource(R.string.settings_view_assist)) {
         source.availableAssistTools.forEach { tool ->
-            MonitorSettingsSwitchInlineRow(tool.title, assist.isOn(tool),
-                help = "Apply this monitor tool to the displayed picture.", testTag = "monitor.assist.${tool.name}") {
+            MonitorSettingsSwitchInlineRow(tool.titleRes?.let { stringResource(it) } ?: tool.title, assist.isOn(tool),
+                help = stringResource(R.string.assist_apply_help), testTag = "monitor.assist.${tool.name}") {
                 assist.toggle(tool)
             }
             if (tool !in setOf(MonitorAssistTool.EV, MonitorAssistTool.LEVEL) &&

@@ -74,6 +74,7 @@ import com.opencapture.monitorui.settings.MonitorSettingsDisplayToggle
 import com.opencapture.monitorui.settings.MonitorSettingsInlineRow
 import com.opencapture.monitorui.settings.MonitorSettingsPercentSlider
 import com.opencapture.monitorui.settings.MonitorSettingsRowCard
+import com.opencapture.monitorui.settings.MonitorSettingsChoices
 import com.opencapture.monitorui.settings.MonitorSettingsSegmented
 import com.opencapture.monitorui.settings.MonitorSettingsSwitchInlineRow
 import com.opencapture.monitorui.settings.MonitorSettingsTab
@@ -494,10 +495,22 @@ private fun FalseColorAssistCard(assist: MonitorAssistState, help: OperatorHelpC
         onReset = reset,
     ) {
         MonitorSettingsInlineRow(stringResource(R.string.settings_scale), help.FALSE_COLOR_SCALE, showTopDivider = false, stacked = true) {
+            // The segmented control speaks in display words; the picked word maps back to the
+            // scale by its position, because [MonitorFalseColorSelection.fromMenuLabel] only
+            // understands the round-trip words.
+            val scaleWords = MonitorFalseColorSelection.entries.map { scale ->
+                scale.menuLabelRes?.let { stringResource(it) } ?: scale.menuLabel
+            }
             MonitorSettingsSegmented(
-                options = listOf("CineStop", "Video", "IRE", "Limits"),
-                selected = assist.falseColorScale.menuLabel,
-            ) { label -> assist.setFalseColor(scale = MonitorFalseColorSelection.fromMenuLabel(label)); changed() }
+                options = scaleWords,
+                selected = MonitorFalseColorSelection.entries
+                    .getOrNull(assist.falseColorScale.ordinal)?.let { scaleWords[it.ordinal] }
+                    ?: assist.falseColorScale.menuLabel,
+            ) { word ->
+                MonitorFalseColorSelection.entries.getOrNull(scaleWords.indexOf(word))?.let { picked ->
+                    assist.setFalseColor(scale = picked); changed()
+                }
+            }
         }
         MonitorSettingsInlineRow(title = stringResource(R.string.settings_reference_key), stacked = true) {
             FalseColorKey(assist.falseColorScale, transfer, ceiling)
@@ -554,10 +567,13 @@ private fun PeakingAssistCard(assist: MonitorAssistState, help: OperatorHelpCopy
         onReset = reset,
     ) {
         MonitorSettingsInlineRow(stringResource(R.string.settings_sensitivity), help.PEAKING_SENSITIVITY, showTopDivider = false, stacked = true) {
-            MonitorSettingsSegmented(
-                options = MonitorPeakingSense.entries.map { it.label },
-                selected = assist.peakingSensitivity.label,
-            ) { label -> assist.setPeaking(sense = MonitorPeakingSense.fromPersisted(label)); changed() }
+            // The enum stays the selected value; only its drawn word is translated.
+            val senseLabels = MonitorPeakingSense.entries.associateWith { peakingSenseLabel(it) }
+            MonitorSettingsChoices(
+                options = MonitorPeakingSense.entries.toList(),
+                selected = assist.peakingSensitivity,
+                title = { senseLabels.getValue(it) },
+            ) { sense -> assist.setPeaking(sense = sense); changed() }
         }
         MonitorSettingsInlineRow(stringResource(R.string.settings_color), help.PEAKING_COLOR, stacked = true) {
             MonitorSettingsColorDots(dots = host.peakingColors, selectedName = assist.peakingColor.label) { name ->
@@ -566,6 +582,18 @@ private fun PeakingAssistCard(assist: MonitorAssistState, help: OperatorHelpCopy
         }
     }
 }
+
+/**
+ * The peaking sensitivity word. [MonitorPeakingSense] keeps its English `label` as the persisted
+ * identity; only the segmented control draws this translated word.
+ */
+@Composable
+private fun peakingSenseLabel(sense: MonitorPeakingSense): String =
+    when (sense) {
+        MonitorPeakingSense.LOW -> stringResource(R.string.settings_peaking_low)
+        MonitorPeakingSense.MED -> stringResource(R.string.settings_peaking_med)
+        MonitorPeakingSense.HIGH -> stringResource(R.string.settings_peaking_high)
+    }
 
 @Composable
 private fun ZebraAssistCard(assist: MonitorAssistState, help: OperatorHelpCopy, host: AssistHost, transfer: MonitorTransfer, ceiling: ScopeClipSource,
@@ -688,7 +716,7 @@ private fun HistogramAssistCard(assist: MonitorAssistState, reset: () -> Unit, c
             showTopDivider = false,
             stacked = true,
         ) { assist.setHistogram(traffic = !assist.histoTrafficLights); changed() }
-        MonitorSettingsInlineRow(title = HistogramAssist.COMPENSATION_TITLE, help = HistogramAssist.COMPENSATION_HELP, stacked = true) {
+        MonitorSettingsInlineRow(title = stringResource(R.string.assist_crush_clip_title), help = HistogramAssist.COMPENSATION_HELP, stacked = true) {
             CrushClipControl(assist.crushClipCompensation) { assist.setHistogram(compensation = it); changed() }
         }
     }
@@ -715,7 +743,7 @@ private fun VectorscopeAssistCard(assist: MonitorAssistState, help: OperatorHelp
 private fun TrafficLightsAssistCard(assist: MonitorAssistState, help: OperatorHelpCopy, reset: () -> Unit, changed: () -> Unit) {
     MonitorSettingsRowCard(title = stringResource(R.string.settings_traffic_lights), onReset = reset) {
         MonitorSettingsInlineRow(
-            title = HistogramAssist.COMPENSATION_TITLE,
+            title = stringResource(R.string.assist_crush_clip_title),
             help = help.TRAFFIC_LIGHTS_COMPENSATION,
             showTopDivider = false,
             stacked = true,

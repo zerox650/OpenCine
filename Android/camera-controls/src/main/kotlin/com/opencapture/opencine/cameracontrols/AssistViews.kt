@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
@@ -270,11 +271,18 @@ private fun FalseColorOptions(state: MonitorAssistState, transfer: MonitorTransf
     val haptics = LocalOperatorHaptics.current
     val scaleHelp = stringResource(R.string.assist_false_color_scale_help)
     val readHelp = stringResource(R.string.assist_false_color_read_help)
+    // The menu words are what an operator reads; the round-trip key stays each
+    // [MonitorFalseColorSelection.menuLabel]. Resolved here, outside the menu's lambda.
+    val scaleWords = MonitorFalseColorSelection.entries.map { scale ->
+        scale.menuLabelRes?.let { stringResource(it) } ?: scale.menuLabel
+    }
     com.opencapture.monitorui.MonitorFalseColorMenu(
-        listOf("CineStop", "Video", "IRE", "Limits").map(MonitorFalseColorSelection::fromMenuLabel),
-        state.falseColorScale, { haptics.selection(); state.setFalseColor(scale = it) }, { it.menuLabel },
+        MonitorFalseColorSelection.entries,
+        state.falseColorScale, { haptics.selection(); state.setFalseColor(scale = it) },
+        { scale -> scaleWords.getOrNull(scale.ordinal) ?: scale.menuLabel },
         state.falseColorRec709, { haptics.selection(); state.setFalseColorRead(it) },
-        falseColorReferenceValues(state, transfer, host.scopeCeiling(state), host.rec709LookCurve(transfer)), state.falseColorReference,
+        falseColorReferenceValues(state, transfer, host.scopeCeiling(state), host.rec709LookCurve(transfer),
+            LocalContext.current), state.falseColorReference,
         { haptics.selection(); state.setFalseColor(reference = it) }, scaleHelp, readHelp,
         stringResource(R.string.assist_false_color_key_help))
 }
@@ -416,9 +424,17 @@ fun AssistInspectorFrame(
     options: @Composable (maxHeightDp: Float) -> Unit,
 ) {
     val haptics = LocalOperatorHaptics.current
-    fun descriptor(item: MonitorAssistTool?) = (item?.chipLabel ?: review?.label.orEmpty()).let {
-        com.opencapture.monitorui.MonitorInspectorTool(value = item, title = it, label = it)
+    // The inspector header and its tabs speak the operator's language; the review item already
+    // carries the host's own words. Resolved here, outside the descriptor the inspector maps over.
+    val spoken = tabs.associate { tool ->
+        tool to ((tool.titleRes?.let { stringResource(it) } ?: tool.title) to
+            (tool.chipLabelRes?.let { stringResource(it) } ?: tool.chipLabel))
     }
+    fun descriptor(item: MonitorAssistTool?) = com.opencapture.monitorui.MonitorInspectorTool(
+        value = item,
+        title = spoken[item]?.first ?: item?.title ?: review?.title.orEmpty(),
+        label = spoken[item]?.second ?: item?.chipLabel ?: review?.label.orEmpty(),
+    )
     val entries: List<MonitorAssistTool?> = if (review != null) tabs + null else tabs
     com.opencapture.monitorui.MonitorToolInspector(selection = descriptor(tool), tools = entries.map(::descriptor),
         viewportWidth = viewportWidth, viewportHeight = viewportHeight,
@@ -586,7 +602,7 @@ fun AssistOverlayLayer(
         }
         val reference = if (shown(MonitorAssistTool.FALSE) && state.falseColorReference && showsReference) {
             referenceValues ?: transfer?.let {
-                falseColorReferenceValues(state, it, host.scopeCeiling(state), host.rec709LookCurve(it))
+                falseColorReferenceValues(state, it, host.scopeCeiling(state), host.rec709LookCurve(it), LocalContext.current)
             }
         } else null
         if (reference != null) {
@@ -721,7 +737,7 @@ private fun StackedScopePanel(
 
 /** The false color ruler's values for [transfer], read through [ceiling]. */
 fun falseColorReferenceValues(state: MonitorAssistState, transfer: MonitorTransfer, ceiling: ScopeClipSource,
-    lookCurve: List<Double>? = null): MonitorFalseColorReferenceValues {
+    lookCurve: List<Double>? = null, context: android.content.Context? = null): MonitorFalseColorReferenceValues {
     val rec709 = state.falseColorRec709
     val segments = FalseColorReference.segments(state.falseColorScale, transfer, rec709, ceiling, lookCurve)
     val markers =
@@ -730,8 +746,11 @@ fun falseColorReferenceValues(state: MonitorAssistState, transfer: MonitorTransf
         } else {
             emptyList()
         }
+    // The scale names itself in the operator's language; the round-trip key stays [menuLabel].
+    val scaleWord = state.falseColorScale.menuLabelRes?.let { lstr(context, it) }
+        ?.takeIf { it.isNotEmpty() } ?: state.falseColorScale.menuLabel
     return MonitorFalseColorReferenceValues(
-            subtitle = "${state.falseColorScale.menuLabel} · ${FalseColorReference.curveKeyLabel(transfer, rec709, lookCurve)}",
+            subtitle = "$scaleWord · ${FalseColorReference.curveKeyLabel(transfer, rec709, lookCurve)}",
             segments = segments.mapIndexed { index, segment ->
                 com.opencapture.monitorui.MonitorFalseColorReferenceSegment(index,
                     segment.lowerFraction, segment.upperFraction, segment.band.red, segment.band.green, segment.band.blue)

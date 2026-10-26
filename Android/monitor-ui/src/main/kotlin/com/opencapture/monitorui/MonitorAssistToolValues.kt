@@ -30,6 +30,33 @@ enum class MonitorAssistTool {
     val label: String
         get() = name
 
+    /**
+     * The palette and inspector words for this tool, or null when the English chip stays
+     * (LUT, ND, EV and DE-SQ are abbreviations every operator reads). [chipLabel] remains the
+     * identity: it round-trips through [fromPersisted] and the palette's usage keys, so only
+     * the drawn word resolves.
+     */
+    @get:StringRes
+    val chipLabelRes: Int?
+        get() =
+            when (this) {
+                PEAK -> R.string.monitor_assist_chip_peak
+                FALSE -> R.string.monitor_assist_chip_false
+                ZEBRA -> R.string.monitor_assist_chip_zebra
+                WAVE -> R.string.monitor_assist_chip_wave
+                PARADE -> R.string.monitor_assist_chip_parade
+                HISTO -> R.string.monitor_assist_chip_histo
+                VECTOR -> R.string.monitor_assist_chip_vector
+                LIGHTS -> R.string.monitor_assist_chip_lights
+                AUDIO -> R.string.monitor_assist_chip_audio
+                GUIDES -> R.string.monitor_assist_chip_guides
+                GRID -> R.string.monitor_assist_chip_grid
+                CROSS -> R.string.monitor_assist_chip_cross
+                LEVEL -> R.string.monitor_assist_chip_level
+                MIRROR -> R.string.monitor_assist_chip_mirror
+                LUT, ND, EV, DESQ -> null
+            }
+
     /** Settings names, matching the shared Swift catalog. */
     val displaySettingsTitle: String
         get() = when (this) {

@@ -51,7 +51,7 @@
     <string name="help_app_version">Current %1$s build from the native project metadata.</string>
     <string name="help_local_cache">Cached clips, thumbnails and camera indexes for every camera on this phone.</string>
     <string name="help_cache_full_resolution">Download the original camera file when you open a clip. Off keeps only the 720p proxy to save space. Share needs the original, so connect the camera if it is not cached.</string>
-    <string name="help_false_color_scale">The camera color mode selects D-Log, D-Log2, Rec.709, or HLG automatically. CineStop paints five stops around 18% gray, read through the camera\'s log curve: dark green −2, yellow-green −1, gray at 18%, light pink +1 (skin), soft yellow +2 (upper skin limit). Red is clipped and violet is crushed; other shadows are flat dark gray and other highlights flat light gray. Video paints video-level IRE stripes (green 41–48, pink 61–70, red clip) over luminance grayscale. IRE paints six video-level zones over luminance grayscale: purple crush, blue near-black, green 18% gray, pink one stop over, yellow near clip, red clip. On log, Video and IRE read the camera\'s Rec.709 look (709) or the raw signal (LOG), set under Read. Limits paints only shadow and highlight warnings, leaving other colors untouched.</string>
+    <string name="help_false_color_scale" formatted="false">The camera color mode selects D-Log, D-Log2, Rec.709, or HLG automatically. CineStop paints five stops around 18% gray, read through the camera\'s log curve: dark green −2, yellow-green −1, gray at 18%, light pink +1 (skin), soft yellow +2 (upper skin limit). Red is clipped and violet is crushed; other shadows are flat dark gray and other highlights flat light gray. Video paints video-level IRE stripes (green 41–48, pink 61–70, red clip) over luminance grayscale. IRE paints six video-level zones over luminance grayscale: purple crush, blue near-black, green 18% gray, pink one stop over, yellow near clip, red clip. On log, Video and IRE read the camera\'s Rec.709 look (709) or the raw signal (LOG), set under Read. Limits paints only shadow and highlight warnings, leaving other colors untouched.</string>
     <string name="help_false_color_reference">Show a compact color key over live view while False Color is active.</string>
     <string name="help_peaking_sensitivity">Higher sensitivity catches finer edges but can get noisy on detailed scenes.</string>
     <string name="help_peaking_color">Choose the edge color that stays readable over your typical scene.</string>
@@ -121,6 +121,7 @@
     <string name="settings_processing">Processing</string>
     <string name="settings_feed_upscaler">Feed Upscaler</string>
     <string name="settings_controller_connected">Connected</string>
+    <string name="settings_view_assist">View Assist</string>
 
     <!-- Operator Setup: View Assist -->
     <string name="settings_anamorphic_desqueeze">Anamorphic Desqueeze</string>
@@ -137,6 +138,9 @@
 
     <string name="settings_peaking">Peaking</string>
     <string name="settings_sensitivity">Sensitivity</string>
+    <string name="settings_peaking_low">Low</string>
+    <string name="settings_peaking_med">Med</string>
+    <string name="settings_peaking_high">High</string>
     <string name="settings_color">Color</string>
 
     <string name="settings_zebra">Zebra</string>
@@ -346,4 +350,26 @@
     <string name="delivery_lut_baked">LUT baked</string>
     <string name="delivery_camera_original">Camera original</string>
     <string name="delivery_summary">%1$s · %2$s · %3$s</string>
+    <string name="action_close">Close</string>
+    <string name="media_library_page_title">Media</string>
+    <string name="media_header_scanning">Scanning…</string>
+    <string name="media_header_listing">Listing… %1$d found</string>
+    <string name="media_header_item_one">%1$d item</string>
+    <string name="media_header_item_many">%1$d items</string>
+    <string name="media_sort_newest">Newest</string>
+    <string name="media_sort_oldest">Oldest</string>
+    <string name="media_sort_name">Name</string>
+    <string name="media_sort_rating">Rating</string>
+    <string name="media_filter_heading">FILTER</string>
+    <string name="media_filter_popup_a11y">Filter popup</string>
+    <string name="media_delete_confirm_one">Delete %1$d item from the camera?</string>
+    <string name="media_delete_confirm_many">Delete %1$d items from the camera?</string>
+    <string name="media_delete_confirm_action">Delete</string>
+    <string name="media_action_ok">OK</string>
+    <string name="media_action_done">Done</string>
+    <string name="media_action_clear">Clear</string>
+    <string name="media_action_retry">Retry</string>
+    <string name="assist_crush_clip_title">Crush/Clip Compensation</string>
+    <string name="settings_passcode_placeholder">Optional</string>
+    <string name="assist_apply_help">Apply this monitor tool to the displayed picture.</string>
 </resources>

@@ -619,9 +619,6 @@ internal fun SettingsSystem(configuration: MonitorOperatorSettingsConfiguration,
     }
 }
 
-/** The placeholder an empty passcode field shows, as on iOS (`SecureField("Optional")`). */
-internal const val SETTINGS_PASSCODE_PLACEHOLDER = "Optional"
-
 /**
  * The watcher passcode entry: an outlined field with a placeholder, so an empty code is still a
  * visible target, named by its row title for TalkBack (hardware pass 3.5). The placeholder is
@@ -633,6 +630,7 @@ internal const val SETTINGS_PASSCODE_PLACEHOLDER = "Optional"
 internal fun SettingsPasscodeField(value: String, title: String, onValueChange: (String) -> Unit) {
     val shape = RoundedCornerShape(8.dp)
     val measurer = rememberTextMeasurer()
+    val placeholder = stringResource(R.string.settings_passcode_placeholder)
     val placeholderStyle = LocalTextStyle.current.copy(color = MonitorPalette.faint, fontSize = 14.sp)
     BasicTextField(value, onValueChange = onValueChange,
         textStyle = LocalTextStyle.current.copy(color = MonitorPalette.text, fontSize = 14.sp, textAlign = TextAlign.End),
@@ -647,7 +645,7 @@ internal fun SettingsPasscodeField(value: String, title: String, onValueChange: 
                 .padding(horizontal = 10.dp, vertical = 8.dp)
                 .drawBehind {
                     if (value.isEmpty()) {
-                        val layout = measurer.measure(SETTINGS_PASSCODE_PLACEHOLDER, placeholderStyle)
+                        val layout = measurer.measure(placeholder, placeholderStyle)
                         drawText(layout, topLeft = Offset(size.width - layout.size.width,
                             (size.height - layout.size.height) / 2f))
                     }

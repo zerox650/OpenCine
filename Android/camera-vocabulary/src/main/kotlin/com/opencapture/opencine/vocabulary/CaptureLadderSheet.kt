@@ -46,6 +46,12 @@ data class LadderTab<K>(
     val steps: ((selected: String) -> Pair<LadderStep, LadderStep>?)? = null,
     /** Spoken on the drum when it carries steps: what the buttons beside the value do. */
     val stepsHint: String? = null,
+    /**
+     * Words an operator reads for this tab's camera labels, keyed by the label the body writes.
+     * The drum draws these and reports the camera's own label back, so a translated drum still
+     * writes the exact value the body advertised. Empty keeps every label verbatim.
+     */
+    val valueLabels: Map<String, String> = emptyMap(),
 )
 
 data class LadderSheetPresentation<K>(
@@ -55,4 +61,10 @@ data class LadderSheetPresentation<K>(
     val initialTab: Int = 0,
     val lock: CaptureLock? = null,
     val lockBanner: String? = null,
+    /**
+     * Words an operator reads for the tab titles, keyed by the tab's own [LadderTab.label]. The bar
+     * draws these while every rule keeps reading the tab's label, so a translated bar still matches
+     * the host's ordering and writes. Empty keeps every title verbatim.
+     */
+    val tabLabels: Map<String, String> = emptyMap(),
 )

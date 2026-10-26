@@ -156,14 +156,18 @@ public final class com/opencapture/opencine/appkit/CamerasMapping {
 	public static final field INSTANCE Lcom/opencapture/opencine/appkit/CamerasMapping;
 	public final fun action (Ljava/lang/String;Ljava/lang/String;Lcom/opencapture/opencine/appkit/CamerasModel;)Lcom/opencapture/opencine/core/RecoveryAction;
 	public final fun addSetupSelection (Lcom/opencapture/opencine/appkit/CamerasModel;Lcom/opencapture/opencine/core/SavedCamera;Lcom/opencapture/opencine/appkit/AddSetupChooser;)Ljava/lang/String;
-	public final fun failure (Lcom/opencapture/opencine/core/ConnectionFailure;Lcom/opencapture/opencine/core/SavedCamera;)Lcom/opencapture/monitorui/MonitorConnectFailure;
-	public static synthetic fun failure$default (Lcom/opencapture/opencine/appkit/CamerasMapping;Lcom/opencapture/opencine/core/ConnectionFailure;Lcom/opencapture/opencine/core/SavedCamera;ILjava/lang/Object;)Lcom/opencapture/monitorui/MonitorConnectFailure;
+	public final fun failure (Lcom/opencapture/opencine/core/ConnectionFailure;Lcom/opencapture/opencine/core/SavedCamera;Landroid/content/Context;)Lcom/opencapture/monitorui/MonitorConnectFailure;
+	public static synthetic fun failure$default (Lcom/opencapture/opencine/appkit/CamerasMapping;Lcom/opencapture/opencine/core/ConnectionFailure;Lcom/opencapture/opencine/core/SavedCamera;Landroid/content/Context;ILjava/lang/Object;)Lcom/opencapture/monitorui/MonitorConnectFailure;
 	public final fun id (Lcom/opencapture/opencine/core/RecoveryAction;)Ljava/lang/String;
-	public final fun nearby (Lcom/opencapture/opencine/appkit/CamerasModel;)Ljava/util/List;
-	public final fun paired (Lcom/opencapture/opencine/appkit/CamerasModel;)Ljava/util/List;
-	public final fun pairing (Lcom/opencapture/opencine/appkit/CamerasModel;)Lcom/opencapture/monitorui/MonitorPairingPresentation;
+	public final fun nearby (Lcom/opencapture/opencine/appkit/CamerasModel;Landroid/content/Context;)Ljava/util/List;
+	public static synthetic fun nearby$default (Lcom/opencapture/opencine/appkit/CamerasMapping;Lcom/opencapture/opencine/appkit/CamerasModel;Landroid/content/Context;ILjava/lang/Object;)Ljava/util/List;
+	public final fun paired (Lcom/opencapture/opencine/appkit/CamerasModel;Landroid/content/Context;)Ljava/util/List;
+	public static synthetic fun paired$default (Lcom/opencapture/opencine/appkit/CamerasMapping;Lcom/opencapture/opencine/appkit/CamerasModel;Landroid/content/Context;ILjava/lang/Object;)Ljava/util/List;
+	public final fun pairing (Lcom/opencapture/opencine/appkit/CamerasModel;Landroid/content/Context;)Lcom/opencapture/monitorui/MonitorPairingPresentation;
+	public static synthetic fun pairing$default (Lcom/opencapture/opencine/appkit/CamerasMapping;Lcom/opencapture/opencine/appkit/CamerasModel;Landroid/content/Context;ILjava/lang/Object;)Lcom/opencapture/monitorui/MonitorPairingPresentation;
 	public final fun steps (Lcom/opencapture/opencine/appkit/CamerasModel$Attempt;)Ljava/util/List;
-	public final fun title (Lcom/opencapture/opencine/core/SavedRoute;)Ljava/lang/String;
+	public final fun title (Lcom/opencapture/opencine/core/SavedRoute;Landroid/content/Context;)Ljava/lang/String;
+	public static synthetic fun title$default (Lcom/opencapture/opencine/appkit/CamerasMapping;Lcom/opencapture/opencine/core/SavedRoute;Landroid/content/Context;ILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class com/opencapture/opencine/appkit/CamerasMappingKt {
@@ -848,11 +852,13 @@ public final class com/opencapture/opencine/appkit/MonitorCapturePolicy {
 	public static synthetic fun copy$default (Lcom/opencapture/opencine/appkit/MonitorCapturePolicy;ZZZZZLjava/lang/Boolean;ZILjava/lang/Object;)Lcom/opencapture/opencine/appkit/MonitorCapturePolicy;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAccessibilityLabel ()Ljava/lang/String;
+	public final fun getAccessibilityLabelRes ()I
 	public final fun getAlpha ()F
 	public final fun getBusy ()Z
 	public final fun getCanRecord ()Z
 	public final fun getEnabled ()Z
 	public final fun getHoldAccessibilityLabel ()Ljava/lang/String;
+	public final fun getHoldAccessibilityLabelRes ()Ljava/lang/Integer;
 	public final fun getHoldAction ()Lcom/opencapture/opencine/appkit/MonitorCapturePolicy$Action;
 	public final fun getInteractive ()Z
 	public final fun getModeAdmitted ()Z
@@ -862,6 +868,7 @@ public final class com/opencapture/opencine/appkit/MonitorCapturePolicy {
 	public final fun getPressAdmitted ()Z
 	public final fun getRecording ()Ljava/lang/Boolean;
 	public final fun getStateDescription ()Ljava/lang/String;
+	public final fun getStateDescriptionRes ()Ljava/lang/Integer;
 	public final fun getTapAction ()Lcom/opencapture/opencine/appkit/MonitorCapturePolicy$Action;
 	public fun hashCode ()I
 	public final fun hold (Lcom/opencapture/opencine/appkit/OperatorHaptics;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
@@ -992,10 +999,10 @@ public final class com/opencapture/opencine/appkit/MonitorControlModel {
 	public static final field CONNECT_FIRST Ljava/lang/String;
 	public static final field Companion Lcom/opencapture/opencine/appkit/MonitorControlModel$Companion;
 	public static final field RECORDING_UNKNOWN Ljava/lang/String;
-	public fun <init> (Lkotlinx/coroutines/CoroutineScope;JLkotlin/jvm/functions/Function2;)V
-	public synthetic fun <init> (Lkotlinx/coroutines/CoroutineScope;JLkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;JLkotlin/jvm/functions/Function2;)V
-	public synthetic fun <init> (Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;JLkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlinx/coroutines/CoroutineScope;JLkotlin/jvm/functions/Function2;Landroid/content/Context;)V
+	public synthetic fun <init> (Lkotlinx/coroutines/CoroutineScope;JLkotlin/jvm/functions/Function2;Landroid/content/Context;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;JLkotlin/jvm/functions/Function2;Landroid/content/Context;)V
+	public synthetic fun <init> (Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;JLkotlin/jvm/functions/Function2;Landroid/content/Context;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun bind (Lcom/opencapture/opencine/core/CameraSession;)V
 	public final fun canCommitRecord (Lcom/opencapture/opencine/appkit/MonitorControlModel$RecordEditor;)Z
 	public final fun cancelEdit (Lcom/opencapture/opencine/core/SettingKey;)V
@@ -1035,7 +1042,8 @@ public final class com/opencapture/opencine/appkit/MonitorControlModel {
 
 public final class com/opencapture/opencine/appkit/MonitorControlModel$Companion {
 	public final fun getRATE_CHANGE_HOLD-UwyO8pc ()J
-	public final fun note (Lcom/opencapture/opencine/core/CommandStage;Ljava/lang/String;)Ljava/lang/String;
+	public final fun note (Lcom/opencapture/opencine/core/CommandStage;Ljava/lang/String;Landroid/content/Context;)Ljava/lang/String;
+	public static synthetic fun note$default (Lcom/opencapture/opencine/appkit/MonitorControlModel$Companion;Lcom/opencapture/opencine/core/CommandStage;Ljava/lang/String;Landroid/content/Context;ILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class com/opencapture/opencine/appkit/MonitorControlModel$Editor {
@@ -4806,8 +4814,8 @@ public final class com/opencapture/opencine/appkit/PairingWizard {
 	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/List;Lcom/opencapture/monitorui/MonitorPairingInstruction;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;)Lcom/opencapture/opencine/appkit/PairingWizard;
 	public static synthetic fun copy$default (Lcom/opencapture/opencine/appkit/PairingWizard;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lcom/opencapture/monitorui/MonitorPairingInstruction;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;ILjava/lang/Object;)Lcom/opencapture/opencine/appkit/PairingWizard;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun flow (Lcom/opencapture/opencine/appkit/CamerasModel;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;)Lcom/opencapture/opencine/appkit/IntegrationPairingFlow;
-	public static synthetic fun flow$default (Lcom/opencapture/opencine/appkit/PairingWizard;Lcom/opencapture/opencine/appkit/CamerasModel;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lcom/opencapture/opencine/appkit/IntegrationPairingFlow;
+	public final fun flow (Lcom/opencapture/opencine/appkit/CamerasModel;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Landroid/content/Context;Lkotlin/jvm/functions/Function2;)Lcom/opencapture/opencine/appkit/IntegrationPairingFlow;
+	public static synthetic fun flow$default (Lcom/opencapture/opencine/appkit/PairingWizard;Lcom/opencapture/opencine/appkit/CamerasModel;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Landroid/content/Context;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lcom/opencapture/opencine/appkit/IntegrationPairingFlow;
 	public final fun getApproveLines ()Ljava/util/List;
 	public final fun getBlocker ()Ljava/lang/String;
 	public final fun getBodies ()Ljava/util/List;
@@ -4825,7 +4833,8 @@ public final class com/opencapture/opencine/appkit/PairingWizard$Companion {
 }
 
 public final class com/opencapture/opencine/appkit/PairingWizardKt {
-	public static final fun wizard (Lcom/opencapture/opencine/appkit/CamerasMapping;Lcom/opencapture/opencine/appkit/CamerasModel;Lcom/opencapture/opencine/appkit/PairingWizard;)Lcom/opencapture/monitorui/MonitorPairingPresentation;
+	public static final fun wizard (Lcom/opencapture/opencine/appkit/CamerasMapping;Lcom/opencapture/opencine/appkit/CamerasModel;Lcom/opencapture/opencine/appkit/PairingWizard;Landroid/content/Context;)Lcom/opencapture/monitorui/MonitorPairingPresentation;
+	public static synthetic fun wizard$default (Lcom/opencapture/opencine/appkit/CamerasMapping;Lcom/opencapture/opencine/appkit/CamerasModel;Lcom/opencapture/opencine/appkit/PairingWizard;Landroid/content/Context;ILjava/lang/Object;)Lcom/opencapture/monitorui/MonitorPairingPresentation;
 }
 
 public final class com/opencapture/opencine/appkit/PermissionGate {

@@ -225,7 +225,7 @@ class NikonIntegration(private val port: NikonConnectPort, private val context: 
                 val route = target.camera.routes.firstOrNull { it.id == target.route }
                 val host = route?.extras?.get(NikonSavedRecordsV0.Extra.HOST)
                 if (route == null || host == null) {
-                    send(ConnectionEvent.Failed(failure(ConnectionFailure.Reason.Unsupported, "route.unsupported", lstr(context, R.string.nikon_fail_route_unreachable))))
+                    send(ConnectionEvent.Failed(failure(ConnectionFailure.Reason.Unsupported, "route.unsupported", lstr(context, R.string.nikon_fail_route_unreachable), context)))
                     return@channelFlow
                 }
                 request = NikonConnectRequest.Saved(host, route.kind)
@@ -247,7 +247,7 @@ class NikonIntegration(private val port: NikonConnectPort, private val context: 
                 val anchor = target.camera.routes.firstOrNull { it.id == target.camera.preferredRoute } ?: target.camera.routes.firstOrNull()
                 val host = anchor?.extras?.get(NikonSavedRecordsV0.Extra.HOST)
                 if (anchor == null || host == null || target.draft.kind == RouteKind.CAPTURE_DEVICE) {
-                    send(ConnectionEvent.Failed(failure(ConnectionFailure.Reason.Unsupported, "route.unsupported", lstr(context, R.string.nikon_fail_route_cannot_add))))
+                    send(ConnectionEvent.Failed(failure(ConnectionFailure.Reason.Unsupported, "route.unsupported", lstr(context, R.string.nikon_fail_route_cannot_add), context)))
                     return@channelFlow
                 }
                 request = NikonConnectRequest.AddSetup(host, anchor.kind, target.draft.kind)
@@ -341,7 +341,7 @@ class NikonIntegration(private val port: NikonConnectPort, private val context: 
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
-                outcome = ConnectionEvent.Failed(failure(ConnectionFailure.Reason.Other, "connect.failed", error.message ?: lstr(context, R.string.nikon_fail_not_connected)))
+                outcome = ConnectionEvent.Failed(failure(ConnectionFailure.Reason.Other, "connect.failed", error.message ?: lstr(context, R.string.nikon_fail_not_connected), context))
             } finally {
                 phases.cancel()
                 // The consumer stopped listening before an outcome: cancel the attempt.
@@ -390,8 +390,15 @@ class NikonIntegration(private val port: NikonConnectPort, private val context: 
                 (route.extras[NikonSavedRecordsV0.Extra.HOST].equals(host, ignoreCase = true) || (usb && route.kind == RouteKind.USB))
         }?.key
 
-        fun failure(reason: ConnectionFailure.Reason, code: String, message: String): ConnectionFailure = ConnectionFailure(
-            reason, null, "Couldn't connect", message,
+        fun failure(reason: ConnectionFailure.Reason, code: String, message: String): ConnectionFailure =
+            failure(reason, code, message, null)
+
+        /**
+         * The same failure with an operator-facing title in [context]'s language. The three-argument
+         * form stays for hosts and tests that read the bundled English copy.
+         */
+        fun failure(reason: ConnectionFailure.Reason, code: String, message: String, context: Context?): ConnectionFailure = ConnectionFailure(
+            reason, null, lstr(context, R.string.nikon_fail_couldnt_connect), message,
             if (reason == ConnectionFailure.Reason.Permission(ConnectionFailure.Permission.LOCAL_NETWORK)) {
                 listOf(RecoveryAction.OpenSettings, RecoveryAction.Retry)
             } else {

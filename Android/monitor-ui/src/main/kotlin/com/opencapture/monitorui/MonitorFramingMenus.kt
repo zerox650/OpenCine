@@ -32,10 +32,13 @@ fun MonitorAssistHelp(text: String) { Text(text, color = MonitorPalette.muted, f
 @Composable
 fun MonitorAudioMenu(orientation: MonitorAudioOrientation, onOrientation: (MonitorAudioOrientation) -> Unit,
     showDB: Boolean, onShowDB: (Boolean) -> Unit, help: String) {
+    // The enum keeps its English label as the persisted identity; only the drawn word is translated.
+    val orientationWords = MonitorAudioOrientation.entries
+        .associateWith { axisWord(it == MonitorAudioOrientation.VERTICAL) }
     MonitorSettingsInlineRow(stringResource(R.string.monitor_framing_orientation), help = help,
         showTopDivider = false, stacked = true) {
         MonitorSettingsChoices(MonitorAudioOrientation.entries, orientation, accentSelection = true,
-            title = { it.label }, onSelect = onOrientation)
+            title = { orientationWords.getValue(it) }, onSelect = onOrientation)
     }
     MonitorSettingsSwitchInlineRow(stringResource(R.string.monitor_framing_show_db), isOn = showDB,
         stacked = false) { onShowDB(!showDB) }
@@ -139,8 +142,16 @@ fun MonitorDesqueezeMenu(preset: MonitorDesqueezePreset, custom: Boolean, factor
             }
         }
     }
+    // The enum keeps its English label as the persisted identity; only the drawn word is translated.
+    val directionWords = MonitorDesqueezeDirection.entries
+        .associateWith { axisWord(it == MonitorDesqueezeDirection.VERTICAL) }
     MonitorSettingsInlineRow(stringResource(R.string.monitor_framing_direction), stacked = true) {
         MonitorSettingsChoices(MonitorDesqueezeDirection.entries, direction, accentSelection = true,
-            title = { it.label }, onSelect = onDirection)
+            title = { directionWords.getValue(it) }, onSelect = onDirection)
     }
 }
+
+/** Axis words shared by the audio and desqueeze menus; the enums keep English identities. */
+@Composable
+private fun axisWord(vertical: Boolean): String =
+    stringResource(if (vertical) R.string.monitor_framing_vertical else R.string.monitor_framing_horizontal)

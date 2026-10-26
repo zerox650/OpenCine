@@ -50,7 +50,7 @@
     <string name="help_app_version">来自原生专案元数据的当前 %1$s 版本信息。</string>
     <string name="help_local_cache">本手机上每台相机的缓存片段、缩略图与相机索引。</string>
     <string name="help_cache_full_resolution">打开片段时下载相机的原始文件。关闭时仅保留 720p 代理以节省空间。分享需要原始文件——若尚未缓存，请连接相机。</string>
-    <string name="help_false_color_scale">相机的色彩模式会自动选择 D-Log、D-Log2、Rec.709 或 HLG。CineStop 以 18% 灰为中心绘制五档，并通过相机的 log 曲线读取：墨绿 −2、黄绿 −1、18% 中灰、浅粉 +1（肤色）、柔黄 +2（肤色上限）。红色代表削波，紫色代表暗部缺失；其余暗部为平深灰，其余亮部为平浅灰。Video 在亮度灰度上叠加视频级 IRE 条纹（绿色 41–48、粉色 61–70、红色为削波）。IRE 在亮度灰度上叠加六个视频级分区：紫色暗部缺失、蓝色接近全黑、绿色 18% 灰、粉色高一档、黄色接近削波、红色削波。在 log 下，Video 与 IRE 读取相机的 Rec.709 观感（709）或原始信号（LOG），可在「读取」中设置。Limits 仅绘制暗部与亮部警告，其余颜色保持不变。</string>
+    <string name="help_false_color_scale" formatted="false">相机的色彩模式会自动选择 D-Log、D-Log2、Rec.709 或 HLG。CineStop 以 18% 灰为中心绘制五档，并通过相机的 log 曲线读取：墨绿 −2、黄绿 −1、18% 中灰、浅粉 +1（肤色）、柔黄 +2（肤色上限）。红色代表削波，紫色代表暗部缺失；其余暗部为平深灰，其余亮部为平浅灰。Video 在亮度灰度上叠加视频级 IRE 条纹（绿色 41–48、粉色 61–70、红色为削波）。IRE 在亮度灰度上叠加六个视频级分区：紫色暗部缺失、蓝色接近全黑、绿色 18% 灰、粉色高一档、黄色接近削波、红色削波。在 log 下，Video 与 IRE 读取相机的 Rec.709 观感（709）或原始信号（LOG），可在「读取」中设置。Limits 仅绘制暗部与亮部警告，其余颜色保持不变。</string>
     <string name="help_false_color_reference">伪色彩启用时，在实时画面上显示紧凑色标。</string>
     <string name="help_peaking_sensitivity">灵敏度越高越能捕捉到更细微的边缘，但在细节丰富的画面上可能产生噪点。</string>
     <string name="help_peaking_color">选择在常见画面上依然清晰可读的边缘颜色。</string>
@@ -120,6 +120,7 @@
     <string name="settings_processing">处理</string>
     <string name="settings_feed_upscaler">画面超分</string>
     <string name="settings_controller_connected">已连接</string>
+    <string name="settings_view_assist">监看辅助</string>
 
     <!-- 操作员设置：监看辅助 -->
     <string name="settings_anamorphic_desqueeze">变形宽银幕解压</string>
@@ -136,6 +137,9 @@
 
     <string name="settings_peaking">峰值对焦</string>
     <string name="settings_sensitivity">灵敏度</string>
+    <string name="settings_peaking_low">低</string>
+    <string name="settings_peaking_med">中</string>
+    <string name="settings_peaking_high">高</string>
     <string name="settings_color">颜色</string>
 
     <string name="settings_zebra">斑马纹</string>
@@ -345,4 +349,26 @@
     <string name="delivery_lut_baked">已烘焙 LUT</string>
     <string name="delivery_camera_original">相机原始文件</string>
     <string name="delivery_summary">%1$s · %2$s · %3$s</string>
+    <string name="action_close">关闭</string>
+    <string name="media_library_page_title">媒体</string>
+    <string name="media_header_scanning">扫描中…</string>
+    <string name="media_header_listing">正在列出… 已找到 %1$d 个</string>
+    <string name="media_header_item_one">%1$d 个项目</string>
+    <string name="media_header_item_many">%1$d 个项目</string>
+    <string name="media_sort_newest">最新</string>
+    <string name="media_sort_oldest">最早</string>
+    <string name="media_sort_name">名称</string>
+    <string name="media_sort_rating">评分</string>
+    <string name="media_filter_heading">筛选</string>
+    <string name="media_filter_popup_a11y">筛选弹窗</string>
+    <string name="media_delete_confirm_one">从相机删除 %1$d 个项目？</string>
+    <string name="media_delete_confirm_many">从相机删除 %1$d 个项目？</string>
+    <string name="media_delete_confirm_action">删除</string>
+    <string name="media_action_ok">确定</string>
+    <string name="media_action_done">完成</string>
+    <string name="media_action_clear">清除</string>
+    <string name="media_action_retry">重试</string>
+    <string name="assist_crush_clip_title">暗部/高光补偿</string>
+    <string name="settings_passcode_placeholder">可选</string>
+    <string name="assist_apply_help">将此监看工具应用到当前画面。</string>
 </resources>

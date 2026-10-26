@@ -19,6 +19,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opencapture.monitorui.MonitorAssistTool
@@ -37,6 +38,10 @@ fun AssistToolCell(
     modifier: Modifier = Modifier,
 ) {
     val tint = if (isOn) LiveDesign.accent else LiveDesign.muted
+    // The semantics block is not composable, so the words it speaks are resolved here.
+    val spoken = tool.titleRes?.let { stringResource(it) } ?: tool.title
+    val chip = tool.chipLabelRes?.let { stringResource(it) } ?: tool.chipLabel
+    val options = if (onLongClick != null) ". Hold for options" else ""
     Column(
         modifier =
             modifier
@@ -55,8 +60,7 @@ fun AssistToolCell(
                     // the 9sp "WAVE" abbreviation being read after the name;
                     // plain `semantics` leaves it behind as a second stop, and
                     // the tap and hold actions survive the clear.
-                    val options = if (onLongClick != null) ". Hold for options" else ""
-                    contentDescription = "${tool.title}, ${if (isOn) "on" else "off"}$options"
+                    contentDescription = "$spoken, ${if (isOn) "on" else "off"}$options"
                     if (!enabled) disabled()
                 }
                 .padding(vertical = 5.dp, horizontal = 8.dp)
@@ -67,7 +71,7 @@ fun AssistToolCell(
             AssistToolGlyph(tool, tint, Modifier.size(19.dp))
         }
         Text(
-            tool.chipLabel,
+            chip,
             style = LiveType.mono(9f, FontWeight.Medium).copy(letterSpacing = 0.9.sp),
             color = tint,
             maxLines = 1,

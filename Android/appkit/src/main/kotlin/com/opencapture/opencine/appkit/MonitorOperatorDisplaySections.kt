@@ -1,6 +1,7 @@
 package com.opencapture.opencine.appkit
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import com.opencapture.monitorui.MonitorAssistTool
 import com.opencapture.monitorui.settings.MonitorDisplaySectionStyle
 import com.opencapture.monitorui.settings.MonitorDisplaySections
@@ -27,53 +28,74 @@ public fun MonitorOperatorDisplaySections(
         MonitorDisplaySection.CODEC, MonitorDisplaySection.COLOR, MonitorDisplaySection.STORAGE, MonitorDisplaySection.FPS,
         MonitorDisplaySection.RAIL_RECORD, MonitorDisplaySection.RAIL_MEDIA, MonitorDisplaySection.RAIL_SETTINGS,
         MonitorDisplaySection.ZOOM_CHIP, MonitorDisplaySection.GIMBAL_STICK, MonitorDisplaySection.FOCUS_BOX)
-    MonitorDisplaySections(modes.map { mode ->
+    val sections = mutableListOf<DisplaySection>()
+    for (mode in modes) {
         val value = chrome(mode)
-        DisplaySection(id = mode.name, title = mode.settingsTitle, caption = mode.settingsCaption,
+        sections += DisplaySection(id = mode.name, title = stringResource(mode.settingsTitleRes),
+            caption = stringResource(mode.settingsCaptionRes),
             reset = {
                 feedback()
                 onChange(mode, MonitorDisplayChrome.defaults(mode))
-            }, editHint = "Arrange the bars, readouts and tools directly on the monitor.",
+            }, editTitle = stringResource(R.string.display_edit_view),
+            editHint = stringResource(R.string.display_edit_hint),
             edit = edit?.let { action -> { action(mode) } },
-            unavailableEditHelp = "Connect to arrange this on the monitor.",
-            visibility = order.filter { it in available && MonitorDisplayChrome.isConfigurable(it, mode) }.map { section ->
-                MonitorDisplayToggle(id = mode.name + "." + section.name,
-                    title = if (section == MonitorDisplaySection.FOCUS_BOX) "AF Box" else section.title,
-                    isOn = value.isVisible(section), help = displayHelp(section)) {
-                    feedback(); onChange(mode, value.toggling(section))
-                }
-            }, pinsTitle = "View assists that stay on in clean view",
-            pins = if (mode != MonitorDisplayMode.CLEAN) emptyList() else MonitorAssistTool.cleanPinCases.filter { it in pinnable }.map { tool ->
-                MonitorDisplayToggle(id = "clean.pin." + tool.name, title = tool.title,
-                    isOn = tool in assist.pinned, accessibilityLabel = "Keep ${tool.title} in clean view") {
-                    feedback()
-                    if (onPinsChanged == null) assist.togglePin(tool)
-                    else {
-                        val next = if (tool in assist.pinned) assist.pinned - tool else assist.pinned + tool
-                        assist.pinned = next; onPinsChanged(next)
-                    }
-                }
-            }, style = MonitorDisplaySectionStyle.CONTROLS)
-    })
+            unavailableEditHelp = stringResource(R.string.display_edit_unavailable),
+            visibility = visibilityToggles(order, available, mode, value, feedback, onChange),
+            pinsTitle = stringResource(R.string.display_pins_title),
+            pins = pinToggles(mode, pinnable, assist, onPinsChanged, feedback),
+            style = MonitorDisplaySectionStyle.CONTROLS)
+    }
+    MonitorDisplaySections(sections)
 }
 
-private fun displayHelp(section: MonitorDisplaySection): String = when (section) {
-    MonitorDisplaySection.STATUS_BAR -> "REC, timecode, format, and FPS along the top of the feed."
-    MonitorDisplaySection.TOOL_BAR -> "The view-assist strip under the feed."
-    MonitorDisplaySection.CAMERA_VALUES -> "ISO, shutter, white balance, and the rest of the capture strip."
-    MonitorDisplaySection.LOCK_BUTTON -> "Side-rail lock. Remounts while the interface is locked."
-    MonitorDisplaySection.BATTERIES -> "Phone and camera battery cluster."
-    MonitorDisplaySection.REC_READOUT -> "Standby / recording chip on the status bar."
-    MonitorDisplaySection.TIMECODE -> "Running timecode on the status bar."
-    MonitorDisplaySection.FORMAT -> "Recording resolution and frame rate."
-    MonitorDisplaySection.CODEC -> "Recording codec chip on the status bar."
-    MonitorDisplaySection.COLOR -> "Color mode chip on the status bar."
-    MonitorDisplaySection.STORAGE -> "Remaining media time on the status bar."
-    MonitorDisplaySection.FPS -> "Live-view rate and link bars."
-    MonitorDisplaySection.RAIL_RECORD -> "Rail record lamp. Stays available while rolling."
-    MonitorDisplaySection.RAIL_MEDIA -> "Rail media button."
-    MonitorDisplaySection.RAIL_SETTINGS -> "Rail settings button. Always an escape hatch."
-    MonitorDisplaySection.ZOOM_CHIP -> "Live zoom readout on the feed."
-    MonitorDisplaySection.GIMBAL_STICK -> "On-screen gimbal stick."
-    MonitorDisplaySection.FOCUS_BOX -> "Focus and face-tracking brackets on the feed."
+/**
+ * The mode's switch rows. The resolved words are read one row at a time because a translated
+ * label is drawn, never stored: the row's identity stays `mode.name + section.name`.
+ */
+@Composable
+private fun visibilityToggles(
+    order: List<MonitorDisplaySection>,
+    available: Set<MonitorDisplaySection>,
+    mode: MonitorDisplayMode,
+    value: MonitorDisplayChrome,
+    feedback: () -> Unit,
+    onChange: (MonitorDisplayMode, MonitorDisplayChrome) -> Unit,
+): List<MonitorDisplayToggle> {
+    val toggles = mutableListOf<MonitorDisplayToggle>()
+    for (section in order) {
+        if (section !in available || !MonitorDisplayChrome.isConfigurable(section, mode)) continue
+        val title = stringResource(section.titleRes)
+        toggles += MonitorDisplayToggle(id = mode.name + "." + section.name, title = title,
+            isOn = value.isVisible(section), help = stringResource(section.helpRes)) {
+            feedback(); onChange(mode, value.toggling(section))
+        }
+    }
+    return toggles
+}
+
+/** Clean view's pinned assists, named with the same words the palette chips use. */
+@Composable
+private fun pinToggles(
+    mode: MonitorDisplayMode,
+    pinnable: Set<MonitorAssistTool>,
+    assist: MonitorAssistState,
+    onPinsChanged: ((Set<MonitorAssistTool>) -> Unit)?,
+    feedback: () -> Unit,
+): List<MonitorDisplayToggle> {
+    if (mode != MonitorDisplayMode.CLEAN) return emptyList()
+    val toggles = mutableListOf<MonitorDisplayToggle>()
+    for (tool in MonitorAssistTool.cleanPinCases) {
+        if (tool !in pinnable) continue
+        val title = tool.titleRes?.let { stringResource(it) } ?: tool.title
+        toggles += MonitorDisplayToggle(id = "clean.pin." + tool.name, title = title,
+            isOn = tool in assist.pinned, accessibilityLabel = stringResource(R.string.display_pin_a11y, title)) {
+            feedback()
+            if (onPinsChanged == null) assist.togglePin(tool)
+            else {
+                val next = if (tool in assist.pinned) assist.pinned - tool else assist.pinned + tool
+                assist.pinned = next; onPinsChanged(next)
+            }
+        }
+    }
+    return toggles
 }

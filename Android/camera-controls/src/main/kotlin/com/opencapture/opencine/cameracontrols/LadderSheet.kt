@@ -300,42 +300,54 @@ fun <K> LadderSheet(
                         },
                     )
                 }
-                else -> LabelDrum(
-                    options = options,
-                    // Unknown stays blank: the drum seats on its first label without claiming it.
-                    selection = shown,
-                    marked = tab.ladder.marked,
-                    enabled = gates.drumEnabled,
-                    steps = tab.steps?.invoke(shown),
-                    stepsHint = tab.stepsHint,
-                    previewPosition = host?.previewPosition,
-                    onSelect = { value ->
-                        if (!gates.drumEnabled || value.isBlank()) return@LabelDrum
-                        if (host != null) {
-                            if (host.previewPosition == null) onWrite(LadderWrite(tab.key, value))
-                            return@LabelDrum
-                        }
-                        if (index in landed.indices) landed[index] = value
-                        ladderPickWrite(tab, applied.getOrNull(index).orEmpty(), value)?.let { write ->
-                            if (index in applied.indices) applied[index] = value
-                            onWrite(write)
-                        }
-                    },
-                    onStep = { step ->
-                        val value = step.value ?: return@LabelDrum
-                        if (!gates.drumEnabled) return@LabelDrum
-                        if (step.lands && index in landed.indices) {
-                            landed[index] = value
-                            if (index in applied.indices) applied[index] = value
-                        }
-                        onWrite(LadderWrite(tab.key, value))
-                    },
-                )
+                else -> {
+                    // The drum draws the operator's words; the pick still reports the camera's
+                    // own label, so a translated drum writes exactly what the body advertised.
+                    val words = tab.valueLabels
+                    val drawn = if (words.isEmpty()) options else options.map { words[it] ?: it }
+                    val drawnShown = if (words.isEmpty()) shown else words[shown] ?: shown
+                    val drawnMarked =
+                        if (words.isEmpty()) tab.ladder.marked
+                        else tab.ladder.marked.map { words[it] ?: it }.toSet()
+                    LabelDrum(
+                        options = drawn,
+                        // Unknown stays blank: the drum seats on its first label without claiming it.
+                        selection = drawnShown,
+                        marked = drawnMarked,
+                        enabled = gates.drumEnabled,
+                        steps = tab.steps?.invoke(shown),
+                        stepsHint = tab.stepsHint,
+                        previewPosition = host?.previewPosition,
+                        onSelect = { word ->
+                            if (!gates.drumEnabled || word.isBlank()) return@LabelDrum
+                            val value = if (words.isEmpty()) word
+                                else options.getOrNull(drawn.indexOf(word)) ?: word
+                            if (host != null) {
+                                if (host.previewPosition == null) onWrite(LadderWrite(tab.key, value))
+                                return@LabelDrum
+                            }
+                            if (index in landed.indices) landed[index] = value
+                            ladderPickWrite(tab, applied.getOrNull(index).orEmpty(), value)?.let { write ->
+                                if (index in applied.indices) applied[index] = value
+                                onWrite(write)
+                            }
+                        },
+                        onStep = { step ->
+                            val value = step.value ?: return@LabelDrum
+                            if (!gates.drumEnabled) return@LabelDrum
+                            if (step.lands && index in landed.indices) {
+                                landed[index] = value
+                                if (index in applied.indices) applied[index] = value
+                            }
+                            onWrite(LadderWrite(tab.key, value))
+                        },
+                    )
+                }
             }
         }
         if (presentation.tabs.size > 1) {
             ModeBar(
-                tabs = presentation.tabs.map { it.label },
+                tabs = presentation.tabs.map { presentation.tabLabels[it.label] ?: it.label },
                 selected = index,
                 enabled = gates.tabsEnabled,
                 details = presentation.tabs.map { it.detail },

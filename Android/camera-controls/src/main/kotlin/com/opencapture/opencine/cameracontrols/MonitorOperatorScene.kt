@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.opencapture.monitorui.*
 import com.opencapture.monitorui.settings.*
@@ -170,7 +171,9 @@ public fun MonitorOperatorScreen(
             mounts.remove(MonitorDisplaySection.RAIL_RECORD)
         val format = control.snapshot?.mode?.value?.id?.let { MonitorOperatorLiveReadout<MonitorOperatorSceneCaptureKey, MonitorDisplaySection>(
             MonitorOperatorSceneCaptureKey.Mode, "Shooting mode", it, action = {}) }
-        val tools = availableAssistTools.map { tool -> MonitorOperatorPaletteItem(tool.name, tool.title, tool.chipLabel,
+        val tools = availableAssistTools.map { tool -> MonitorOperatorPaletteItem(tool.name,
+            tool.titleRes?.let { stringResource(it) } ?: tool.title,
+            tool.chipLabelRes?.let { stringResource(it) } ?: tool.chipLabel,
             tool, assist.isOn(tool), { assist.toggle(tool) },
             tool !in setOf(MonitorAssistTool.EV, MonitorAssistTool.LEVEL) && (tool != MonitorAssistTool.LUT || lookOptions != null),
             accessibilityIdentifier = "monitor.assist.${tool.name}") }

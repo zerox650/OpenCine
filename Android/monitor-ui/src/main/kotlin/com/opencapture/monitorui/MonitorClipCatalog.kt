@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
@@ -51,12 +52,26 @@ data class MonitorClipValue(val id: String, val title: String, val detail: Strin
     val accessibilityDescription: String? = null, val favoriteLabel: String? = null,
     val selectionEntryLabel: String? = null)
 
+/** The words an operator reads for a clip's source badge; the token stays the cache-state key. */
+@Composable
+private fun monitorClipSourceWord(source: String): String = when (source) {
+    "CACHED" -> stringResource(R.string.monitor_media_source_cached)
+    "PROXY" -> stringResource(R.string.monitor_media_source_proxy)
+    "ON CAMERA" -> stringResource(R.string.monitor_media_source_on_camera)
+    else -> source
+}
+
 /** Grid and list share one presentation value and one thumbnail-loader slot. */
 @Composable
 fun MonitorClipCard(clip: MonitorClipValue, list: Boolean, selecting: Boolean, selected: Boolean,
     onOpen: () -> Unit, onSelect: () -> Unit, onFavorite: (() -> Unit)? = null,
     modifier: Modifier = Modifier, clicks: Boolean = true, thumbnail: @Composable BoxScope.() -> Unit) {
     val shape = RoundedCornerShape(11.dp)
+    val sourceWord = clip.source?.let { monitorClipSourceWord(it) }
+    val openLabel = stringResource(if (selecting) R.string.monitor_media_clip_toggle_a11y else R.string.monitor_media_clip_open_a11y)
+    val holdLabel = stringResource(if (selecting) R.string.monitor_media_clip_toggle_a11y else R.string.monitor_media_clip_select_a11y)
+    val favoriteLabel = stringResource(
+        if (clip.favorite) R.string.monitor_media_clip_favorite_remove else R.string.monitor_media_clip_favorite_add)
     val surface = modifier.fillMaxWidth().clip(shape)
         .background(if (selected) MonitorPalette.accent.copy(alpha = .12f) else MonitorPalette.surface)
         .border(if (selected) 2.dp else 1.dp,
@@ -66,16 +81,16 @@ fun MonitorClipCard(clip: MonitorClipValue, list: Boolean, selecting: Boolean, s
                 role = Role.Button,
                 onClick = { if (selecting) onSelect() else onOpen() },
                 onLongClick = onSelect,
-                onLongClickLabel = clip.selectionEntryLabel,
+                onLongClickLabel = clip.selectionEntryLabel ?: holdLabel,
             ).semantics { contentDescription = clip.accessibilityDescription ?: clip.title }
             else Modifier.semantics {
                 role = Role.Button
                 contentDescription = clip.accessibilityDescription ?: clip.title
-                onClick(label = if (selecting) "Toggle selection" else "Open") {
+                onClick(label = openLabel) {
                     if (selecting) onSelect() else onOpen()
                     true
                 }
-                onLongClick(label = if (selecting) "Toggle selection" else "Select clip") {
+                onLongClick(label = holdLabel) {
                     onSelect()
                     true
                 }
@@ -100,10 +115,10 @@ fun MonitorClipCard(clip: MonitorClipValue, list: Boolean, selecting: Boolean, s
         }
         Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(clip.duration.orEmpty(), style = MonitorTypography.readout(9.5f))
-            clip.source?.let { Text(it, color = MonitorPalette.muted, style = MonitorTypography.text(7.5f, FontWeight.SemiBold)) }
+            sourceWord?.let { Text(it, color = MonitorPalette.muted, style = MonitorTypography.text(7.5f, FontWeight.SemiBold)) }
         }
         if (favoriteAction != null) {
-            MonitorClipFavorite(clip.favorite, favoriteAction, clip.favoriteLabel ?: if (clip.favorite) "Remove from favorites" else "Add to favorites")
+            MonitorClipFavorite(clip.favorite, favoriteAction, favoriteLabel)
         }
     } else Column(surface, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(shape).background(MonitorPalette.backgroundDeep)) {
@@ -113,14 +128,14 @@ fun MonitorClipCard(clip: MonitorClipValue, list: Boolean, selecting: Boolean, s
                     MonitorClipSelection(selected, if (clicks) onSelect else null)
                 }
             } else clip.burstCount?.let {
-                ClipBadge("$it frames", Modifier.align(Alignment.TopStart).padding(6.dp))
+                ClipBadge(stringResource(R.string.monitor_media_clip_frames, it), Modifier.align(Alignment.TopStart).padding(6.dp))
             }
             if (favoriteAction != null) {
                 Box(Modifier.align(Alignment.TopEnd)) {
-                    MonitorClipFavorite(clip.favorite, favoriteAction, clip.favoriteLabel ?: if (clip.favorite) "Remove from favorites" else "Add to favorites")
+                    MonitorClipFavorite(clip.favorite, favoriteAction, favoriteLabel)
                 }
             }
-            clip.source?.let {
+            sourceWord?.let {
                 if (MonitorIosParity.enabled) IosClipTag(it, clip.sourceTint, state = true,
                     Modifier.align(Alignment.BottomStart).padding(6.dp))
                 else ClipBadge(it, Modifier.align(Alignment.BottomStart).padding(6.dp))
@@ -144,19 +159,24 @@ fun MonitorClipCard(clip: MonitorClipValue, list: Boolean, selecting: Boolean, s
 }
 
 @Composable
-fun MonitorClipFavorite(favorite: Boolean, onClick: () -> Unit,
-    label: String = if (favorite) "Remove from favorites" else "Add to favorites") {
+fun MonitorClipFavorite(favorite: Boolean, onClick: () -> Unit, label: String? = null) {
+    // The default word is resolved here: a parameter default is evaluated in the caller's context.
+    val spoken = label ?: stringResource(
+        if (favorite) R.string.monitor_media_clip_favorite_remove else R.string.monitor_media_clip_favorite_add)
     Box(Modifier.size(44.dp).combinedClickable(role = Role.Button, onClick = onClick), contentAlignment = Alignment.Center) {
-        MonitorIcon(MonitorIcon.STAR, label,
+        MonitorIcon(MonitorIcon.STAR, spoken,
             Modifier.size(13.dp), if (favorite) Color(0xFFE9C35A) else MonitorPalette.muted, favorite)
     }
 }
 
 @Composable
 fun MonitorClipSelection(selected: Boolean, onClick: (() -> Unit)? = null) {
+    // The semantics block is not composable, so the words it speaks are resolved here.
+    val spoken = if (selected) stringResource(R.string.monitor_media_clip_deselect_a11y)
+        else stringResource(R.string.monitor_media_clip_select_a11y)
     Box(Modifier.size(44.dp).then(
         if (onClick != null) Modifier.combinedClickable(role = Role.Checkbox, onClick = onClick) else Modifier,
-    ).semantics { contentDescription = if (selected) "Deselect clip" else "Select clip" }, contentAlignment = Alignment.Center) {
+    ).semantics { contentDescription = spoken }, contentAlignment = Alignment.Center) {
         // iOS: circle-check / circle glyph over a 40% black disc.
         MonitorIcon(if (selected) MonitorIcon.CIRCLE_CHECK else MonitorIcon.CIRCLE, null,
             Modifier.size(22.dp).background(Color.Black.copy(alpha = .4f), CircleShape),
@@ -243,6 +263,9 @@ private fun CatalogLayoutCell(icon: MonitorIcon, label: String, tag: String, sel
 fun MonitorCatalogHeader(title: String, subtitle: String, compact: Boolean, sort: String,
     filterActive: Boolean, onSort: () -> Unit, onFilter: () -> Unit, modifier: Modifier = Modifier,
     filterCount: Int = 0) {
+    // The semantics blocks below are not composable, so the words they speak are resolved here.
+    val sortSpoken = stringResource(R.string.monitor_media_sort_a11y)
+    val filterSpoken = stringResource(R.string.monitor_media_filter_a11y)
     val identity: @Composable () -> Unit = {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(title, style = MonitorTypography.text(10.5f, FontWeight.SemiBold), maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -256,7 +279,7 @@ fun MonitorCatalogHeader(title: String, subtitle: String, compact: Boolean, sort
             Row(Modifier.height(34.dp).clip(RoundedCornerShape(8.dp)).background(MonitorPalette.tile)
                 .combinedClickable(role = Role.Button, onClick = onSort).padding(horizontal = 9.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                MonitorIcon(MonitorIcon.ARROW_UP_DOWN, "Sort clips", Modifier.size(12.dp), MonitorPalette.muted)
+                MonitorIcon(MonitorIcon.ARROW_UP_DOWN, sortSpoken, Modifier.size(12.dp), MonitorPalette.muted)
                 Text(sort, style = MonitorTypography.text(10.5f, FontWeight.Medium), color = MonitorPalette.muted)
             }
             Row(
@@ -267,7 +290,7 @@ fun MonitorCatalogHeader(title: String, subtitle: String, compact: Boolean, sort
                     )
                     .combinedClickable(role = Role.Button, onClick = onFilter)
                     .semantics {
-                        contentDescription = "Filter library"
+                        contentDescription = filterSpoken
                         selected = filterActive
                     }
                     .padding(horizontal = 9.dp),
@@ -279,7 +302,7 @@ fun MonitorCatalogHeader(title: String, subtitle: String, compact: Boolean, sort
                     if (filterActive) MonitorPalette.text else MonitorPalette.muted,
                 )
                 Text(
-                    "Filter",
+                    stringResource(R.string.monitor_media_filter),
                     style = MonitorTypography.text(10.5f, FontWeight.Medium),
                     color = if (filterActive) MonitorPalette.text else MonitorPalette.muted,
                 )

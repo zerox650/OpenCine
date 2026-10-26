@@ -57,4 +57,5 @@
     <string name="nikon_popup_codec_record_at">Record %1$s at %2$d bit</string>
     <string name="nikon_shots_remaining">%1$d shots remaining</string>
 
+    <string name="nikon_fail_couldnt_connect">Couldn\'t connect</string>
 </resources>

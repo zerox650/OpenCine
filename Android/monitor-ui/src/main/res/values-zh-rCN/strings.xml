@@ -105,9 +105,14 @@
 
     <!-- 监看辅助菜单 -->
     <string name="monitor_settings_sensitivity">灵敏度</string>
+    <string name="monitor_peaking_low">低</string>
+    <string name="monitor_peaking_med">中</string>
+    <string name="monitor_peaking_high">高</string>
     <string name="monitor_settings_color">颜色</string>
     <string name="monitor_settings_scale">刻度</string>
     <string name="monitor_settings_read">读取</string>
+    <string name="monitor_false_color_scale_video">视频</string>
+    <string name="monitor_false_color_scale_limits">极限</string>
     <string name="monitor_settings_reference_key">参考色键</string>
     <string name="monitor_settings_reference_display">参考显示</string>
     <string name="monitor_settings_units">单位</string>
@@ -156,6 +161,24 @@
     <string name="monitor_assist_level">水平仪</string>
     <string name="monitor_assist_desqueeze">变形宽银幕解压</string>
     <string name="monitor_assist_mirror">镜像</string>
+    <string name="monitor_assist_crush_clip">暗部/高光补偿</string>
+
+    <!-- 辅助栏/检查器短片；LUT、ND、EV、DE-SQ 为缩写，保留原文 -->
+    <string name="monitor_assist_chip_peak">峰值</string>
+    <string name="monitor_assist_chip_false">伪色</string>
+    <string name="monitor_assist_chip_zebra">斑马纹</string>
+    <string name="monitor_assist_chip_wave">波形</string>
+    <string name="monitor_assist_chip_parade">分量图</string>
+    <string name="monitor_assist_chip_histo">直方图</string>
+    <string name="monitor_assist_chip_vector">矢量</string>
+    <string name="monitor_assist_chip_lights">红绿灯</string>
+    <string name="monitor_assist_chip_audio">音量</string>
+    <string name="monitor_assist_chip_guides">参考线</string>
+    <string name="monitor_assist_chip_grid">网格</string>
+    <string name="monitor_assist_chip_cross">十字</string>
+    <string name="monitor_assist_chip_level">水平</string>
+    <string name="monitor_assist_chip_mirror">镜像</string>
+    <string name="monitor_assist_chip_play">回放</string>
 
     <!-- 系统页：反馈与支持 -->
     <string name="monitor_action_open">打开</string>
@@ -276,4 +299,17 @@
     <string name="monitor_media_filter_storage">存储</string>
     <string name="monitor_media_filter_start">开始</string>
     <string name="monitor_media_filter_end">结束</string>
+    <string name="monitor_media_sort_a11y">排序片段</string>
+    <string name="monitor_media_filter_a11y">筛选媒体库</string>
+    <string name="monitor_media_filter">筛选</string>
+    <string name="monitor_media_source_cached">已缓存</string>
+    <string name="monitor_media_source_proxy">代理</string>
+    <string name="monitor_media_source_on_camera">在相机上</string>
+    <string name="monitor_media_clip_open_a11y">打开</string>
+    <string name="monitor_media_clip_toggle_a11y">切换选择</string>
+    <string name="monitor_media_clip_select_a11y">选择片段</string>
+    <string name="monitor_media_clip_deselect_a11y">取消选择片段</string>
+    <string name="monitor_media_clip_favorite_add">添加到收藏</string>
+    <string name="monitor_media_clip_favorite_remove">从收藏移除</string>
+    <string name="monitor_media_clip_frames">%1$d 帧</string>
 </resources>

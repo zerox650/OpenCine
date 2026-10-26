@@ -105,9 +105,14 @@
 
     <!-- View Assist menus -->
     <string name="monitor_settings_sensitivity">Sensitivity</string>
+    <string name="monitor_peaking_low">Low</string>
+    <string name="monitor_peaking_med">Med</string>
+    <string name="monitor_peaking_high">High</string>
     <string name="monitor_settings_color">Color</string>
     <string name="monitor_settings_scale">Scale</string>
     <string name="monitor_settings_read">Read</string>
+    <string name="monitor_false_color_scale_video">Video</string>
+    <string name="monitor_false_color_scale_limits">Limits</string>
     <string name="monitor_settings_reference_key">REFERENCE KEY</string>
     <string name="monitor_settings_reference_display">Reference Display</string>
     <string name="monitor_settings_units">Units</string>
@@ -156,6 +161,24 @@
     <string name="monitor_assist_level">Level</string>
     <string name="monitor_assist_desqueeze">Anamorphic Desqueeze</string>
     <string name="monitor_assist_mirror">Mirror</string>
+    <string name="monitor_assist_crush_clip">Crush/Clip Compensation</string>
+
+    <!-- Monitor-assist palette/inspector chip words; LUT, ND, EV and DE-SQ keep their chips -->
+    <string name="monitor_assist_chip_peak">PEAK</string>
+    <string name="monitor_assist_chip_false">FALSE</string>
+    <string name="monitor_assist_chip_zebra">ZEBRA</string>
+    <string name="monitor_assist_chip_wave">WAVE</string>
+    <string name="monitor_assist_chip_parade">PARADE</string>
+    <string name="monitor_assist_chip_histo">HISTO</string>
+    <string name="monitor_assist_chip_vector">VECTOR</string>
+    <string name="monitor_assist_chip_lights">LIGHTS</string>
+    <string name="monitor_assist_chip_audio">AUDIO</string>
+    <string name="monitor_assist_chip_guides">GUIDES</string>
+    <string name="monitor_assist_chip_grid">GRID</string>
+    <string name="monitor_assist_chip_cross">CROSS</string>
+    <string name="monitor_assist_chip_level">LEVEL</string>
+    <string name="monitor_assist_chip_mirror">MIRROR</string>
+    <string name="monitor_assist_chip_play">PLAY</string>
 
     <!-- System tab: support -->
     <string name="monitor_action_open">Open</string>
@@ -276,4 +299,17 @@
     <string name="monitor_media_filter_storage">STORAGE</string>
     <string name="monitor_media_filter_start">Start</string>
     <string name="monitor_media_filter_end">End</string>
+    <string name="monitor_media_sort_a11y">Sort clips</string>
+    <string name="monitor_media_filter_a11y">Filter library</string>
+    <string name="monitor_media_filter">Filter</string>
+    <string name="monitor_media_source_cached">CACHED</string>
+    <string name="monitor_media_source_proxy">PROXY</string>
+    <string name="monitor_media_source_on_camera">ON CAMERA</string>
+    <string name="monitor_media_clip_open_a11y">Open</string>
+    <string name="monitor_media_clip_toggle_a11y">Toggle selection</string>
+    <string name="monitor_media_clip_select_a11y">Select clip</string>
+    <string name="monitor_media_clip_deselect_a11y">Deselect clip</string>
+    <string name="monitor_media_clip_favorite_add">Add to favorites</string>
+    <string name="monitor_media_clip_favorite_remove">Remove from favorites</string>
+    <string name="monitor_media_clip_frames">%1$d frames</string>
 </resources>

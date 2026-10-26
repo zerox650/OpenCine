@@ -19,7 +19,7 @@ fun MonitorHistogramMenu(trafficLights: Boolean, onTrafficLights: () -> Unit,
 @Composable
 fun MonitorCrushClipMenu(compensation: MonitorCrushClipCompensation,
     onCompensation: (MonitorCrushClipCompensation) -> Unit, help: String, showTopDivider: Boolean = true) {
-    MonitorSettingsInlineRow("Crush/Clip Compensation", help, showTopDivider = showTopDivider, stacked = true) {
+    MonitorSettingsInlineRow(stringResource(R.string.monitor_assist_crush_clip), help, showTopDivider = showTopDivider, stacked = true) {
         MonitorSettingsCrushClipSegmented(
             options = MonitorCrushClipCompensation.entries.map { it.label to it.compactLabel },
             selectedLabel = compensation.label, accentSelection = true,

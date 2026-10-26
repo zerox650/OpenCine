@@ -43,6 +43,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
@@ -485,29 +486,40 @@ internal fun <K, S, M, N> MonitorOperatorLiveComposition(
                 // is open: its plate then covers the corner instead of the palette peeking past it
                 // and covering the panel's own header (the inspector hides the palette for the
                 // same reason).
-                if (sections.assists in mounted && !inspecting && panel == null) MonitorAssistPalette(palette,
-                    layout.portrait, !interactive, { it.isOn }, { it.tool?.title ?: it.title },
-                    { it.tool?.chipLabel ?: it.label }, hasOptions,
-                    onToggle = { if (interactive && currentSource()) it.toggle() },
-                    onOptions = { if (interactive && currentSource()) { assist.configureTool = it.tool; reviewing = it.tool == null } },
-                    glyph = { item, tint, decoration ->
-                        val custom = item.glyph
-                        if (custom != null) custom(tint, decoration)
-                        else item.tool?.let { MonitorAssistToolGlyph(it, tint, decoration, evFontSize = 17f) }
-                    }, chevron = { expanded, portrait -> MonitorIcon(if (portrait) {
-                        if (expanded) MonitorIcon.CHEVRON_DOWN else MonitorIcon.CHEVRON_UP
-                    } else if (expanded) MonitorIcon.CHEVRON_LEFT else MonitorIcon.CHEVRON_RIGHT,
-                        null, Modifier.size(14.dp), MonitorPalette.muted) },
-                    modifier = Modifier.descriptorFrame(layout.assists).then(edit(sections.assists)),
-                    usageSeed = usageSeed, idOf = { it.id }, usage = usage, onUsageChange = setUsage,
-                    collapseRevision = paletteRevision, accessibilityIdentifier = { it.accessibilityIdentifier },
-                    onBoundsInRootChanged = { bounds ->
-                        val frame = bounds?.let { with(density) { MonitorRect(
-                            (it.left - origin.x).toDp().value, (it.top - origin.y).toDp().value,
-                            it.width.toDp().value, it.height.toDp().value) } }
-                        if (frame != paletteFrame) paletteFrame = frame
-                        paletteFrameChanged(frame)
-                    })
+                if (sections.assists in mounted && !inspecting && panel == null) {
+                    // Palette chips and their spoken names resolve per tool; the toolless
+                    // review item (instant playback) keeps the host's own words. Resolved here:
+                    // the palette's title and label lambdas are not composable contexts.
+                    val spoken = palette.associate { item ->
+                        item to ((item.tool?.titleRes?.let { stringResource(it) } ?: item.tool?.title ?: item.title) to
+                            (item.tool?.chipLabelRes?.let { stringResource(it) } ?: item.tool?.chipLabel ?: item.label))
+                    }
+                    MonitorAssistPalette(palette,
+                        layout.portrait, !interactive, { it.isOn },
+                        { item -> spoken[item]?.first ?: item.title },
+                        { item -> spoken[item]?.second ?: item.label },
+                        hasOptions,
+                        onToggle = { if (interactive && currentSource()) it.toggle() },
+                        onOptions = { if (interactive && currentSource()) { assist.configureTool = it.tool; reviewing = it.tool == null } },
+                        glyph = { item, tint, decoration ->
+                            val custom = item.glyph
+                            if (custom != null) custom(tint, decoration)
+                            else item.tool?.let { MonitorAssistToolGlyph(it, tint, decoration, evFontSize = 17f) }
+                        }, chevron = { expanded, portrait -> MonitorIcon(if (portrait) {
+                            if (expanded) MonitorIcon.CHEVRON_DOWN else MonitorIcon.CHEVRON_UP
+                        } else if (expanded) MonitorIcon.CHEVRON_LEFT else MonitorIcon.CHEVRON_RIGHT,
+                            null, Modifier.size(14.dp), MonitorPalette.muted) },
+                        modifier = Modifier.descriptorFrame(layout.assists).then(edit(sections.assists)),
+                        usageSeed = usageSeed, idOf = { it.id }, usage = usage, onUsageChange = setUsage,
+                        collapseRevision = paletteRevision, accessibilityIdentifier = { it.accessibilityIdentifier },
+                        onBoundsInRootChanged = { bounds ->
+                            val frame = bounds?.let { with(density) { MonitorRect(
+                                (it.left - origin.x).toDp().value, (it.top - origin.y).toDp().value,
+                                it.width.toDp().value, it.height.toDp().value) } }
+                            if (frame != paletteFrame) paletteFrame = frame
+                            paletteFrameChanged(frame)
+                        })
+                }
                 // Hidden under the lock like focus reset (pre-shared Z Android hid the MF strip there).
                 if (!locked) cameraViews.focusDrive?.let { drive ->
                     val height = minOf(280f, layout.viewport.height * .55f)

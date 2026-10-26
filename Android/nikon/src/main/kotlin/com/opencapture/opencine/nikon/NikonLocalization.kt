@@ -38,6 +38,7 @@ private val NIKON_ENGLISH_STRINGS = mapOf(
     R.string.nikon_fail_route_unreachable to "This setup can no longer be reached.",
     R.string.nikon_fail_route_cannot_add to "This setup cannot be added.",
     R.string.nikon_fail_not_connected to "The camera did not connect.",
+    R.string.nikon_fail_couldnt_connect to "Couldn't connect",
 
     R.string.nikon_takeover_title to "Take over this camera?",
     R.string.nikon_takeover_confirm to "Take Over",

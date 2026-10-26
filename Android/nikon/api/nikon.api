@@ -1367,7 +1367,8 @@ public final class com/opencapture/opencine/nikon/MonitorTextFormat {
 	public final fun resolutionLabel (IID)Ljava/lang/String;
 	public final fun resolutionLabel (Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;
 	public static synthetic fun resolutionLabel$default (Lcom/opencapture/opencine/nikon/MonitorTextFormat;Ljava/lang/String;ILjava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
-	public final fun shotsRemainingAccessibilityLabel (I)Ljava/lang/String;
+	public final fun shotsRemainingAccessibilityLabel (ILandroid/content/Context;)Ljava/lang/String;
+	public static synthetic fun shotsRemainingAccessibilityLabel$default (Lcom/opencapture/opencine/nikon/MonitorTextFormat;ILandroid/content/Context;ILjava/lang/Object;)Ljava/lang/String;
 	public final fun shotsRemainingCompactLabel (I)Ljava/lang/String;
 }
 
@@ -1529,8 +1530,8 @@ public final class com/opencapture/opencine/nikon/NikonCapturePopupState {
 	public static final field KELVIN_TAB Ljava/lang/String;
 	public static final field PRESET_TAB Ljava/lang/String;
 	public static final field TINT_TAB Ljava/lang/String;
-	public fun <init> (Lcom/opencapture/opencine/nikon/NikonCapturePopupKind;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/Integer;ZZZZZZZLkotlin/Pair;ZLjava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Lcom/opencapture/opencine/nikon/NikonControlSetting;)V
-	public synthetic fun <init> (Lcom/opencapture/opencine/nikon/NikonCapturePopupKind;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/Integer;ZZZZZZZLkotlin/Pair;ZLjava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Lcom/opencapture/opencine/nikon/NikonControlSetting;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/opencapture/opencine/nikon/NikonCapturePopupKind;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/Integer;ZZZZZZZLkotlin/Pair;ZLjava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Lcom/opencapture/opencine/nikon/NikonControlSetting;Landroid/content/Context;)V
+	public synthetic fun <init> (Lcom/opencapture/opencine/nikon/NikonCapturePopupKind;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/Integer;ZZZZZZZLkotlin/Pair;ZLjava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Lcom/opencapture/opencine/nikon/NikonControlSetting;Landroid/content/Context;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/opencapture/opencine/nikon/NikonCapturePopupKind;
 	public final fun component10 ()Ljava/lang/String;
 	public final fun component11 ()Ljava/lang/Integer;
@@ -1549,6 +1550,7 @@ public final class com/opencapture/opencine/nikon/NikonCapturePopupState {
 	public final fun component23 ()Ljava/util/List;
 	public final fun component24 ()Ljava/lang/Integer;
 	public final fun component25 ()Lcom/opencapture/opencine/nikon/NikonControlSetting;
+	public final fun component26 ()Landroid/content/Context;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/util/List;
 	public final fun component5 ()Ljava/lang/String;
@@ -1556,8 +1558,8 @@ public final class com/opencapture/opencine/nikon/NikonCapturePopupState {
 	public final fun component7 ()Ljava/lang/Integer;
 	public final fun component8 ()Ljava/lang/String;
 	public final fun component9 ()Z
-	public final fun copy (Lcom/opencapture/opencine/nikon/NikonCapturePopupKind;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/Integer;ZZZZZZZLkotlin/Pair;ZLjava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Lcom/opencapture/opencine/nikon/NikonControlSetting;)Lcom/opencapture/opencine/nikon/NikonCapturePopupState;
-	public static synthetic fun copy$default (Lcom/opencapture/opencine/nikon/NikonCapturePopupState;Lcom/opencapture/opencine/nikon/NikonCapturePopupKind;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/Integer;ZZZZZZZLkotlin/Pair;ZLjava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Lcom/opencapture/opencine/nikon/NikonControlSetting;ILjava/lang/Object;)Lcom/opencapture/opencine/nikon/NikonCapturePopupState;
+	public final fun copy (Lcom/opencapture/opencine/nikon/NikonCapturePopupKind;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/Integer;ZZZZZZZLkotlin/Pair;ZLjava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Lcom/opencapture/opencine/nikon/NikonControlSetting;Landroid/content/Context;)Lcom/opencapture/opencine/nikon/NikonCapturePopupState;
+	public static synthetic fun copy$default (Lcom/opencapture/opencine/nikon/NikonCapturePopupState;Lcom/opencapture/opencine/nikon/NikonCapturePopupKind;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/Integer;ZZZZZZZLkotlin/Pair;ZLjava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Lcom/opencapture/opencine/nikon/NikonControlSetting;Landroid/content/Context;ILjava/lang/Object;)Lcom/opencapture/opencine/nikon/NikonCapturePopupState;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getActiveCodecDepth ()Ljava/lang/Integer;
 	public final fun getAllowsManualIso ()Z
@@ -1567,6 +1569,7 @@ public final class com/opencapture/opencine/nikon/NikonCapturePopupState {
 	public final fun getCodec ()Ljava/lang/String;
 	public final fun getCodecDepths ()Ljava/util/List;
 	public final fun getCodecRows ()Ljava/util/List;
+	public final fun getContext ()Landroid/content/Context;
 	public final fun getDualBaseIso ()Z
 	public final fun getIsoCameraOwned ()Z
 	public final fun getIsoRecordingLocked ()Z
@@ -1590,9 +1593,11 @@ public final class com/opencapture/opencine/nikon/NikonCapturePopupState {
 }
 
 public final class com/opencapture/opencine/nikon/NikonCapturePopupState$Companion {
-	public final fun codecSteps (Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;)Lkotlin/Pair;
+	public final fun codecSteps (Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;Landroid/content/Context;)Lkotlin/Pair;
+	public static synthetic fun codecSteps$default (Lcom/opencapture/opencine/nikon/NikonCapturePopupState$Companion;Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;Landroid/content/Context;ILjava/lang/Object;)Lkotlin/Pair;
 	public final fun including (Ljava/lang/String;Ljava/util/List;)Ljava/util/List;
-	public final fun kelvinSteps (Ljava/lang/String;)Lkotlin/Pair;
+	public final fun kelvinSteps (Ljava/lang/String;Landroid/content/Context;)Lkotlin/Pair;
+	public static synthetic fun kelvinSteps$default (Lcom/opencapture/opencine/nikon/NikonCapturePopupState$Companion;Ljava/lang/String;Landroid/content/Context;ILjava/lang/Object;)Lkotlin/Pair;
 }
 
 public final class com/opencapture/opencine/nikon/NikonCodecColorKt {
@@ -1872,7 +1877,8 @@ public final class com/opencapture/opencine/nikon/NikonHosts {
 
 public final class com/opencapture/opencine/nikon/NikonIntegration : com/opencapture/opencine/core/CameraIntegration {
 	public static final field Companion Lcom/opencapture/opencine/nikon/NikonIntegration$Companion;
-	public fun <init> (Lcom/opencapture/opencine/nikon/NikonConnectPort;)V
+	public fun <init> (Lcom/opencapture/opencine/nikon/NikonConnectPort;Landroid/content/Context;)V
+	public synthetic fun <init> (Lcom/opencapture/opencine/nikon/NikonConnectPort;Landroid/content/Context;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun connect (Lcom/opencapture/opencine/core/ConnectTarget;)Lkotlinx/coroutines/flow/Flow;
 	public fun discover (Lcom/opencapture/opencine/core/DiscoveryMode;)Lkotlinx/coroutines/flow/Flow;
 	public fun forget (Lcom/opencapture/opencine/core/SavedCamera;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -1884,9 +1890,12 @@ public final class com/opencapture/opencine/nikon/NikonIntegration : com/opencap
 }
 
 public final class com/opencapture/opencine/nikon/NikonIntegration$Companion {
-	public final fun defaultText (Lcom/opencapture/opencine/nikon/NikonConnectionPhase;Ljava/lang/String;)Ljava/lang/String;
+	public final fun defaultText (Lcom/opencapture/opencine/nikon/NikonConnectionPhase;Ljava/lang/String;Landroid/content/Context;)Ljava/lang/String;
+	public static synthetic fun defaultText$default (Lcom/opencapture/opencine/nikon/NikonIntegration$Companion;Lcom/opencapture/opencine/nikon/NikonConnectionPhase;Ljava/lang/String;Landroid/content/Context;ILjava/lang/Object;)Ljava/lang/String;
 	public final fun failure (Lcom/opencapture/opencine/core/ConnectionFailure$Reason;Ljava/lang/String;Ljava/lang/String;)Lcom/opencapture/opencine/core/ConnectionFailure;
-	public final fun plan (Lcom/opencapture/opencine/nikon/NikonConnectRequest;)Ljava/util/List;
+	public final fun failure (Lcom/opencapture/opencine/core/ConnectionFailure$Reason;Ljava/lang/String;Ljava/lang/String;Landroid/content/Context;)Lcom/opencapture/opencine/core/ConnectionFailure;
+	public final fun plan (Lcom/opencapture/opencine/nikon/NikonConnectRequest;Landroid/content/Context;)Ljava/util/List;
+	public static synthetic fun plan$default (Lcom/opencapture/opencine/nikon/NikonIntegration$Companion;Lcom/opencapture/opencine/nikon/NikonConnectRequest;Landroid/content/Context;ILjava/lang/Object;)Ljava/util/List;
 }
 
 public abstract interface class com/opencapture/opencine/nikon/NikonLadderControl {
@@ -2592,14 +2601,14 @@ public final class com/opencapture/opencine/nikon/NikonStillPreviewStrategy$Comp
 
 public final class com/opencapture/opencine/nikon/NikonTakeOverPrompt : com/opencapture/opencine/core/ConfirmationPrompt {
 	public static final field Companion Lcom/opencapture/opencine/nikon/NikonTakeOverPrompt$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/lang/String;Landroid/content/Context;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/lang/String;Landroid/content/Context;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Lkotlin/jvm/functions/Function0;
 	public final fun component4 ()Lkotlin/jvm/functions/Function0;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/lang/String;)Lcom/opencapture/opencine/nikon/NikonTakeOverPrompt;
-	public static synthetic fun copy$default (Lcom/opencapture/opencine/nikon/NikonTakeOverPrompt;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/lang/String;ILjava/lang/Object;)Lcom/opencapture/opencine/nikon/NikonTakeOverPrompt;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/lang/String;Landroid/content/Context;)Lcom/opencapture/opencine/nikon/NikonTakeOverPrompt;
+	public static synthetic fun copy$default (Lcom/opencapture/opencine/nikon/NikonTakeOverPrompt;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/lang/String;Landroid/content/Context;ILjava/lang/Object;)Lcom/opencapture/opencine/nikon/NikonTakeOverPrompt;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCamera ()Ljava/lang/String;
 	public fun getCancel ()Lkotlin/jvm/functions/Function0;
@@ -2615,7 +2624,8 @@ public final class com/opencapture/opencine/nikon/NikonTakeOverPrompt : com/open
 }
 
 public final class com/opencapture/opencine/nikon/NikonTakeOverPrompt$Companion {
-	public final fun message (Ljava/lang/String;)Ljava/lang/String;
+	public final fun message (Ljava/lang/String;Landroid/content/Context;)Ljava/lang/String;
+	public static synthetic fun message$default (Lcom/opencapture/opencine/nikon/NikonTakeOverPrompt$Companion;Ljava/lang/String;Landroid/content/Context;ILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class com/opencapture/opencine/nikon/NikonTakeOverRecovery {

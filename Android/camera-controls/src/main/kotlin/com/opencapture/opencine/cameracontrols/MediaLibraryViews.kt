@@ -150,7 +150,12 @@ fun MediaCatalogHeaderRow(
     com.opencapture.monitorui.MonitorCatalogHeader(
         title = "$headerTitle · $headerCount",
         subtitle = mediaLibraryGalleryHint(fetchInProgress, isSelecting, isLive),
-        compact = compact, sort = sortOrder.menuLabel,
+        compact = compact, sort = when (sortOrder) {
+            MediaLibrarySort.NEWEST -> stringResource(R.string.media_sort_newest)
+            MediaLibrarySort.OLDEST -> stringResource(R.string.media_sort_oldest)
+            MediaLibrarySort.NAME -> stringResource(R.string.media_sort_name)
+            MediaLibrarySort.RATING -> stringResource(R.string.media_sort_rating)
+        },
         filterActive = filterOpen || activeFilterCount > 0,
         filterCount = activeFilterCount,
         onSort = onSort, onFilter = onFilter)
@@ -268,7 +273,7 @@ fun MediaEmptyState(listing: Boolean, subtitle: String, title: String? = null, r
             style = LiveType.ui(12f),
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
         )
-        if (retry != null) Text("Retry", color = LiveDesign.accent, style = LiveType.ui(13f, FontWeight.SemiBold),
+        if (retry != null) Text(stringResource(R.string.media_action_retry), color = LiveDesign.accent, style = LiveType.ui(13f, FontWeight.SemiBold),
             modifier = Modifier.chromeClickable(onClick = retry).padding(horizontal = 16.dp, vertical = 8.dp))
     }
 }
@@ -385,6 +390,7 @@ fun MediaFilterPopup(
                 .background(Color.Black.copy(alpha = 0.18f))
                 .clickable(onClick = onClose),
         )
+        val filterPopupSpoken = stringResource(R.string.media_filter_popup_a11y)
         val filterScroll = rememberScrollState()
         Column(
             Modifier
@@ -396,11 +402,11 @@ fun MediaFilterPopup(
                 .padding(16.dp)
                 .monitorScrollFade(filterScroll)
                 .verticalScroll(filterScroll)
-                .semantics { contentDescription = "Filter popup" },
+                .semantics { contentDescription = filterPopupSpoken },
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "FILTER",
+                    stringResource(R.string.media_filter_heading),
                     color = LiveDesign.muted,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
@@ -429,12 +435,12 @@ fun MediaFilterPopup(
                                 edit.commit(key)
                             }
                             edit.cancel(); pickingDate = null
-                        }) { Text("Done") }
+                        }) { Text(stringResource(R.string.media_action_done)) }
                     },
                     dismissButton = {
                         TextButton(onClick = {
                             edit.commit(null); edit.cancel(); pickingDate = null
-                        }) { Text("Clear") }
+                        }) { Text(stringResource(R.string.media_action_clear)) }
                     },
                 ) {
                     DatePicker(pickerState)
@@ -454,13 +460,14 @@ fun MediaCloseButton(
     size: Dp = 37.dp,
     enabled: Boolean = true,
 ) {
+    val closeSpoken = stringResource(R.string.action_close)
     Box(
         modifier
             .size(size)
             .clip(CircleShape)
             .mediaGlass(CircleShape)
             .chromeClickable(enabled = enabled, onClick = onClick)
-            .semantics { contentDescription = "Close" },
+            .semantics { contentDescription = closeSpoken },
         contentAlignment = Alignment.Center,
     ) {
         MonitorIcon(
@@ -611,7 +618,7 @@ fun MediaLibraryPage(
                     .padding(end = if (close != null && !portrait) MEDIA_PAGE_CLOSE_SLOT else 0.dp),
                 navigationWidth = 206f,
                 heading = {
-                    com.opencapture.monitorui.MonitorPageHeading("Media", state.cameraName)
+                    com.opencapture.monitorui.MonitorPageHeading(stringResource(R.string.media_library_page_title), state.cameraName)
                 },
                 navigation = { compact ->
                     Column(

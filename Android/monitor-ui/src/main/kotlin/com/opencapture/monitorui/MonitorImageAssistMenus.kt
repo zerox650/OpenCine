@@ -36,13 +36,23 @@ class MonitorFalseColorReadChoice(val read709: Boolean, val onChange: (Boolean) 
 fun MonitorPeakingMenu(sensitivity: MonitorPeakingSense, color: MonitorPeakingColor,
     colors: List<MonitorSettingsColorDot>, sensitivityHelp: String, colorHelp: String,
     onSensitivity: (MonitorPeakingSense) -> Unit, onColor: (MonitorPeakingColor) -> Unit) {
+    // The enum keeps its English label as the persisted identity; only the drawn word is translated.
+    val senseWords = MonitorPeakingSense.entries.associateWith { peakingSenseLabel(it) }
     MonitorSettingsInlineRow(stringResource(R.string.monitor_settings_sensitivity), help = sensitivityHelp, showTopDivider = false, stacked = true) {
         MonitorSettingsChoices(MonitorPeakingSense.entries, sensitivity, accentSelection = true,
-            title = { it.label }, onSelect = onSensitivity)
+            title = { senseWords.getValue(it) }, onSelect = onSensitivity)
     }
     MonitorSettingsInlineRow(stringResource(R.string.monitor_settings_color), help = colorHelp, stacked = true) {
         MonitorSettingsColorDots(colors, color.label) { onColor(MonitorPeakingColor.fromPersisted(it)) }
     }
+}
+
+/** The peaking sensitivity word. [MonitorPeakingSense] keeps its English `label` as the identity. */
+@Composable
+private fun peakingSenseLabel(sense: MonitorPeakingSense): String = when (sense) {
+    MonitorPeakingSense.LOW -> stringResource(R.string.monitor_peaking_low)
+    MonitorPeakingSense.MED -> stringResource(R.string.monitor_peaking_med)
+    MonitorPeakingSense.HIGH -> stringResource(R.string.monitor_peaking_high)
 }
 
 /** The host resolves the current source's reference key and scale labels. */

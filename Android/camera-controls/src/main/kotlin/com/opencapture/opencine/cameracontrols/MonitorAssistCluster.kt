@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.opencapture.monitorui.MonitorAssistTool
 import com.opencapture.monitorui.MonitorIcon
@@ -53,9 +54,16 @@ fun MonitorAssistCluster(usageStore: MonitorToolUsagePreferences?, portrait: Boo
     var usage by remember(usageStore) { mutableStateOf(usageStore?.value ?: MonitorToolUsageState()) }
     val catalog = if (playback) MonitorAssistTool.playbackToolbarCases else MonitorAssistTool.settingsCases
     val tools = catalog.filter { (showsAudio || it != MonitorAssistTool.AUDIO) && (availableTools?.contains(it) != false) }
+    // The palette's words, resolved here: its title and label lambdas are not composable contexts.
+    val spoken = tools.associate { tool ->
+        tool to ((tool.titleRes?.let { stringResource(it) } ?: tool.title) to
+            (tool.chipLabelRes?.let { stringResource(it) } ?: tool.chipLabel))
+    }
     com.opencapture.monitorui.MonitorAssistPalette(
         tools = tools, usageSeed = ASSIST_USAGE_SEED,
-        portrait = portrait, locked = locked, isOn = isOn, title = { it.title }, label = { it.chipLabel },
+        portrait = portrait, locked = locked, isOn = isOn,
+        title = { spoken[it]?.first ?: it.title },
+        label = { spoken[it]?.second ?: it.chipLabel },
         hasOptions = hasOptions, onToggle = onToggle, onOptions = onLongPress,
         glyph = { tool, tint, iconModifier -> AssistToolGlyph(tool, tint, iconModifier, evFontSize = 17f) },
         chevron = { expanded, vertical ->
