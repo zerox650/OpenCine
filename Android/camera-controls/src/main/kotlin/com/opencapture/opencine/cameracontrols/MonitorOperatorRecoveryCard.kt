@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.opencapture.opencine.appkit.MonitorRecoveryOverlay
 import com.opencapture.opencine.vocabulary.SessionDropSuspect
-import com.opencapture.opencine.vocabulary.SessionRecoveryCopy
 import com.opencapture.opencine.vocabulary.SessionRecoveryDrive
 import com.opencapture.opencine.vocabulary.SessionRecoveryUi
 import kotlinx.coroutines.delay
@@ -39,12 +38,13 @@ public fun MonitorOperatorRecoveryCard(
         graceElapsed = true
     }
     if (!showsRecoveryCard(state, graceElapsed)) return
+    val copy = recoveryText(state, cameraName, dropSuspect)
     MonitorRecoveryOverlay(
         retrying = state is SessionRecoveryUi.Retrying,
-        title = SessionRecoveryCopy.title(state),
-        detail = SessionRecoveryCopy.detail(state, cameraName, dropSuspect),
-        retryTitle = SessionRecoveryCopy.RETRY_CONNECTION,
-        operatorMenuTitle = SessionRecoveryCopy.OPERATOR_MENU,
+        title = copy.title,
+        detail = copy.detail,
+        retryTitle = copy.retry,
+        operatorMenuTitle = copy.operatorMenu,
         onRetry = onRetry,
         onOperatorMenu = onOperatorMenu,
         modifier = modifier,

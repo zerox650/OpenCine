@@ -371,4 +371,21 @@
     <string name="assist_crush_clip_title">暗部/高光补偿</string>
     <string name="settings_passcode_placeholder">可选</string>
     <string name="assist_apply_help">将此监看工具应用到当前画面。</string>
+
+    <!-- 断连恢复卡片 -->
+    <string name="recovery_title_retrying">正在重新连接…</string>
+    <string name="recovery_title_disconnected">相机已断开</string>
+    <string name="recovery_title_keeps_dropping">连接反复中断</string>
+    <string name="recovery_title_taken_over">相机已被接管</string>
+    <string name="recovery_retry">重新连接</string>
+    <string name="recovery_operator_menu">操作员菜单</string>
+    <string name="recovery_camera">相机</string>
+    <string name="recovery_other_device">另一台设备</string>
+    <string name="recovery_try_once">1 次</string>
+    <string name="recovery_tries">%1$d 次</string>
+    <string name="recovery_detail_retrying">%1$s 已断开。正在保持最后一帧，第 %2$d 次尝试，最多重连 %3$d 分钟。</string>
+    <string name="recovery_detail_waiting">%1$s 在 %2$s 后仍未恢复。请关闭相机再重新开机，然后点按「重试」。下方画面是保持的最后一帧，并非实时画面。</string>
+    <string name="recovery_detail_paused">%1$s 已重新连接，但短时间内连续断开 %2$d 次。为避免影响相机，自动重试已暂停。下方画面是保持的最后一帧，并非实时画面。</string>
+    <string name="recovery_detail_paused_scanning">%1$s 已重新连接，但短时间内连续断开 %2$d 次。可能还有其他设备正在扫描相机，为避免影响相机，自动重试已暂停。下方画面是保持的最后一帧，并非实时画面。</string>
+    <string name="recovery_detail_taken_over">%1$s 已连接到 %2$s，因此本机停止重连。点按「重试」可重新接管相机。下方画面是保持的最后一帧，并非实时画面。</string>
 </resources>
