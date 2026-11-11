@@ -523,7 +523,10 @@ internal fun <K, S, M, N> MonitorOperatorLiveComposition(
                         }
                     }
                 }
-                if (sections.assists in mounted && !inspecting) CompositionLocalProvider(
+                // A presented capture panel owns the screen. Keep the assist palette out of its
+                // way while one is open, otherwise the palette peeks past the plate and covers
+                // the panel's own header and values (the inspector hides it for the same reason).
+                if (sections.assists in mounted && !inspecting && panel == null) CompositionLocalProvider(
                     LocalMonitorAssistExpansion provides paletteExpansion) { MonitorAssistPalette(palette,
                     layout.portrait, !interactive, { it.isOn }, { it.tool?.title ?: it.title },
                     { it.tool?.chipLabel ?: it.label }, hasOptions,
