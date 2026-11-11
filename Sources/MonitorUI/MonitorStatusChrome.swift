@@ -4,7 +4,7 @@
 
   /// Common status composition. Integrations fill only their format, color, mode and telemetry readouts.
   public struct MonitorStatusChrome<
-    Storage: View, Format: View, ColorProfile: View, Mode: View, Link: View
+    Storage: View, Format: View, ColorProfile: View, Mode: View, Link: View, Corner: View
   >: View {
     @Environment(\.monitorPortraitPrimaryFit) private var primaryFit
     private let layout: FieldMonitorLayout
@@ -13,21 +13,31 @@
     private let showsRecording: Bool
     private let showsCompactTelemetry: Bool
     private let minimumOccupiedTop: Double
+    private let clock: (() -> String?)?
     private let storage: () -> Storage
     private let format: () -> Format
     private let color: () -> ColorProfile
     private let mode: () -> Mode
     private let link: () -> Link
+    private let corner: () -> Corner
+    private let cornerShown: Bool
 
+    /// `corner` fills the landscape row's trailing corner beside the recording readout and the
+    /// clock (a photo row shows camera setup values there, `MonitorStatusCorner`). Portrait
+    /// rows have no such corner and never show it. While `cornerShown`, the corner keeps its
+    /// tiles whole and the leading readouts scale to make room; otherwise the row lays out
+    /// exactly as it does without a corner.
     public init(
       layout: FieldMonitorLayout, status: MonitorStatusPresentation,
       showsTimecode: Bool = true, showsRecording: Bool = true, showsCompactTelemetry: Bool = true,
-      minimumOccupiedTop: Double = 0,
+      minimumOccupiedTop: Double = 0, clock: (() -> String?)? = nil,
       @ViewBuilder storage: @escaping () -> Storage,
       @ViewBuilder format: @escaping () -> Format,
       @ViewBuilder color: @escaping () -> ColorProfile,
       @ViewBuilder mode: @escaping () -> Mode,
-      @ViewBuilder link: @escaping () -> Link
+      @ViewBuilder link: @escaping () -> Link,
+      cornerShown: Bool = true,
+      @ViewBuilder corner: @escaping () -> Corner
     ) {
       self.layout = layout
       self.status = status
@@ -35,13 +45,37 @@
       self.showsRecording = showsRecording
       self.showsCompactTelemetry = showsCompactTelemetry
       self.minimumOccupiedTop = minimumOccupiedTop
+      self.clock = clock
       self.storage = storage
       self.format = format
       self.color = color
       self.mode = mode
       self.link = link
+      self.corner = corner
+      self.cornerShown = cornerShown
     }
+  }
 
+  extension MonitorStatusChrome where Corner == EmptyView {
+    public init(
+      layout: FieldMonitorLayout, status: MonitorStatusPresentation,
+      showsTimecode: Bool = true, showsRecording: Bool = true, showsCompactTelemetry: Bool = true,
+      minimumOccupiedTop: Double = 0, clock: (() -> String?)? = nil,
+      @ViewBuilder storage: @escaping () -> Storage,
+      @ViewBuilder format: @escaping () -> Format,
+      @ViewBuilder color: @escaping () -> ColorProfile,
+      @ViewBuilder mode: @escaping () -> Mode,
+      @ViewBuilder link: @escaping () -> Link
+    ) {
+      self.init(
+        layout: layout, status: status, showsTimecode: showsTimecode,
+        showsRecording: showsRecording, showsCompactTelemetry: showsCompactTelemetry,
+        minimumOccupiedTop: minimumOccupiedTop, clock: clock, storage: storage, format: format,
+        color: color, mode: mode, link: link, cornerShown: false, corner: { EmptyView() })
+    }
+  }
+
+  extension MonitorStatusChrome {
     public var body: some View {
       Group {
         if layout.portrait {
@@ -53,13 +87,15 @@
             HStack(spacing: 0) { if showsRecording { MonitorRecordingReadout(status: status) } }
             HStack(spacing: 0) {
               if showsTimecode {
-                if let primaryFit, primaryFit.tracking < 0 {
-                  MonitorPortraitTrackedClock(
-                    status.timecode, placeholder: status.timecodePlaceholder, fit: primaryFit)
-                } else {
-                  MonitorClock(
-                    status.timecode, placeholder: status.timecodePlaceholder,
-                    fontSize: primaryFit?.clockSize ?? (layout.tablet ? 25 : 23))
+                MonitorStatusClockSlot(read: clock, fallback: status.timecode) { shown in
+                  if let primaryFit, primaryFit.tracking < 0 {
+                    MonitorPortraitTrackedClock(
+                      shown, placeholder: status.timecodePlaceholder, fit: primaryFit)
+                  } else {
+                    MonitorClock(
+                      shown, placeholder: status.timecodePlaceholder,
+                      fontSize: primaryFit?.clockSize ?? (layout.tablet ? 25 : 23))
+                  }
                 }
               }
             }
@@ -69,23 +105,43 @@
               color()
             }
           }
+          .monitorReadoutShadow()
         } else {
-          HStack(spacing: 24) {
-            storage()
-            format()
-            color()
-            mode()
-            Spacer(minLength: 4)
-            HStack(spacing: 10) {
-              if showsRecording { MonitorRecordingReadout(status: status) }
-              if showsTimecode { MonitorClock(status.timecode, placeholder: status.timecodePlaceholder, fontSize: layout.tablet ? 25 : 23) }
+          // Each readout group takes the readout shadow once. The corner's tiles are camera
+          // value readouts that already carry it (`MonitorReadout`), as the strip's do, so the
+          // row's shadow stops short of them instead of stacking a second halo.
+          // A corner keeps `MonitorStatusCorner.leadingGap` from the leading readouts; without one
+          // the trailing readouts keep the row's earlier 52 pt (24 + 4 + 24).
+          HStack(spacing: 0) {
+            HStack(spacing: 24) {
+              storage()
+              format()
+              color()
+              mode()
             }
+            .monitorReadoutShadow()
+            Spacer(minLength: cornerShown ? MonitorStatusCorner.leadingGap : 52)
+            HStack(spacing: 10) {
+              if showsRecording || showsTimecode {
+                HStack(spacing: 10) {
+                  if showsRecording { MonitorRecordingReadout(status: status) }
+                  if showsTimecode {
+                    MonitorStatusClockSlot(read: clock, fallback: status.timecode) { shown in
+                      MonitorClock(shown, placeholder: status.timecodePlaceholder, fontSize: layout.tablet ? 25 : 23)
+                    }
+                  }
+                }
+                .monitorReadoutShadow()
+              }
+              // At its natural width: the leading readouts scale to make room, never the tiles.
+              if cornerShown { corner().fixedSize(horizontal: true, vertical: false) }
+            }
+            .layoutPriority(cornerShown ? 1 : 0)
             .padding(.trailing, layout.recordingReadoutTrailingInset)
           }
+          .frame(height: layout.status.height)
         }
       }
-      .frame(height: layout.portrait ? nil : layout.status.height)
-      .monitorReadoutShadow()
       .overlay(alignment: .topLeading) {
         if layout.portrait, showsCompactTelemetry {
           if layout.tablet {
@@ -105,6 +161,17 @@
         }
       }
     }
+  }
+
+  /// Reads a source's live clock in its own body. A timecode that advances every live view frame
+  /// then re-renders this readout only, not the status composition and the surface that hold it
+  /// (lane media-perf 2026-10-25: Z's per-frame timecode re-evaluated the whole live surface).
+  /// Without a reader the status value shows, as before.
+  private struct MonitorStatusClockSlot<Clock: View>: View {
+    let read: (() -> String?)?
+    let fallback: String?
+    @ViewBuilder let render: (String?) -> Clock
+    var body: some View { render(read.map { $0() } ?? fallback) }
   }
 
   /// Reserve performance first; storage scales inside its remaining slot.

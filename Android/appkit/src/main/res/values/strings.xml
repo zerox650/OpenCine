@@ -200,6 +200,8 @@
     <string name="station_scan_none">No networks found yet</string>
     <string name="station_scan_appear">Networks appear here as it finds them</string>
     <string name="station_scan_failed">The scan did not finish. Try Scan again.</string>
+    <string name="station_scan_cannot_list">This camera can’t list networks</string>
+    <string name="station_scan_choose_known">Choose a known network, or Other network.</string>
     <string name="station_header_network">NETWORK</string>
     <string name="station_current_network">This phone’s current network</string>
     <string name="station_phone_joins_too">This phone joins it too</string>
@@ -215,6 +217,8 @@
     <string name="station_password_placeholder">Password</string>
     <string name="station_password_hide">Hide password</string>
     <string name="station_password_show">Show password</string>
+    <string name="station_password_secured">This network is secured. Enter its password.</string>
+    <string name="station_password_empty_open">Leave it empty only for an open network.</string>
     <string name="station_hotspot_on">Hotspot is on</string>
     <string name="station_hotspot_off">Hotspot not detected yet. It can appear once the camera joins.</string>
     <string name="station_header_settings_hotspot">IN SETTINGS › HOTSPOT</string>

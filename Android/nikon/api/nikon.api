@@ -1407,6 +1407,7 @@ public final class com/opencapture/opencine/nikon/NikonAndroidGalleryProjectionP
 	public final fun formatKey (Lcom/opencapture/opencine/nikon/NikonMediaClipRecord;)Ljava/lang/String;
 	public final fun offered (Ljava/util/List;Ljava/time/LocalDate;)Lcom/opencapture/opencine/media/MonitorMediaProjectionOffered;
 	public final fun photoSizeKey (Lcom/opencapture/opencine/nikon/NikonMediaClipRecord;Ljava/util/List;)Ljava/lang/String;
+	public final fun photoSizeRanking (Ljava/util/List;)Ljava/util/List;
 	public final fun resolutionKey (Lcom/opencapture/opencine/nikon/NikonMediaClipRecord;)Ljava/lang/String;
 	public final fun stillWidths (Ljava/util/List;)Ljava/util/List;
 	public final fun windowContains (Ljava/lang/String;JLjava/time/LocalDate;)Z
@@ -1859,6 +1860,18 @@ public final class com/opencapture/opencine/nikon/NikonGallerySourceItem {
 	public final fun getNamespace ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/opencapture/opencine/nikon/NikonGyroCameraAdapter : com/opencapture/opencine/gyro/GyroCameraAdapter {
+	public fun <init> (Lcom/opencapture/opencine/nikon/CameraSession;Lcom/opencapture/opencine/nikon/SwiftCoreLiveFrameSource;Lcom/opencapture/opencine/gyro/GyroNativeApi;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function0;)V
+	public fun getIdentity ()Lkotlinx/coroutines/flow/StateFlow;
+	public fun getLevel ()Lkotlinx/coroutines/flow/Flow;
+	public fun getProvidesLevel ()Z
+	public fun getRecording ()Lkotlinx/coroutines/flow/StateFlow;
+	public fun getStabilization ()Lkotlinx/coroutines/flow/StateFlow;
+	public fun getStabilizationSettings ()Ljava/util/List;
+	public fun getVideoMode ()Lkotlinx/coroutines/flow/StateFlow;
+	public fun writeStabilization (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/opencapture/opencine/nikon/NikonHosts {
@@ -2320,6 +2333,7 @@ public final class com/opencapture/opencine/nikon/NikonNative {
 	public final fun sessionStopMediaTransfer (J)V
 	public final fun sessionTerminateStillCapture (J)I
 	public final fun sessionThumbnail (JI)[B
+	public final fun sessionUprightThumbnail (JILjava/lang/String;)[B
 }
 
 public abstract interface class com/opencapture/opencine/nikon/NikonNative$LiveFrameListener {

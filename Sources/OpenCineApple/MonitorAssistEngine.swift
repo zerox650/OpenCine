@@ -120,7 +120,9 @@ public final class MonitorAssistEngine: @unchecked Sendable {
     ) {
         let still = Still(image: image)
         queue.async { [self] in
-            guard effects.needsScopes, scopeNow() >= nextScopeAt,
+            guard effects.needsScopes,
+                Self.scopeDue(now: scopeNow(), deadline: nextScopeAt,
+                    interval: Self.minInterval(activeScopeCount: effects.activeScopeCount)),
                 let buffer = raster.prepared(still.image)
             else { return }
             pendingBuffer = buffer
@@ -203,8 +205,8 @@ public final class MonitorAssistEngine: @unchecked Sendable {
         if fx.needsScopes {
             let now = scopeNow()
             let interval = Self.minInterval(activeScopeCount: fx.activeScopeCount)
-            if now >= nextScopeAt {
-                nextScopeAt = now + interval
+            if Self.scopeDue(now: now, deadline: nextScopeAt, interval: interval) {
+                nextScopeAt = Self.nextScopeDeadline(now: now, deadline: nextScopeAt, interval: interval)
                 packed = LiveFrameTap.copyBGRA8(
                     buffer, maxWidth: ScopeSampler.maxWidth)
                 if packed == nil {
@@ -283,8 +285,9 @@ public final class MonitorAssistEngine: @unchecked Sendable {
                 clipByte: exposureCeiling.clipByte(transfer: transfer),
                 includePoints: fx.waveform || fx.parade,
                 includeVectorPoints: fx.vectorscope,
-                look: fx.vectorscope
-                    ? (Self.armedCube(fx.image) ?? configuration.defaultScopeLook(transfer)) : nil,
+                // Scopes measure the camera signal. VECTOR maps it through the source's fixed
+                // display transform, never the operator's LUT, so toggling a look cannot move it.
+                look: fx.vectorscope ? configuration.defaultScopeLook(transfer) : nil,
                 trafficThreshold: fx.trafficThreshold,
                 previous: previousBundle)
             let observed = exposureCeiling.observeTapMax(tapMax, transfer: transfer)
@@ -338,6 +341,25 @@ public final class MonitorAssistEngine: @unchecked Sendable {
             busy = false
             drain()
         }
+    }
+
+    /// A frame that lands a little early for its tap still takes it. Frames arrive at the clip
+    /// rate with scheduling jitter, so a deadline of exactly one interval after the previous tap
+    /// skipped every other frame: a 25 fps clip measured at 12 to 15 Hz instead of its 25 Hz.
+    static func scopeDue(now: CFAbsoluteTime, deadline: CFAbsoluteTime, interval: TimeInterval)
+        -> Bool
+    {
+        now >= deadline - interval * 0.25
+    }
+
+    /// The deadline advances one interval per tap, so the rate never exceeds the budget. A tap
+    /// so late that the next deadline's early window is already open restarts from now instead
+    /// of catching up, so two taps are never one source frame apart.
+    static func nextScopeDeadline(
+        now: CFAbsoluteTime, deadline: CFAbsoluteTime, interval: TimeInterval
+    ) -> CFAbsoluteTime {
+        let next = deadline + interval
+        return scopeDue(now: now, deadline: next, interval: interval) ? now + interval : next
     }
 
     public static func minInterval(activeScopeCount: Int,

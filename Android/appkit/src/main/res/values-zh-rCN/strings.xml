@@ -198,6 +198,8 @@
     <string name="station_scan_none">尚未找到网络</string>
     <string name="station_scan_appear">找到的网络会显示在这里</string>
     <string name="station_scan_failed">扫描未完成。请尝试重新扫描。</string>
+    <string name="station_scan_cannot_list">该相机无法列出网络</string>
+    <string name="station_scan_choose_known">请选择一个已知网络，或选择“其他网络”。</string>
     <string name="station_header_network">网络</string>
     <string name="station_current_network">本手机当前的网络</string>
     <string name="station_phone_joins_too">本手机也将接入</string>
@@ -213,6 +215,8 @@
     <string name="station_password_placeholder">密码</string>
     <string name="station_password_hide">隐藏密码</string>
     <string name="station_password_show">显示密码</string>
+    <string name="station_password_secured">该网络受密码保护，请输入密码。</string>
+    <string name="station_password_empty_open">仅在开放网络下才可留空。</string>
     <string name="station_hotspot_on">热点已开启</string>
     <string name="station_hotspot_off">尚未检测到热点。相机接入后才会出现。</string>
     <string name="station_header_settings_hotspot">在“设置 › 热点”中</string>

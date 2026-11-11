@@ -178,7 +178,16 @@ open class OperatorHelpCopy(private val appName: String, private val context: Co
         get() = context?.getString(R.string.help_cache_full_resolution) ?: "Download the original camera file when you open a clip. Off keeps only the 720p proxy to save space. Share needs the original, so connect the camera if it is not cached."
     val FEED_UPSCALER = MonitorSettingsCopy.feedUpscaler
     val FALSE_COLOR_SCALE
-        get() = context?.getString(R.string.help_false_color_scale) ?: "The camera color mode selects D-Log, D-Log2, Rec.709, or HLG automatically. CineStop paints five stops around 18% gray, read through the camera's log curve: dark green −2, yellow-green −1, gray at 18%, light pink +1 (skin), soft yellow +2 (upper skin limit). Red is clipped and violet is crushed; other shadows are flat dark gray and other highlights flat light gray. Video paints video-level IRE stripes (green 41–48, pink 61–70, red clip) over luminance grayscale. IRE paints six video-level zones over luminance grayscale: purple crush, blue near-black, green 18% gray, pink one stop over, yellow near clip, red clip. On log, Video and IRE read the camera's Rec.709 look (709) or the raw signal (LOG), set under Read. Limits paints only shadow and highlight warnings, leaving other colors untouched."
+        get() = context?.getString(R.string.help_false_color_scale) ?: "The camera color mode selects D-Log, D-Log2, Rec.709, or HLG automatically. " +
+            "CineStop paints five stops around 18% gray, read through the " +
+            "camera's log curve: dark green −2, yellow-green −1, gray at 18%, light pink +1 " +
+            "(skin), soft yellow +2 (upper skin limit). Red is clipped and violet is crushed; " +
+            "other shadows are flat dark gray and other highlights flat light gray. " +
+            "Video paints video-level IRE stripes (green 41–48, pink 61–70, red clip) " +
+            "over luminance grayscale. IRE paints six video-level zones over " +
+            "luminance grayscale: purple crush, blue near-black, green 18% gray, pink one " +
+            "stop over, yellow near clip, red clip. On log, Video and IRE read the camera's " +
+            "Rec.709 look (709) or the raw signal (LOG), set under Read. Limits paints only shadow and highlight warnings, leaving other colors untouched."
     val FALSE_COLOR_REFERENCE
         get() = context?.getString(R.string.help_false_color_reference) ?: "Show a compact color key over live view while False Color is active."
     val PEAKING_SENSITIVITY
@@ -196,12 +205,11 @@ open class OperatorHelpCopy(private val appName: String, private val context: Co
     val PARADE_BRIGHTNESS
         get() = context?.getString(R.string.help_parade_brightness) ?: "Raise trace intensity when channel separation is hard to see."
     val VECTORSCOPE_ZOOM
-        get() = context?.getString(R.string.help_vectorscope_zoom) ?: "Magnifies only the chroma trace; the graticule stays at unity. The vectorscope reads the monitor image (your active LUT, or the built-in display tone map), where chroma is meaningful."
+        get() = context?.getString(R.string.help_vectorscope_zoom) ?: "Magnifies only the chroma trace; the graticule stays at unity. The vectorscope reads the camera signal through the built-in display tone map, whatever LUT is on, so chroma stays meaningful."
     val VECTORSCOPE_BRIGHTNESS
         get() = context?.getString(R.string.help_vectorscope_brightness) ?: "Raise trace intensity when the chroma plot is hard to read."
     val TRAFFIC_LIGHTS_COMPENSATION
-        get() = context?.getString(R.string.help_traffic_lights_compensation) ?: "Stops of crush/clip tolerance before a channel indicator glows. Shared with the histogram traffic lights."
-}
+        get() = context?.getString(R.string.help_traffic_lights_compensation) ?: "Stops of crush/clip tolerance before a channel indicator glows. Shared with the histogram traffic lights."}
 
 /**
  * The clip cache directories: the app's [mediaRoots] (per-camera folders, each keeping its `index.json`)

@@ -11,7 +11,14 @@
     >: View {
         private let brand: String
         private let safeArea: EdgeInsets
-        private let items: [MonitorMediaItem]
+        /// Displayed order. Items are built per cell, only for cells the lazy grid realizes, so a
+        /// 3200-item card does not build 3200 items (and call the host per item) on every render.
+        private let ids: [String]
+        private let item: (String) -> MonitorMediaItem?
+        private let permissions: (String) -> MonitorMediaPermissions?
+        /// Width over height of each item's picture in `ids` order, known from metadata (nil or
+        /// missing when unknown).
+        private let aspectRatios: [Double?]
         private let categories: [MonitorMediaCategory]
         private let category: String
         private let layout: MonitorMediaLayout
@@ -43,10 +50,40 @@
             @ViewBuilder empty: () -> Empty, @ViewBuilder filters: () -> Filters,
             @ViewBuilder sidebar: () -> Sidebar, @ViewBuilder accessory: () -> Accessory
         ) {
+            let byID = Dictionary(items.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+            self.init(
+                brand: brand, safeArea: safeArea, ids: items.map(\.id), item: { byID[$0] },
+                categories: categories, category: category, layout: layout,
+                thumbnailSize: thumbnailSize, sortTitle: sortTitle, status: status,
+                selectedIDs: selectedIDs, selecting: selecting, refreshing: refreshing,
+                canRefresh: canRefresh, tablet: tablet, hint: hint, action: action,
+                thumbnail: thumbnail, empty: empty, filters: filters, sidebar: sidebar,
+                accessory: accessory)
+        }
+
+        /// Lazy items: `item` is called only for realized cells, inside their own views, and
+        /// `permissions` (derived from `item` when nil) for selected ids in the selection tray, so a value a cell reads (such as transfer
+        /// progress) re-renders that cell, not the whole catalog.
+        public init(
+            brand: String, safeArea: EdgeInsets, ids: [String],
+            item: @escaping (String) -> MonitorMediaItem?,
+            permissions: ((String) -> MonitorMediaPermissions?)? = nil,
+            aspectRatios: [Double?] = [],
+            categories: [MonitorMediaCategory], category: String, layout: MonitorMediaLayout,
+            thumbnailSize: MonitorThumbnailSize, sortTitle: String, status: String,
+            selectedIDs: Set<String>, selecting: Bool, refreshing: Bool, canRefresh: Bool,
+            tablet: Bool, hint: String? = nil, action: @escaping (MonitorMediaAction) -> Void,
+            @ViewBuilder thumbnail: @escaping (MonitorMediaItem) -> Thumbnail,
+            @ViewBuilder empty: () -> Empty, @ViewBuilder filters: () -> Filters,
+            @ViewBuilder sidebar: () -> Sidebar, @ViewBuilder accessory: () -> Accessory
+        ) {
             self.hint = hint
             self.brand = brand
             self.safeArea = safeArea
-            self.items = items
+            self.ids = ids
+            self.item = item
+            self.permissions = permissions ?? { item($0)?.permissions }
+            self.aspectRatios = aspectRatios
             self.categories = categories
             self.category = category
             self.layout = layout
@@ -78,7 +115,10 @@
                     header(portrait: portrait)
                     accessory
                     gallery
-                    if selecting { selectionTray }
+                    if selecting {
+                        MonitorMediaSelectionTray(
+                            selectedIDs: selectedIDs, permissions: permissions, action: action)
+                    }
                     if portrait { displayControls }
                 }
             }
@@ -153,7 +193,7 @@
                     if refreshing {
                         ProgressView().controlSize(.mini).tint(MonitorTheme.accent)
                     }
-                    Text("\(items.count) items · \(category.lowercased())")
+                    Text("\(ids.count) items · \(category.lowercased())")
                         .font(MonitorTheme.font(10.5, weight: .semibold))
                         .foregroundStyle(MonitorTheme.text)
                 }
@@ -181,19 +221,15 @@
             GeometryReader { proxy in
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 0) {
-                        if items.isEmpty {
+                        if ids.isEmpty {
                             empty.frame(maxWidth: .infinity, minHeight: proxy.size.height)
                         } else if layout == .grid {
-                            LazyVGrid(
-                                columns: Array(
-                                    repeating: GridItem(.flexible(), spacing: 10),
-                                    count: thumbnailSize.columns(tablet: tablet)), spacing: 10
-                            ) {
-                                ForEach(items) { item in gridCard(item) }
-                            }
+                            masonry(width: proxy.size.width)
                         } else {
                             LazyVStack(spacing: 1) {
-                                ForEach(items) { item in listRow(item) }
+                                ForEach(ids, id: \.self) { id in
+                                    MonitorMediaLazyCell(id: id) { listRow($0) }
+                                }
                             }
                             .background(
                                 MonitorTheme.surface, in: RoundedRectangle(cornerRadius: 12))
@@ -201,7 +237,7 @@
                     }
                     .background(
                         MonitorMediaSelectionBridge(
-                            interaction: selectionInteraction, ids: items.map(\.id),
+                            interaction: selectionInteraction, ids: ids,
                             selected: selectedIDs, selecting: selecting,
                             context:
                                 "\(category)/\(layout.rawValue)/\(thumbnailSize.rawValue)/\(sortTitle)"
@@ -214,26 +250,62 @@
             }
         }
 
+        /// Staggered columns: each item goes into the shortest column in display order, sized by
+        /// the picture shape its metadata gives, so no row leaves a gap under a shorter card.
+        /// Each column is its own lazy stack, so only realized cards are built.
+        private func masonry(width: CGFloat) -> some View {
+            let count = thumbnailSize.columns(tablet: tablet)
+            let aspects = ids.indices.map { index -> Double? in
+                aspectRatios.indices.contains(index) ? aspectRatios[index] : nil
+            }
+            let placement = MonitorMediaMasonry(
+                aspects: aspects, columnCount: count, width: Double(width),
+                spacing: Self.gridSpacing, captionHeight: Self.gridCaptionHeight)
+            return HStack(alignment: .top, spacing: Self.gridSpacing) {
+                ForEach(0..<count, id: \.self) { column in
+                    LazyVStack(spacing: Self.gridSpacing) {
+                        ForEach(
+                            placement.columns[column].map {
+                                MonitorMediaMasonryCell(
+                                    id: ids[$0], aspect: placement.frames[$0].aspect)
+                            }
+                        ) { cell in
+                            MonitorMediaLazyCell(id: cell.id) { gridCard($0, aspect: cell.aspect) }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .top)
+                }
+            }
+        }
+
+        private static var gridSpacing: Double { 10 }
+        /// The grid card's title and detail under the picture (placement only; cards size
+        /// themselves).
+        private static var gridCaptionHeight: Double { 44 }
+
         private func refresh() {
             if canRefresh && !refreshing { action(.refresh) }
         }
 
-        private func gridCard(_ item: MonitorMediaItem) -> some View {
-            cell(item, layout: .grid)
+        @ViewBuilder private func gridCard(_ id: String, aspect: Double) -> some View {
+            if let value = item(id) { cell(value, layout: .grid, aspect: aspect) }
         }
 
-        private func listRow(_ item: MonitorMediaItem) -> some View {
-            cell(item, layout: .list)
+        @ViewBuilder private func listRow(_ id: String) -> some View {
+            if let value = item(id) { cell(value, layout: .list) }
         }
 
-        private func cell(_ item: MonitorMediaItem, layout: MonitorMediaLayout) -> some View {
+        private func cell(
+            _ item: MonitorMediaItem, layout: MonitorMediaLayout,
+            aspect: Double = MonitorMediaMasonry.defaultAspect
+        ) -> some View {
             MonitorMediaCell(
                 clip: MonitorClipValue(item: item), layout: layout, tablet: tablet,
                 selecting: selecting, selected: selectedIDs.contains(item.id),
                 favoriteEnabled: item.permissions.contains(.favorite),
                 sourceTint: item.availability == .original ? MonitorTheme.color(0x3FD3A3) : MonitorTheme.muted,
                 onOpen: { action(.open(item.id)) }, onSelect: { action(.select(item.id)) },
-                onFavorite: { action(.favorite(item.id)) }
+                onFavorite: { action(.favorite(item.id)) }, artworkAspect: aspect
             ) { thumbnail(item) }
             // On the cell's own element, before the selection anchor joins it: after it, both
             // carried the identifier and a clip no longer resolved to one element.
@@ -241,62 +313,29 @@
             .background(MonitorMediaSelectionAnchor(id: item.id, interaction: selectionInteraction))
         }
 
-        private var selectedItems: [MonitorMediaItem] {
-            items.filter { selectedIDs.contains($0.id) }
-        }
-
-        private func selectionAllows(_ permission: MonitorMediaPermissions, every: Bool = false)
-            -> Bool
-        {
-            !selectedItems.isEmpty
-                && (every
-                    ? selectedItems.allSatisfy { $0.permissions.contains(permission) }
-                    : selectedItems.contains { $0.permissions.contains(permission) })
-        }
-
-        private var selectionTray: some View {
-            HStack(spacing: 4) {
-                Text("\(selectedIDs.count) selected").font(
-                    MonitorTheme.font(10.5, weight: .semibold)
-                )
-                .foregroundStyle(MonitorTheme.text).lineLimit(1)
-                Spacer(minLength: 0)
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 3) {
-                        chip("Select all", icon: .circleCheck, text: "All") {
-                            action(.selectAll)
-                        }
-                        chip("Clear selection", icon: .x, text: "Clear") {
-                            action(.clearSelection)
-                        }
-                        chip(
-                            "Share selected", icon: .share, text: "Share",
-                            active: true
-                        ) {
-                            action(.shareSelection)
-                        }
-                        .disabled(!selectionAllows(.share, every: true))
-                        chip("Cache selected", icon: .download) { action(.cacheSelection) }
-                            .disabled(!selectionAllows(.cache))
-                        chip("Favorite selected", icon: .star) { action(.favoriteSelection) }
-                            .disabled(!selectionAllows(.favorite))
-                        chip("Delete selected", icon: .trash, danger: true) {
-                            action(.deleteSelection)
-                        }
-                        .disabled(!selectionAllows(.delete, every: true))
-                    }
-                }
-                .monitorScrollFade(.horizontal)
-                .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(6).monitorCardSurface()
-        }
-
         private func chip(
             _ label: String, icon: MonitorIcon, filled: Bool = false, text: String? = nil,
             active: Bool = false,
             iconSize: CGFloat = 13, danger: Bool = false, action: @escaping () -> Void
         ) -> some View {
+            MonitorMediaCatalogChip(
+                label: label, icon: icon, filled: filled, text: text, active: active,
+                iconSize: iconSize, danger: danger, action: action)
+        }
+
+    }
+
+    private struct MonitorMediaCatalogChip: View {
+        let label: String
+        let icon: MonitorIcon
+        var filled = false
+        var text: String? = nil
+        var active = false
+        var iconSize: CGFloat = 13
+        var danger = false
+        let action: () -> Void
+
+        var body: some View {
             Button(action: action) {
                 HStack(spacing: 7) {
                     icon.view(filled: filled).frame(width: iconSize, height: iconSize)
@@ -316,7 +355,76 @@
             }
             .buttonStyle(MonitorButtonStyle()).accessibilityLabel(label)
         }
+    }
 
+    private struct MonitorMediaMasonryCell: Identifiable {
+        let id: String
+        let aspect: Double
+    }
+
+    /// One realized cell. Its body builds the item, so what the item reads is tracked here.
+    private struct MonitorMediaLazyCell<Content: View>: View {
+        let id: String
+        @ViewBuilder let content: (String) -> Content
+        var body: some View { content(id) }
+    }
+
+    /// The selection actions. Permissions are read from the selected items only, in this view.
+    /// Close (leave selection mode) and the count hold the leading edge; the actions hold the
+    /// trailing edge, and scroll only when the bar is too narrow for them.
+    private struct MonitorMediaSelectionTray: View {
+        let selectedIDs: Set<String>
+        let permissions: (String) -> MonitorMediaPermissions?
+        let action: (MonitorMediaAction) -> Void
+
+        var body: some View {
+            let selected = selectedIDs.compactMap(permissions)
+            HStack(spacing: 4) {
+                MonitorMediaCatalogChip(label: MonitorMediaSelectionCopy.exit, icon: .x) {
+                    action(.clearSelection)
+                }
+                .accessibilityIdentifier(MonitorMediaSelectionCopy.exitIdentifier)
+                Text("\(selectedIDs.count) selected").font(
+                    MonitorTheme.font(10.5, weight: .semibold)
+                )
+                .foregroundStyle(MonitorTheme.text).lineLimit(1).fixedSize()
+                Spacer(minLength: 8)
+                ViewThatFits(in: .horizontal) {
+                    actions(selected)
+                    ScrollView(.horizontal, showsIndicators: false) { actions(selected) }
+                        .monitorScrollFade(.horizontal)
+                }
+                .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(6).monitorCardSurface()
+        }
+
+        private func actions(_ selected: [MonitorMediaPermissions]) -> some View {
+            HStack(spacing: 3) {
+                MonitorMediaCatalogChip(label: "Select all", icon: .circleCheck, text: "All") {
+                    action(.selectAll)
+                }
+                MonitorMediaCatalogChip(
+                    label: "Share selected", icon: .share, text: "Share", active: true
+                ) {
+                    action(.shareSelection)
+                }
+                .disabled(!Self.allows(.share, in: selected))
+                MonitorMediaCatalogChip(
+                    label: "Delete selected", icon: .trash, danger: true
+                ) {
+                    action(.deleteSelection)
+                }
+                .disabled(!Self.allows(.delete, in: selected))
+            }
+        }
+
+        /// Every selected item must allow the action.
+        private static func allows(
+            _ permission: MonitorMediaPermissions, in selected: [MonitorMediaPermissions]
+        ) -> Bool {
+            !selected.isEmpty && selected.allSatisfy { $0.contains(permission) }
+        }
     }
 
     extension MonitorMediaCatalog where Sidebar == EmptyView, Accessory == EmptyView {

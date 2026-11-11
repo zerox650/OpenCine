@@ -17,6 +17,10 @@
     @MainActor
     final class MonitorPortraitHeaderClearanceTests: XCTestCase {
         private static let safeTops: [CGFloat] = [0, 24, 30.333333, 44, 59, 62]
+        /// The production header's spoken link label for the fixture's 4 bars at a measured 25 fps.
+        /// Apps report the live rate as a number ("25", "25.00"); since #252 a non-numeric reading
+        /// such as "25 fps" is a feed state word and reads "feed 25 fps".
+        private static let liveLink = "Live link 4 of 4 delivery bars, feed 25 frames per second"
         override func setUp() async throws {
             let active = await HostedCondition.wait {
                 UIApplication.shared.applicationState == .active
@@ -240,7 +244,7 @@
                 ("99999 SHOTS", nil, nil),  // the same count as the word readout used to show it
                 ("123456789 GB", nil, nil),
             ]
-            let link = "Live link 4 of 4 bars, feed 25 fps frames per second"
+            let link = Self.liveLink
             for phone in phones {
                 for readout in readouts {
                     let fixture = try ProductionHeaderFixture(
@@ -270,7 +274,7 @@
             let phones: [(width: CGFloat, height: CGFloat, safeTop: CGFloat)] = [
                 (393, 852, 59), (402, 874, 62), (430, 932, 59), (440, 956, 62),
             ]
-            let link = "Live link 4 of 4 bars, feed 25 fps frames per second"
+            let link = Self.liveLink
             for phone in phones {
                 for value in ["115GB", "521GB", "99.9k"] {
                     let fixture = try ProductionHeaderFixture(
@@ -938,7 +942,7 @@
                         .init(recording: probe.status, showsTimecode: true, showsRecording: true,
                             storage: .init(id: "storage", title: "Storage remaining", value: probe.storageValue,
                                 valueIcon: probe.storageIcon, accessibilityLabel: probe.storageSpoken),
-                            format: readouts, fps: "25 fps", signalBars: 4,
+                            format: readouts, fps: "25", signalBars: 4,
                             portraitFormat: probe.typedPortraitHeader ? .init(id: "format", title: "Recording format",
                                 value: "6K · 25p", section: .format, action: { probe.formatCalls += 1 }, quickEnabled: false) : nil,
                             color: probe.codecOnly || probe.photo ? nil : .init(id: "color", title: "Color mode", value: "D-Log2",
@@ -952,7 +956,7 @@
                     record: { .init(photo: probe.photo, confirm: false, busy: false, openMode: nil, external: nil) },
                     exposure: nil, level: nil, audio: { nil }, readOnly: { false }, borrowed: { false },
                     returnToStage: nil, coverOpen: { false }, note: $probe.note, settings: {}, media: {}),
-                assists: .init(scopes: nil, tools: { [] }, rendered: { nil }, fitted: { [] },
+                assists: .init(scopes: nil, tools: { [] }, rendered: { nil },
                     signalOptions: .init(), usage: $probe.usage, usageSeed: [:], toggle: { _ in }),
                 views: .init(motion: testsMotionVisibility ? .init(
                     controls: AnyView(EmptyView()), editor: AnyView(EmptyView()),
@@ -1130,6 +1134,7 @@
             let color = try node("Color mode")
             let codec = try node("Codec")
             let picture = try node("SIMULATED production picture")
+            assertReadoutsReachedOnce(nodes)
             let image = try native.renderedImage()
             let photo = XCTAttachment(image: image)
             photo.name = "SIMULATED production long width \(sample.width) raw \(sample.safeTop) side \(sample.sideSafe) elapsed \(probe.status.elapsedLabel)"
@@ -1260,6 +1265,14 @@
             XCTAssertEqual(probe.formatCalls, beforeFormat + 1); XCTAssertEqual(probe.codecCalls, beforeCodec + 1)
             return nativeHeights
         }
+        /// VoiceOver reaches each header readout once, through its 44 pt target. The painted text
+        /// under the target is never a second element: a visible chrome slot that re-exposed it
+        /// read every value twice and put a stray element over the primary's own glyphs.
+        private func assertReadoutsReachedOnce(_ nodes: [NSObject]) {
+            let painted = ["[\(probe.sensorArea)] 6K · 25p", "R3D NE", "D-Log2"]
+            XCTAssertEqual(nodes.compactMap(\.accessibilityLabel).filter(painted.contains), [],
+                "Painted readout text is reachable as its own element at \(sample)")
+        }
         private func settledNodes(labels: [String] = ["Recording format", "Codec", "Color mode"]) async throws -> [NSObject] {
             var nodes: [NSObject] = []
             for _ in 0..<200 {
@@ -1286,6 +1299,7 @@
             let codec = try node("Codec")
             let color = try node("Color mode")
             let context = "\(sample)"
+            assertReadoutsReachedOnce(nodes)
             // One top edge for STBY/REC, the clock and the resolution and frame rate.
             XCTAssertEqual(recording.minY, field.status.y, accuracy: 0.5, context)
             XCTAssertEqual(clock.minY, field.status.y, accuracy: 0.5, context)

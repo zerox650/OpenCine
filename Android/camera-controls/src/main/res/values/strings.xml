@@ -175,6 +175,7 @@
     <string name="settings_status">Status</string>
     <string name="settings_phone_mount">Phone mount</string>
     <string name="settings_phone_mount_help">Choose the phone\'s position relative to the camera. Keep the mount unchanged during a take; rotating the whole rig needs no new selection.</string>
+    <string name="settings_gyro_calibrate">Calibrate phone mount</string>
     <string name="settings_configure">Configure</string>
 
     <string name="settings_remote_shutter">Remote shutter</string>
@@ -234,6 +235,7 @@
     <string name="media_tray_cache_clips_a11y">Cache selected clips</string>
     <string name="media_tray_favorite_clips_a11y">Favorite selected clips</string>
     <string name="media_caching">Caching %1$s %2$d%%</string>
+    <string name="photo_preview_for">Photo preview for %1$s</string>
     <string name="media_querying_card">Querying card storage…</string>
     <string name="media_clips_found">%1$d clips found so far</string>
     <string name="media_filters_title">Filters</string>

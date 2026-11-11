@@ -253,14 +253,62 @@ public data class MonitorSettingsInformationSource(
     public val theme: String, public val protocolName: String, public val version: String,
     public val themeHelp: String, public val protocolHelp: String, public val versionHelp: String,
 )
-/** Optional phone motion controls; capture and storage remain host-owned. */
+/**
+ * Optional phone motion controls; capture and storage remain host-owned. [calibrate] opens the ring
+ * calibration and adds the "Calibrate phone mount" row; null (no camera that can calibrate) hides it.
+ */
 public class MonitorSettingsGyroSource(
     public val enabled: Boolean, public val setEnabled: (Boolean) -> Unit,
     public val status: String, public val available: Boolean = true,
     public val openLogs: () -> Unit,
-    public val mountName: String? = null,
-    public val configureMount: (() -> Unit)? = null,
-)
+    public val calibrate: (() -> Unit)? = null,
+) {
+    /** The old mount preset's name; mount presets are gone. */
+    @Deprecated("Mount presets are gone; pass calibrate")
+    public var mountName: String? = null
+        private set
+
+    /** The old mount preset picker; mount presets are gone. */
+    @Deprecated("Mount presets are gone; pass calibrate")
+    public var configureMount: (() -> Unit)? = null
+        private set
+
+    /** The source with the old mount preset row, kept for existing callers until a later minor release. */
+    @Deprecated("Mount presets are gone; pass calibrate")
+    @Suppress("DEPRECATION")
+    public constructor(
+        enabled: Boolean, setEnabled: (Boolean) -> Unit,
+        status: String, available: Boolean = true,
+        openLogs: () -> Unit,
+        mountName: String?,
+        configureMount: (() -> Unit)? = null,
+        calibrate: (() -> Unit)? = null,
+    ) : this(enabled, setEnabled, status, available, openLogs, calibrate) {
+        this.mountName = mountName
+        this.configureMount = configureMount
+    }
+}
+
+/** The rows of the settings gyro card, in order. */
+internal enum class MonitorSettingsGyroRow {
+    /** The logging toggle. */
+    LOGGING,
+    /** The capture status line. */
+    STATUS,
+    /** The deprecated mount preset row, only for a caller that still passes one. */
+    MOUNT,
+    /** Opens the ring calibration, only when the host can calibrate. */
+    CALIBRATE,
+}
+
+/** The gyro card's rows for [source]: the calibrate row only when the host passes [MonitorSettingsGyroSource.calibrate]. */
+@Suppress("DEPRECATION")
+internal fun monitorSettingsGyroRows(source: MonitorSettingsGyroSource): List<MonitorSettingsGyroRow> = buildList {
+    add(MonitorSettingsGyroRow.LOGGING)
+    add(MonitorSettingsGyroRow.STATUS)
+    if (source.configureMount != null) add(MonitorSettingsGyroRow.MOUNT)
+    if (source.calibrate != null) add(MonitorSettingsGyroRow.CALIBRATE)
+}
 /**
  * Every app's settings: one value per tab, built by the app from its model. Absent capability
  * sections (motion, sharing, account, cache) are null; the recipe for each tab is the same.
@@ -494,25 +542,34 @@ internal fun SettingsSharing(source: MonitorSettingsSharingSource?, feedback: ()
         } }
     }
 }
+/** The gyro card; still renders the deprecated mount row for a caller that passes one. */
+@Suppress("DEPRECATION")
 @Composable
 internal fun SettingsGyro(source: MonitorSettingsGyroSource?, feedback: () -> Unit) {
     source?.let { gyro ->
         MonitorSettingsRowCard(stringResource(R.string.settings_gyro_logging)) {
-            MonitorSettingsSwitchInlineRow(stringResource(R.string.settings_gyro_log_with_recordings), gyro.enabled,
-                help = stringResource(R.string.settings_gyro_mount_help),
-                showTopDivider = false) {
-                if (gyro.available) { feedback(); gyro.setEnabled(!gyro.enabled) }
-            }
-            MonitorSettingsInlineRow(stringResource(R.string.settings_status), null) {
-                MonitorSettingsValueText(gyro.status)
-            }
-            gyro.configureMount?.let { configureMount ->
-                MonitorSettingsInlineRow(stringResource(R.string.settings_phone_mount),
-                    stringResource(R.string.settings_phone_mount_help)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically) {
-                        gyro.mountName?.let { MonitorSettingsValueText(it) }
-                        MonitorSettingsActionPill(stringResource(R.string.settings_configure), onClick = configureMount)
+            for (row in monitorSettingsGyroRows(gyro)) when (row) {
+                MonitorSettingsGyroRow.LOGGING -> MonitorSettingsSwitchInlineRow(stringResource(R.string.settings_gyro_log_with_recordings), gyro.enabled,
+                    help = stringResource(R.string.settings_gyro_mount_help),
+                    showTopDivider = false) {
+                    if (gyro.available) { feedback(); gyro.setEnabled(!gyro.enabled) }
+                }
+                MonitorSettingsGyroRow.STATUS -> MonitorSettingsInlineRow(stringResource(R.string.settings_status), null) {
+                    MonitorSettingsValueText(gyro.status)
+                }
+                MonitorSettingsGyroRow.MOUNT -> gyro.configureMount?.let { configureMount ->
+                    MonitorSettingsInlineRow(stringResource(R.string.settings_phone_mount),
+                        stringResource(R.string.settings_phone_mount_help)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically) {
+                            gyro.mountName?.let { MonitorSettingsValueText(it) }
+                            MonitorSettingsActionPill(stringResource(R.string.settings_configure), onClick = configureMount)
+                        }
+                    }
+                }
+                MonitorSettingsGyroRow.CALIBRATE -> gyro.calibrate?.let { calibrate ->
+                    MonitorSettingsInlineRow(stringResource(R.string.settings_gyro_calibrate), null) {
+                        MonitorSettingsActionPill(stringResource(R.string.settings_open), onClick = { feedback(); calibrate() })
                     }
                 }
             }
@@ -549,6 +606,7 @@ internal fun SettingsControls(source: MonitorSettingsControlsSource, feedback: (
     motion.controller?.let { MonitorControllerSettings(it, motion.controllerStatus, motion.controllerHelp) }
 }
 
+@Suppress("DEPRECATION") // The storage help still mentions a mount preset for a caller that passes one.
 @Composable
 internal fun SettingsStorage(configuration: MonitorOperatorSettingsConfiguration) {
     configuration.gyro?.let { gyro ->

@@ -165,7 +165,7 @@ public struct MonitorOperatorScreen<Looks: MonitorLookProvider, Picture: View>: 
             let identity = liveIdentity
             MonitorOperatorLiveSurface(host: editorHost, control: shell.control, session: operatorSession,
                 layout: layout, source: source(layout, aspect: aspect),
-                assists: .init(scopes: assistSource, tools: { tools }, rendered: { availableAssistTools }, fitted: { [] },
+                assists: .init(scopes: assistSource, tools: { tools }, rendered: { availableAssistTools },
                     signalOptions: .init(), usage: $usage, usageSeed: MonitorToolUsage.fieldMonitorSeed, toggle: assist.toggle),
                 views: .init(), portraitAspect: $portraitAspect,
                 picture: picture, cameraPanel: { _, _ in EmptyView() }, photoRelease: { _ in EmptyView() },
@@ -217,8 +217,10 @@ public struct MonitorOperatorScreen<Looks: MonitorLookProvider, Picture: View>: 
             MonitorOperatorLiveReadout<MonitorOperatorSceneCaptureKey, MonitorDisplayChrome.Section>(
                 id: .mode, title: "Shooting mode", value: $0.id, section: .format, action: {})
         }
-        return .init(recording: shell.control.statusPresentation(), showsTimecode: operatorSession.mounts(.timecode),
-            showsRecording: operatorSession.mounts(.recReadout), format: format.map { [$0] } ?? [])
+        let live = shell.control.liveStatusPresentation()
+        return .init(recording: live.status, showsTimecode: operatorSession.mounts(.timecode),
+            showsRecording: operatorSession.mounts(.recReadout), format: format.map { [$0] } ?? [],
+            liveClock: live.clock)
     }
     private func captureInputs(_ layout: LiveMonitorLayout) -> MonitorOperatorCaptureInputs<MonitorOperatorSceneCaptureKey,
         MonitorDisplayChrome.Section, Never> {

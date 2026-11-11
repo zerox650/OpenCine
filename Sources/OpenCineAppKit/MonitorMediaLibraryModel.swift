@@ -42,35 +42,86 @@ public enum MonitorMediaSort: String, CaseIterable, Sendable { case newest, olde
 }
 
 public struct MonitorMediaLibraryState<Payload: Sendable>: Sendable {
-    public var records: [MonitorMediaRecord<Payload>] = []
-    public var catalog = MediaCatalog()
-    public var browsing = false
-    public var acquiringSource = false
-    public var fetching = false
-    public var fetchedCount = 0
-    public var note: String?
-    public var cacheRevision: UInt64 = 0
-    public var entries: [MediaAssetID: MonitorMediaCacheEntry] = [:]
-    public var progress: [MediaAssetID: Double] = [:]
-    public var hostProgress: [MonitorMediaLibraryIOKey: Double] = [:]
-    public var deletionProgress: MonitorMediaDeletionProgress?
-    public var transferring: Set<MediaAssetID> = []
-    public var category: MonitorMediaCategoryFilter = .all
-    public var sort: MonitorMediaSort = .newest
-    public var layout: MonitorMediaLayout = .grid
-    public var thumbnailSize: MonitorThumbnailSize = .medium
-    public var formats: Set<String> = []
-    public var resolutions: Set<String> = []
-    public var colors: Set<String> = []
-    public var dateStart: String?
-    public var dateEnd: String?
-    public var selecting = false
-    public var selectedIDs: Set<MediaAssetID> = []
+    public var records: [MonitorMediaRecord<Payload>] = [] { didSet { revisions.records &+= 1 } }
+    public var catalog = MediaCatalog() { didSet { revisions.records &+= 1 } }
+    public var browsing = false { didSet { revisions.status &+= 1 } }
+    public var acquiringSource = false { didSet { revisions.status &+= 1 } }
+    public var fetching = false { didSet { revisions.status &+= 1 } }
+    public var fetchedCount = 0 { didSet { revisions.status &+= 1 } }
+    public var note: String? { didSet { revisions.status &+= 1 } }
+    public var cacheRevision: UInt64 = 0 { didSet { revisions.cache &+= 1 } }
+    public var entries: [MediaAssetID: MonitorMediaCacheEntry] = [:] {
+        didSet { revisions.cache &+= 1 }
+    }
+    public var progress: [MediaAssetID: Double] = [:] { didSet { revisions.progress &+= 1 } }
+    public var hostProgress: [MonitorMediaLibraryIOKey: Double] = [:] {
+        didSet { revisions.progress &+= 1 }
+    }
+    public var deletionProgress: MonitorMediaDeletionProgress? {
+        didSet { revisions.deletion &+= 1 }
+    }
+    public var transferring: Set<MediaAssetID> = [] { didSet { revisions.progress &+= 1 } }
+    public var category: MonitorMediaCategoryFilter = .all {
+        didSet { revisions.presentation &+= 1 }
+    }
+    public var sort: MonitorMediaSort = .newest { didSet { revisions.presentation &+= 1 } }
+    public var layout: MonitorMediaLayout = .grid { didSet { revisions.presentation &+= 1 } }
+    public var thumbnailSize: MonitorThumbnailSize = .medium {
+        didSet { revisions.presentation &+= 1 }
+    }
+    public var formats: Set<String> = [] { didSet { revisions.presentation &+= 1 } }
+    public var resolutions: Set<String> = [] { didSet { revisions.presentation &+= 1 } }
+    public var colors: Set<String> = [] { didSet { revisions.presentation &+= 1 } }
+    public var dateStart: String? { didSet { revisions.presentation &+= 1 } }
+    public var dateEnd: String? { didSet { revisions.presentation &+= 1 } }
+    public var selecting = false { didSet { revisions.selection &+= 1 } }
+    public var selectedIDs: Set<MediaAssetID> = [] { didSet { revisions.selection &+= 1 } }
     public var lifetimeToken = UUID()
-    public var visibility = MonitorMediaLibraryVisibility.sourceAvailability
+    public var visibility = MonitorMediaLibraryVisibility.sourceAvailability {
+        didSet { revisions.status &+= 1 }
+    }
     /// Accepted source deltas in the current listing request; local/cache changes do not count.
-    public var catalogPageCount = 0
+    public var catalogPageCount = 0 { didSet { revisions.status &+= 1 } }
+    /// Which observation group each write touched, so a progress tick never invalidates a view
+    /// that reads only the records, the selection or the filters (2026-10-25 large-card stalls).
+    var revisions = MonitorMediaLibraryRevisions()
     public init() {}
+}
+
+/// Per-group write counters. A write bumps its group even when the value is equal; observers
+/// are only told about groups that were written.
+struct MonitorMediaLibraryRevisions: Equatable, Sendable {
+    var records: UInt64 = 0
+    var status: UInt64 = 0
+    var cache: UInt64 = 0
+    var progress: UInt64 = 0
+    var deletion: UInt64 = 0
+    var presentation: UInt64 = 0
+    var selection: UInt64 = 0
+}
+
+/// The observation groups a commit wrote.
+struct MonitorMediaLibraryGroups: OptionSet {
+    let rawValue: UInt8
+    static let records = Self(rawValue: 1 << 0)
+    static let status = Self(rawValue: 1 << 1)
+    static let cache = Self(rawValue: 1 << 2)
+    static let progress = Self(rawValue: 1 << 3)
+    static let deletion = Self(rawValue: 1 << 4)
+    static let presentation = Self(rawValue: 1 << 5)
+    static let selection = Self(rawValue: 1 << 6)
+    init(rawValue: UInt8) { self.rawValue = rawValue }
+    init(_ old: MonitorMediaLibraryRevisions, _ new: MonitorMediaLibraryRevisions) {
+        var groups: Self = []
+        if old.records != new.records { groups.insert(.records) }
+        if old.status != new.status { groups.insert(.status) }
+        if old.cache != new.cache { groups.insert(.cache) }
+        if old.progress != new.progress { groups.insert(.progress) }
+        if old.deletion != new.deletion { groups.insert(.deletion) }
+        if old.presentation != new.presentation { groups.insert(.presentation) }
+        if old.selection != new.selection { groups.insert(.selection) }
+        self = groups
+    }
 }
 
 /// Captured by the owner; actions cannot reconstruct admission from a filename/location.
@@ -110,8 +161,14 @@ public struct MonitorMediaLibraryCopy: Sendable {
     }
 }
 
-public enum MonitorMediaCatalogPersistence: Sendable {
+public enum MonitorMediaCatalogPersistence: Equatable, Sendable {
     case eachDelta, listingCompleteOrNonCancelFailure
+    /// A checkpoint after every `pages` accepted deltas, plus the final one when the listing
+    /// completes or fails other than by cancellation. Saving the whole catalog on the main actor
+    /// after every 32-object page made listing a large card quadratic (100 full encodes).
+    case everyPages(Int)
+    /// The default: an interrupted listing keeps most of its progress at a bounded cost.
+    public static let standard = Self.everyPages(8)
 }
 /// Refresh may start an unpublished fresh raw catalog; retained local records are independent.
 public enum MonitorMediaCatalogBase: Equatable, Sendable { case retainObserved, freshListing }
@@ -127,152 +184,155 @@ public enum MonitorMediaLibraryVisibility: Sendable {
 public final class MonitorMediaLibraryModel<Payload: Sendable> {
     public private(set) var records: [MonitorMediaRecord<Payload>] {
         get {
-            _ = publication
+            _ = recordsPublication
             return committed.records
         }
         set { commit { $0.records = newValue } }
     }
     public private(set) var catalog: MediaCatalog {
         get {
-            _ = publication
+            _ = recordsPublication
             return committed.catalog
         }
         set { commit { $0.catalog = newValue } }
     }
     public private(set) var browsing: Bool {
         get {
-            _ = publication
+            _ = statusPublication
             return committed.browsing
         }
         set { commit { $0.browsing = newValue } }
     }
     public private(set) var fetching: Bool {
         get {
-            _ = publication
+            _ = statusPublication
             return committed.fetching
         }
         set { commit { $0.fetching = newValue } }
     }
     public private(set) var fetchedCount: Int {
         get {
-            _ = publication
+            _ = statusPublication
             return committed.fetchedCount
         }
         set { commit { $0.fetchedCount = newValue } }
     }
     public private(set) var note: String? {
         get {
-            _ = publication
+            _ = statusPublication
             return committed.note
         }
         set { commit { $0.note = newValue } }
     }
     public private(set) var cacheRevision: UInt64 {
         get {
-            _ = publication
+            _ = cachePublication
             return committed.cacheRevision
         }
         set { commit { $0.cacheRevision = newValue } }
     }
     public private(set) var entries: [MediaAssetID: MonitorMediaCacheEntry] {
         get {
-            _ = publication
+            _ = cachePublication
             return committed.entries
         }
         set { commit { $0.entries = newValue } }
     }
     public private(set) var progress: [MediaAssetID: Double] {
         get {
-            _ = publication
+            _ = progressPublication
             return committed.progress
         }
         set { commit { $0.progress = newValue } }
     }
     public private(set) var transferring: Set<MediaAssetID> {
         get {
-            _ = publication
+            _ = progressPublication
             return committed.transferring
         }
         set { commit { $0.transferring = newValue } }
     }
     public var category: MonitorMediaCategoryFilter {
         get {
-            _ = publication
+            _ = presentationPublication
             return committed.category
         }
         set { commit { $0.category = newValue } }
     }
     public var sort: MonitorMediaSort {
         get {
-            _ = publication
+            _ = presentationPublication
             return committed.sort
         }
         set { commit { $0.sort = newValue } }
     }
     public var layout: MonitorMediaLayout {
         get {
-            _ = publication
+            _ = presentationPublication
             return committed.layout
         }
         set { commit { $0.layout = newValue } }
     }
     public var thumbnailSize: MonitorThumbnailSize {
         get {
-            _ = publication
+            _ = presentationPublication
             return committed.thumbnailSize
         }
         set { commit { $0.thumbnailSize = newValue } }
     }
     public var formats: Set<String> {
         get {
-            _ = publication
+            _ = presentationPublication
             return committed.formats
         }
         set { commit { $0.formats = newValue } }
     }
     public var resolutions: Set<String> {
         get {
-            _ = publication
+            _ = presentationPublication
             return committed.resolutions
         }
         set { commit { $0.resolutions = newValue } }
     }
     public var colors: Set<String> {
         get {
-            _ = publication
+            _ = presentationPublication
             return committed.colors
         }
         set { commit { $0.colors = newValue } }
     }
     public var dateStart: String? {
         get {
-            _ = publication
+            _ = presentationPublication
             return committed.dateStart
         }
         set { commit { $0.dateStart = newValue } }
     }
     public var dateEnd: String? {
         get {
-            _ = publication
+            _ = presentationPublication
             return committed.dateEnd
         }
         set { commit { $0.dateEnd = newValue } }
     }
     public var selecting: Bool {
         get {
-            _ = publication
+            _ = selectionPublication
             return committed.selecting
         }
         set { commit { $0.selecting = newValue } }
     }
     public var selectedIDs: Set<MediaAssetID> {
         get {
-            _ = publication
+            _ = selectionPublication
             return committed.selectedIDs
         }
         set { commit { $0.selectedIDs = newValue } }
     }
     @ObservationIgnored public let cache: MonitorMediaCache<Payload>
+    /// Download speed per clip for every transfer this library runs (its own caching and the
+    /// host transfers captured with an asset), read by the grid, player and delivery progress.
+    @ObservationIgnored public let transferRates: MonitorTransferRates<MediaAssetID>
     @ObservationIgnored private let copy: MonitorMediaLibraryCopy
     @ObservationIgnored private let favoritesStore: any MonitorMediaFavoritesStore
     @ObservationIgnored private let sleep: @MainActor (Duration) async throws -> Void
@@ -290,7 +350,6 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         set { commit { $0.lifetimeToken = newValue } }
     }
     @ObservationIgnored private var listing = UUID()
-    @ObservationIgnored private var batchTasks: [UUID: Task<Void, Never>] = [:]
     @ObservationIgnored private var openTask: Task<Void, Never>?
     @ObservationIgnored private var acquisitionTask: Task<Void, Never>?
     @ObservationIgnored private var acquisition = UUID()
@@ -308,9 +367,20 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
     @ObservationIgnored private var deletionProgressOwner: UUID?
     @ObservationIgnored private var finishingDeletions: [UUID: DeletionFinish] = [:]
     @ObservationIgnored private var committed = MonitorMediaLibraryState<Payload>()
-    @ObservationIgnored private var publicationRevision: UInt64 = 0
+    @ObservationIgnored private var pendingRevisions = MonitorMediaLibraryGroups()
+    @ObservationIgnored private var recordIndex: [MediaAssetID: Int]?
+    @ObservationIgnored private var recordIndexRevision: UInt64 = 0
+    @ObservationIgnored private var derivedRecords: [DerivedRecords: [MonitorMediaRecord<Payload>]] = [:]
+    @ObservationIgnored private var derivedRecordsKey: DerivedKey?
     @ObservationIgnored private var notifying = false
-    private var publication: UInt64 = 0
+    // One observation counter per group: a view is invalidated only by the groups it reads.
+    private var recordsPublication: UInt64 = 0
+    private var statusPublication: UInt64 = 0
+    private var cachePublication: UInt64 = 0
+    private var progressPublication: UInt64 = 0
+    private var deletionPublication: UInt64 = 0
+    private var presentationPublication: UInt64 = 0
+    private var selectionPublication: UInt64 = 0
     private var lifetimePublication: UInt64 = 0
     @ObservationIgnored private var notifiedLifetime: UUID?
     @ObservationIgnored private let catalogBase: MonitorMediaCatalogBase
@@ -320,25 +390,43 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         @MainActor (MonitorMediaCacheReadPlan) async throws -> MonitorMediaCacheSnapshot
     @ObservationIgnored private var entryRequest = UUID()
     @ObservationIgnored private var entryTask: Task<Void, Never>?
+    @ObservationIgnored private var entryTargetTasks: [UUID: Task<Void, Never>] = [:]
+    @ObservationIgnored private var entryTargetRequests: [MediaAssetID: UUID] = [:]
+    @ObservationIgnored private var entriesDirtyDuringScan: Set<MediaAssetID> = []
     public var visibility: MonitorMediaLibraryVisibility {
         get {
-            _ = publication
+            _ = statusPublication
             return committed.visibility
         }
         set { commit { $0.visibility = newValue } }
     }
     public var catalogPageCount: Int {
-        _ = publication
+        _ = statusPublication
         return committed.catalogPageCount
     }
     public var state: MonitorMediaLibraryState<Payload> {
-        _ = publication
+        _ = recordsPublication; _ = statusPublication; _ = cachePublication
+        _ = progressPublication; _ = deletionPublication; _ = presentationPublication
+        _ = selectionPublication
         return committed
     }
-    public var acquiringSource: Bool { state.acquiringSource }
-    public var hostProgress: [MonitorMediaLibraryIOKey: Double] { state.hostProgress }
+    /// Changes only when the records change (not on progress, cache, selection or status), so a
+    /// host can key derived per-record work, such as a projection, on it.
+    public var recordsRevision: UInt64 {
+        _ = recordsPublication
+        return committed.revisions.records
+    }
+    public var acquiringSource: Bool {
+        _ = statusPublication
+        return committed.acquiringSource
+    }
+    public var hostProgress: [MonitorMediaLibraryIOKey: Double] {
+        _ = progressPublication
+        return committed.hostProgress
+    }
     public var deletionProgress: MonitorMediaDeletionProgress? {
-        let value = state.deletionProgress
+        _ = deletionPublication
+        let value = committed.deletionProgress
         guard let id = deletionProgressOwner,
             let operation = hostOperations.values.first(where: { $0.deletion?.id == id }),
             operation.deletion?.isCurrent == true, deletionProgressOwner == id,
@@ -347,31 +435,55 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
     }
 
     private func commit(_ change: (inout MonitorMediaLibraryState<Payload>) -> Void) {
+        let before = committed.revisions
         var next = committed
         change(&next)
         committed = next
-        publicationRevision &+= 1
+        let groups = MonitorMediaLibraryGroups(before, committed.revisions)
+        pendingRevisions.formUnion(groups)
+        if groups.contains(.progress) { retainRunningRates() }
         guard !notifying else { return }
         notifying = true
         defer { notifying = false }
-        var delivered: UInt64
+        // The complete state is committed before any group is published, so a synchronous
+        // observer of one group sees the admitted successor of every group. A reentrant commit
+        // only adds groups; the loop publishes them until nothing is pending.
         repeat {
-            delivered = publicationRevision
-            // Publish only genuine lifetime replacement to lifetime observers. The complete
-            // state is committed first, so synchronous callbacks see the admitted successor.
+            // Publish only genuine lifetime replacement to lifetime observers.
             let lifetime = committed.lifetimeToken
             if notifiedLifetime != lifetime {
                 notifiedLifetime = lifetime
                 lifetimePublication &+= 1
             }
-            publication = delivered
-        } while delivered != publicationRevision
+            let groups = pendingRevisions
+            pendingRevisions = []
+            if groups.contains(.records) { recordsPublication &+= 1 }
+            if groups.contains(.status) { statusPublication &+= 1 }
+            if groups.contains(.cache) { cachePublication &+= 1 }
+            if groups.contains(.progress) { progressPublication &+= 1 }
+            if groups.contains(.deletion) { deletionPublication &+= 1 }
+            if groups.contains(.presentation) { presentationPublication &+= 1 }
+            if groups.contains(.selection) { selectionPublication &+= 1 }
+        } while !pendingRevisions.isEmpty || notifiedLifetime != committed.lifetimeToken
+    }
+
+    /// A speed reading lives exactly as long as its download's progress: every path that ends,
+    /// retires or replaces a transfer clears its progress, and with it the reading.
+    private func retainRunningRates() {
+        guard !transferRates.rates.isEmpty else { return }
+        var running = Set(committed.progress.keys)
+        for (key, authority) in hostProgressOwners where committed.hostProgress[key] != nil {
+            if let asset = authority.asset { running.insert(asset) }
+        }
+        transferRates.retain(running)
     }
 
     private struct Transfer {
         let id: UUID
+        let representation: MediaRepresentationID
         let writer: MonitorMediaCacheWrite
         let task: Task<URL, Error>
+        let completion: LibraryCacheCompletion
     }
     private struct HostClaim: Hashable {
         let key: MonitorMediaLibraryIOKey
@@ -384,6 +496,7 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         var task: Task<MediaTransferReceipt, Error>?
         var attempt = UUID()
         var deletion: MonitorMediaLibraryDeletionAuthority?
+        let completion = LibraryCacheCompletion()
         init(authority: MonitorMediaLibraryIOAuthority, purpose: MonitorMediaLibraryIOPurpose,
             writer: MonitorMediaCacheWrite?) {
             self.authority = authority; self.purpose = purpose; self.writer = writer
@@ -405,7 +518,7 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         cache: MonitorMediaCache<Payload>, favorites: any MonitorMediaFavoritesStore,
         service: (any CameraMediaService)? = nil,
         cacheScanning: MonitorMediaCacheScanning = .immediate,
-        catalogPersistence: MonitorMediaCatalogPersistence = .eachDelta,
+        catalogPersistence: MonitorMediaCatalogPersistence = .standard,
         catalogBase: MonitorMediaCatalogBase = .retainObserved,
         initialCatalog: MediaCatalog? = nil,
         initialRecords: [MonitorMediaRecord<Payload>]? = nil,
@@ -413,8 +526,10 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         readSnapshot:
             (@MainActor (MonitorMediaCacheReadPlan) async throws -> MonitorMediaCacheSnapshot)? =
             nil,
-        sleep: @escaping @MainActor (Duration) async throws -> Void = hostSleep(for:)
+        sleep: @escaping @MainActor (Duration) async throws -> Void = hostSleep(for:),
+        rateClock: HostClock = .live
     ) {
+        transferRates = .init(clock: rateClock)
         self.catalogBase = catalogBase
         self.cache = cache
         favoritesStore = favorites
@@ -440,7 +555,84 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
             + (dateStart == nil && dateEnd == nil ? 0 : 1)
     }
     public var libraryRecords: [MonitorMediaRecord<Payload>] {
+        derived(.library) { self.visibleRecords() }
+    }
+    public func records(in category: MonitorMediaCategoryFilter) -> [MonitorMediaRecord<Payload>] {
+        derived(.category(category)) { self.libraryRecords.filter { Self.matches($0, category) } }
+    }
+    public var displayedRecords: [MonitorMediaRecord<Payload>] {
+        derived(.displayed) { self.displayedRecordsUncached() }
+    }
+    public var selectedRecords: [MonitorMediaRecord<Payload>] {
+        displayedRecords.filter { selectedIDs.contains($0.asset.id) }
+    }
+    /// O(1) through an index rebuilt only when the records change (it was a linear scan inside
+    /// select-all, selection expansion and per-chunk admission checks).
+    public func record(_ id: MediaAssetID) -> MonitorMediaRecord<Payload>? {
+        _ = recordsPublication
+        guard let position = recordPosition(id) else { return nil }
+        return committed.records[position]
+    }
+    private func recordPosition(_ id: MediaAssetID) -> Int? {
+        let revision = committed.revisions.records
+        if recordIndexRevision != revision || recordIndex == nil {
+            var index: [MediaAssetID: Int] = [:]
+            index.reserveCapacity(committed.records.count)
+            // The first row wins, as the original linear scan returned the first match.
+            for (position, row) in committed.records.enumerated() where index[row.asset.id] == nil {
+                index[row.asset.id] = position
+            }
+            recordIndex = index
+            recordIndexRevision = revision
+        }
+        return recordIndex?[id]
+    }
+
+    private enum DerivedRecords: Hashable {
+        case library, displayed, category(MonitorMediaCategoryFilter)
+    }
+    /// What a derived record list was computed from. Reading the key registers observation of
+    /// exactly the groups the list depends on.
+    private struct DerivedKey: Equatable {
+        let records: UInt64
+        let presentation: UInt64
+        let visibility: MonitorMediaLibraryVisibility
+        let offline: Bool
+        let cache: UInt64?
+    }
+    private func derivedKey() -> DerivedKey {
+        _ = recordsPublication; _ = presentationPublication; _ = statusPublication
+        let visibility = committed.visibility
+        let offline = service == nil
+        let usesEntries: Bool
         switch visibility {
+        case .allRecords: usesEntries = false
+        case .cachedOnly: usesEntries = true
+        case .sourceAvailability: usesEntries = offline
+        }
+        if usesEntries { _ = cachePublication }
+        return .init(records: committed.revisions.records,
+            presentation: committed.revisions.presentation, visibility: visibility, offline: offline,
+            cache: usesEntries ? committed.revisions.cache : nil)
+    }
+    /// The catalog reads these on every render; they are derived once per change of their inputs.
+    private func derived(_ kind: DerivedRecords, _ compute: () -> [MonitorMediaRecord<Payload>])
+        -> [MonitorMediaRecord<Payload>]
+    {
+        let key = derivedKey()
+        if derivedRecordsKey != key {
+            derivedRecords.removeAll(keepingCapacity: true)
+            derivedRecordsKey = key
+        }
+        if let cached = derivedRecords[kind] { return cached }
+        let value = compute()
+        // A reentrant change during compute leaves a stale key; the next read recomputes.
+        if derivedRecordsKey == key { derivedRecords[kind] = value }
+        return value
+    }
+    private func visibleRecords() -> [MonitorMediaRecord<Payload>] {
+        let records = committed.records, entries = committed.entries
+        switch committed.visibility {
         case .allRecords: return records
         case .cachedOnly: return records.filter { entries[$0.asset.id]?.isPlayableOffline == true }
         case .sourceAvailability:
@@ -448,18 +640,20 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
                 ? records.filter { entries[$0.asset.id]?.isPlayableOffline == true } : records
         }
     }
-    public func records(in category: MonitorMediaCategoryFilter) -> [MonitorMediaRecord<Payload>] {
-        libraryRecords.filter {
-            switch category {
-            case .all: return true
-            case .videos: return ($0.facts.presentationKind ?? $0.asset.kind) == .video
-            case .photos: return ($0.facts.presentationKind ?? $0.asset.kind) == .photo
-            case .favorites: return $0.favorite
-            }
+    private static func matches(_ record: MonitorMediaRecord<Payload>,
+        _ category: MonitorMediaCategoryFilter) -> Bool {
+        switch category {
+        case .all: return true
+        case .videos: return (record.facts.presentationKind ?? record.asset.kind) == .video
+        case .photos: return (record.facts.presentationKind ?? record.asset.kind) == .photo
+        case .favorites: return record.favorite
         }
     }
-    public var displayedRecords: [MonitorMediaRecord<Payload>] {
-        let filtered = records(in: category).filter { record in
+    private func displayedRecordsUncached() -> [MonitorMediaRecord<Payload>] {
+        let state = committed
+        let formats = state.formats, resolutions = state.resolutions, colors = state.colors
+        let dateStart = state.dateStart, dateEnd = state.dateEnd, sort = state.sort
+        let filtered = records(in: state.category).filter { record in
             let facts = record.facts
             if !formats.isEmpty && !facts.format.map(formats.contains).orFalse { return false }
             if !resolutions.isEmpty && !facts.resolution.map(resolutions.contains).orFalse {
@@ -485,12 +679,6 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
                 return (left.facts.orderKey ?? "") > (right.facts.orderKey ?? "")
             }
         }
-    }
-    public var selectedRecords: [MonitorMediaRecord<Payload>] {
-        displayedRecords.filter { selectedIDs.contains($0.asset.id) }
-    }
-    public func record(_ id: MediaAssetID) -> MonitorMediaRecord<Payload>? {
-        records.first { $0.asset.id == id }
     }
     public func resetFilters() {
         formats.removeAll()
@@ -527,9 +715,7 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         return next
     }
     public func toggleFavorite(_ id: MediaAssetID) {
-        guard let position = committed.records.firstIndex(where: { $0.asset.id == id }) else {
-            return
-        }
+        guard let position = recordPosition(id) else { return }
         let generation = lifetimeToken
         var changed = committed.records[position]
         let on: Bool
@@ -660,22 +846,6 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
             }
         }
     }
-    /// Caches originals in order for as long as this library lifetime lasts. The batch outlives
-    /// gallery covers and Back, as the original unstructured download did; close, rebind and a
-    /// source change end it before the next record.
-    public func cacheBatch(_ records: [MonitorMediaRecord<Payload>], admitted token: MonitorMediaLibraryActionToken,
-        download: @escaping @MainActor (MonitorMediaRecord<Payload>) async -> Void) {
-        guard !records.isEmpty, !disposed, isCurrent(token) else { return }
-        let id = UUID()
-        batchTasks[id] = Task { @MainActor [weak self] in
-            defer { self?.batchTasks[id] = nil }
-            for record in records {
-                guard !Task.isCancelled, let self, !self.disposed, self.isCurrent(token),
-                    self.record(record.asset.id) != nil else { return }
-                await download(record)
-            }
-        }
-    }
     /// A host operation's outcome (a refused delete, a failed download) for the gallery's note line.
     public func showNote(_ value: String?) { note = value }
     public func close() { _ = retireGallery() }
@@ -711,9 +881,8 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         let oldReconciliation = reconciliationTask
         let oldCursor = cursor
         let oldEntries = entryTask
+        cancelTargetedEntryReads()
         let closed = browse
-        let oldBatches = batchTasks.values
-        batchTasks.removeAll()
         openTask = nil
         listTask = nil
         reconciliationTask = nil
@@ -740,7 +909,6 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         oldReconciliation?.cancel()
         oldCursor?.close()
         oldEntries?.cancel()
-        oldBatches.forEach { $0.cancel() }
         retired.dispose()
         return token
     }
@@ -820,12 +988,12 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         var listingCatalog = MediaCatalog()
         let authority = cache.catalogAuthority
         var appliedPage = false
-        var checkpointAttempted = false
+        var uncheckpointedPages = 0
         func checkpoint() throws {
             guard cache.isCurrent(authority) && admitted(generation, request, binding: binding),
                 !Task.isCancelled
             else { throw MediaServiceError.retired }
-            checkpointAttempted = true
+            uncheckpointedPages = 0
             try cache.save(
                 records,
                 ifCurrent: {
@@ -857,14 +1025,20 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
                 else { throw MediaServiceError.retired }
                 listingCatalog = nextCatalog
                 appliedPage = true
-                if case .eachDelta = catalogPersistence { try checkpoint() }
+                uncheckpointedPages += 1
+                switch catalogPersistence {
+                case .eachDelta: try checkpoint()
+                case .everyPages(let pages) where uncheckpointedPages >= max(1, pages):
+                    try checkpoint()
+                case .everyPages, .listingCompleteOrNonCancelFailure: break
+                }
             }
-            if case .listingCompleteOrNonCancelFailure = catalogPersistence, appliedPage {
+            if catalogPersistence != .eachDelta, uncheckpointedPages > 0 {
                 try checkpoint()
             }
         } catch {
-            if case .listingCompleteOrNonCancelFailure = catalogPersistence,
-                appliedPage, !checkpointAttempted, !(error is CancellationError),
+            if catalogPersistence != .eachDelta,
+                appliedPage, uncheckpointedPages > 0, !(error is CancellationError),
                 error as? MediaServiceError != .retired, !Task.isCancelled,
                 cache.isCurrent(authority) && admitted(generation, request, binding: binding)
             {
@@ -913,9 +1087,10 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         var values = Dictionary(
             (capture.resetLibrary ? [] : next.records).map { ($0.asset.id, $0) },
             uniquingKeysWith: { _, newer in newer })
-        for id in capture.removed {
-            values[id] = nil
-            order.removeAll { $0 == id }
+        if !capture.removed.isEmpty {
+            let removed = Set(capture.removed)
+            for id in removed { values[id] = nil }
+            order.removeAll { removed.contains($0) }
         }
         for record in capture.upserts {
             if values[record.asset.id] == nil { order.append(record.asset.id) }
@@ -946,10 +1121,13 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         guard ifCurrent() else { return false }
         if capture.sourceFavoriteKeys != nil { favoritesStore.saveFavorites(favorites) }
         guard ifCurrent() else { return false }
-        reloadEntries()
+        // Only new and amended rows can have new cache facts; retained rows keep theirs.
+        reloadEntries(only: Set(capture.upserts.map(\.asset.id) + capture.amendments.map(\.asset.id))
+            .intersection(retained))
         return ifCurrent()
     }
 
+    /// Full cache rescan: init, begin, local removal, clear and an app's explicit refresh.
     private func reloadEntries() {
         let request = UUID()
         let generation = lifetimeToken
@@ -957,6 +1135,7 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         let previous = entryTask
         entryTask = nil
         previous?.cancel()
+        cancelTargetedEntryReads()
         guard entryRequest == request, lifetimeToken == generation else { return }
         switch cacheScanning {
         case .immediate:
@@ -979,10 +1158,17 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
                         snapshot.generation == self.cache.directory.generation
                     else { return }
                     self.entryTask = nil
+                    // A page that removed records during the scan no longer restarts it: keep
+                    // only entries of records that still exist.
+                    let entries = snapshot.entries.filter { self.record($0.key) != nil }
                     self.commit {
-                        $0.entries = snapshot.entries
+                        $0.entries = entries
                         $0.cacheRevision &+= 1
                     }
+                    // Rows written while this scan ran may have been read before the write.
+                    let dirty = self.entriesDirtyDuringScan
+                    self.entriesDirtyDuringScan = []
+                    if !dirty.isEmpty { self.reloadEntries(only: dirty) }
                 } catch {
                     if self.entryRequest == request, self.lifetimeToken == generation {
                         self.entryTask = nil
@@ -990,6 +1176,70 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
                 }
             }
         }
+    }
+
+    /// Rescans only these records: one committed thumbnail or transfer, or a listing page's new
+    /// and amended rows. A full rescan per commit made thumbnail loading O(n^2) (40 thumbnails on
+    /// a 3200-record card scanned 128 000 records). The latest read per record wins, and a full
+    /// scan in flight absorbs the ids and rescans them after it lands.
+    private func reloadEntries(only ids: Set<MediaAssetID>) {
+        guard !ids.isEmpty else { return }
+        if entryTask != nil {
+            entriesDirtyDuringScan.formUnion(ids)
+            return
+        }
+        let epoch = entryRequest
+        let generation = lifetimeToken
+        let targets = ids.compactMap { record($0) }
+        let gone = ids.subtracting(targets.map(\.asset.id))
+        switch cacheScanning {
+        case .immediate:
+            let scanned = targets.map { ($0.asset.id, cache.entry($0)) }
+            guard entryRequest == epoch, lifetimeToken == generation else { return }
+            commit {
+                for (id, entry) in scanned { $0.entries[id] = entry }
+                for id in gone { $0.entries[id] = nil }
+                $0.cacheRevision &+= 1
+            }
+        case .background:
+            guard !targets.isEmpty else { return }
+            let request = UUID()
+            for target in targets { entryTargetRequests[target.asset.id] = request }
+            let plan = cache.readPlan(targets)
+            entryTargetTasks[request] = Task { [weak self] in
+                guard let self else { return }
+                defer { self.entryTargetTasks[request] = nil }
+                guard let snapshot = try? await self.readSnapshot(plan), !Task.isCancelled,
+                    self.entryRequest == epoch, self.lifetimeToken == generation,
+                    snapshot.planID == plan.id,
+                    snapshot.generation == self.cache.directory.generation
+                else { return }
+                if self.entryTask != nil {
+                    // A full scan started meanwhile; it owns these rows now.
+                    self.entriesDirtyDuringScan.formUnion(targets.map(\.asset.id))
+                    return
+                }
+                let current = targets.map(\.asset.id).filter {
+                    self.entryTargetRequests[$0] == request && self.record($0) != nil
+                }
+                for id in current { self.entryTargetRequests[id] = nil }
+                guard !current.isEmpty else { return }
+                self.commit {
+                    for id in current { $0.entries[id] = snapshot.entries[id] }
+                    $0.cacheRevision &+= 1
+                }
+            }
+        }
+    }
+    private func reloadEntries(for asset: MediaAssetID?) {
+        if let asset { reloadEntries(only: [asset]) } else { reloadEntries() }
+    }
+    private func cancelTargetedEntryReads() {
+        let tasks = entryTargetTasks.values
+        entryTargetTasks.removeAll()
+        entryTargetRequests.removeAll()
+        entriesDirtyDuringScan.removeAll()
+        tasks.forEach { $0.cancel() }
     }
     public var actionToken: MonitorMediaLibraryActionToken {
         .init(lifetime: lifetimeToken, binding: browse?.binding)
@@ -1245,6 +1495,8 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
             hostProgressOwners[authority.key] = authority
             oldDelay?.cancel()
             commit { $0.hostProgress[authority.key] = 0 }
+            // A synchronous progress observer can retire this operation inside the commit.
+            if ownsProgress(operation), let asset = authority.asset { transferRates.begin(asset) }
         }
         guard hostCurrent(operation) else {
             finishHost(operation, clearingProgress: true)
@@ -1259,17 +1511,29 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         hostOperations[authority.id] = nil
         let claim = HostClaim(key: authority.key, purpose: operation.purpose)
         if hostClaims[claim] == authority.id { hostClaims[claim] = nil }
+        // No more bytes come from this operation: its speed reading ends with it, unless a newer
+        // playback of the same clip has taken the progress (and the reading) over.
+        if operation.purpose.tracksProgress, hostProgressOwners[authority.key]?.id == authority.id,
+            let asset = authority.asset { transferRates.end(asset) }
         if clearingProgress { clearHostProgress(authority) }
+    }
+    private func ownsProgress(_ operation: HostOperation) -> Bool {
+        hostCurrent(operation) && hostProgressOwners[operation.authority.key]?.id == operation.authority.id
     }
     private func hostSink(_ operation: HostOperation, attempt: UUID, expected: UInt64?, into sink: any MediaByteSink)
         -> any MediaByteSink {
         LibraryHostProgressSink(sink: sink, expected: expected,
             admitted: { [weak self] in self?.hostCurrent(operation) == true && operation.attempt == attempt },
-            publish: { [weak self] value in
+            publish: { [weak self] value, bytes in
                 guard let self, self.hostCurrent(operation), operation.attempt == attempt,
                     self.hostProgressOwners[operation.authority.key]?.id == operation.authority.id,
                     operation.purpose.tracksProgress else { return }
                 self.commit { $0.hostProgress[operation.authority.key] = value }
+                // A retried attempt counts from zero again; the reading restarts with it. The commit
+                // can retire the operation through a synchronous observer: no reading outlives it.
+                guard self.ownsProgress(operation), operation.attempt == attempt,
+                    let asset = operation.authority.asset else { return }
+                self.transferRates.record(asset, totalBytes: bytes)
             })
     }
     private func performHost(_ operation: HostOperation, expected: UInt64?, into sink: any MediaByteSink,
@@ -1345,11 +1609,13 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         }
         try requireHost(operation)
         _ = try writer.commit(receipt)
-        reloadEntries()
+        reloadEntries(for: authority.asset)
     }
 
-    /// One captured host stream and canonical write. Download/thumbnail purposes deduplicate by
-    /// source key; playback attempts retain the original independent-source fallback behavior.
+    /// One captured host stream and canonical write. A download of a source key that is already
+    /// downloading joins that download (and starts its own only if it ended without a file);
+    /// other purposes deduplicate by source key; playback attempts retain the original
+    /// independent-source fallback behavior.
     public func cacheHostFile(_ authority: MonitorMediaLibraryIOAuthority,
         purpose: MonitorMediaLibraryIOPurpose, at address: String, expectedByteCount: UInt64? = nil,
         transfer: @escaping @MainActor (any MediaByteSink) async throws -> MediaTransferReceipt)
@@ -1364,12 +1630,24 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         async throws -> URL? {
         guard purpose != .deletion else { throw MediaServiceError.unsupported }
         try requireAuthority(authority)
+        // A download of a clip that is already downloading (Share while the player's cache runs,
+        // or while a cancelled one finishes its chunk) joins it and downloads only if it failed.
+        while purpose == .download, let claimant = hostClaims[.init(key: authority.key, purpose: purpose)],
+            let running = hostOperations[claimant], running.purpose == .download {
+            try await running.completion.wait()
+            try requireAuthority(authority)
+            if let location = running.completion.location { return location }
+            if hostOperations[claimant] === running { break }
+        }
         if purpose != .playback,
             hostClaims[.init(key: authority.key, purpose: purpose)] != nil { return nil }
         guard hostOperations[authority.id] == nil else { throw MediaServiceError.unavailable }
         guard let operation = try startHost(authority, purpose: purpose, writer: nil) else { return nil }
-        var committed = false
-        defer { operation.writer?.abort(); finishHost(operation, clearingProgress: !committed) }
+        var committed: URL?
+        defer {
+            operation.writer?.abort(); finishHost(operation, clearingProgress: committed == nil)
+            operation.completion.finish(committed)
+        }
         var lastError: any Error = MediaServiceError.unavailable
         for (index, transfer) in plan.attempts.enumerated() {
             try requireHost(operation)
@@ -1390,9 +1668,9 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
             plan.accepted?(index, receipt)
             try requireHost(operation)
             let location = try writer.commit(receipt)
-            reloadEntries()
+            reloadEntries(for: authority.asset)
             try requireHost(operation)
-            committed = true
+            committed = location
             return location
         }
         throw lastError
@@ -1404,7 +1682,9 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         staging: @escaping @MainActor (URL) async throws -> Void) async throws -> URL? {
         guard purpose != .deletion else { throw MediaServiceError.unsupported }
         try requireAuthority(authority)
-        if purpose != .playback, hostClaims[.init(key: authority.key, purpose: purpose)] != nil { return nil }
+        // A running download is joined by cacheHostFile below, not refused here.
+        if purpose != .playback, purpose != .download,
+            hostClaims[.init(key: authority.key, purpose: purpose)] != nil { return nil }
         guard hostOperations[authority.id] == nil else { throw MediaServiceError.unavailable }
         let destination = try cache.directory.url(address)
         let incoming = destination.deletingLastPathComponent().appendingPathComponent(".incoming-" + authority.id.uuidString)
@@ -1487,7 +1767,7 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
             hostProgressOwners[authority.key]?.id == nil || hostProgressOwners[authority.key]?.id == authority.id
         else { return }
         hostProgressOwners[authority.key] = authority
-        reloadEntries()
+        reloadEntries(for: authority.asset)
         guard authority.isCurrent, hostProgressOwners[authority.key]?.id == authority.id else { return }
         if role != .original { clearHostProgress(authority); return }
         let previous = hostProgressDelays.removeValue(forKey: authority.key)
@@ -1502,6 +1782,7 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
         }
         hostProgressDelays[authority.key] = delay
         commit { $0.hostProgress[authority.key] = 1 }
+        if let asset = authority.asset { transferRates.end(asset) }
         if !authority.isCurrent || hostProgressOwners[authority.key]?.id != authority.id { delay.cancel() }
     }
 
@@ -1590,7 +1871,7 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
                 try await writer.write(data)
                 guard self.current(generation), self.thumbnails[id] == operation else { return }
                 _ = try writer.commit(.init(byteCount: UInt64(data.count)))
-                self.reloadEntries()
+                self.reloadEntries(only: [id])
             } catch {
                 // A thumbnail refusal leaves the original row and cache untouched.
             }
@@ -1605,6 +1886,19 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
     public func cacheRepresentation(_ representation: MediaRepresentationID, asset id: MediaAssetID)
         async throws -> URL
     {
+        // A clip already being cached (the player left its cache running, or a cancelled cache
+        // is still finishing a chunk) is joined, never refused: Share of that clip waits for it
+        // and caches the clip itself only when it ended without this representation.
+        while let running = transfers[id] {
+            try await running.completion.wait()
+            if running.representation == representation, let location = running.completion.location,
+                isCurrentFile(location, of: representation, asset: id)
+            {
+                return location
+            }
+            // An operation refused before it started can leave its finished slot behind.
+            if transfers[id]?.id == running.id { transfers[id] = nil }
+        }
         guard let record = record(id), let source = browse?.transfers,
             let descriptor = record.asset.representations.first(where: { $0.id == representation }),
             let address = record.address.representations[representation], transfers[id] == nil
@@ -1619,6 +1913,10 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
                 let expected = descriptor.byteCount, expected > 0
             else { return }
             self.progress[id] = min(1, Double(bytes) / Double(expected))
+            // A synchronous progress observer can retire this transfer inside the write.
+            guard self.current(generation), self.transfers[id]?.id == operation, self.progress[id] != nil
+            else { return }
+            self.transferRates.record(id, totalBytes: bytes)
         }
         let task = Task { [weak self] () throws -> URL in
             defer { writer.abort() }
@@ -1640,7 +1938,7 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
                 throw MediaServiceError.unavailable
             }
             let url = try writer.commit(receipt)
-            self.reloadEntries()
+            self.reloadEntries(only: [id])
             guard self.current(generation), self.transfers[id]?.id == operation, !Task.isCancelled
             else {
                 throw MediaServiceError.retired
@@ -1648,6 +1946,7 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
             // Preserve the donor's brief completion indication, with an injectable clock and
             // operation fencing. Supersession/clear can retire this delay without touching B.
             if self.progress[id] != nil { self.progress[id] = 1 }
+            self.transferRates.end(id)
             try? await self.sleep(.milliseconds(450))
             guard self.current(generation), self.transfers[id]?.id == operation, !Task.isCancelled
             else {
@@ -1655,7 +1954,13 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
             }
             return url
         }
-        transfers[id] = .init(id: operation, writer: writer, task: task)
+        let completion = LibraryCacheCompletion()
+        var location: URL?
+        // Runs after the transfer slot below is released, so a joiner never rejoins this one.
+        defer { completion.finish(location) }
+        transfers[id] = .init(
+            id: operation, representation: representation, writer: writer, task: task,
+            completion: completion)
         commit {
             $0.transferring.insert(id)
             if descriptor.byteCount != nil { $0.progress[id] = 0 }
@@ -1665,6 +1970,8 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
             writer.abort()
             throw MediaServiceError.retired
         }
+        // Only a transfer that survived its own first publication gets a reading.
+        if descriptor.byteCount != nil { transferRates.begin(id) }
         defer {
             if transfers[id]?.id == operation {
                 transfers[id] = nil
@@ -1675,11 +1982,13 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
             }
         }
         do {
-            return try await withTaskCancellationHandler {
+            let url = try await withTaskCancellationHandler {
                 try await task.value
             } onCancel: {
                 task.cancel()
             }
+            location = url
+            return url
         } catch {
             // Only the caller's own cancellation stays a cancellation. A transfer the source
             // cancelled is a failure the operator sees, like any other.
@@ -1690,6 +1999,17 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
             if error is CancellationError, !callerCancelled { throw MediaServiceError.retired }
             throw error
         }
+    }
+    /// A joined file stands only while it is still the current record's file: a retained
+    /// amendment can move an original's address while its transfer runs.
+    private func isCurrentFile(_ location: URL, of representation: MediaRepresentationID, asset id: MediaAssetID)
+        -> Bool
+    {
+        guard let current = record(id),
+            let descriptor = current.asset.representations.first(where: { $0.id == representation })
+        else { return false }
+        guard descriptor.role == .original else { return true }
+        return cache.entry(current).originalURL?.standardizedFileURL.path == location.standardizedFileURL.path
     }
     public func cacheOriginal(_ id: MediaAssetID) async throws -> URL {
         guard
@@ -1726,6 +2046,33 @@ public final class MonitorMediaLibraryModel<Payload: Sendable> {
 
 extension Optional where Wrapped == Bool { fileprivate var orFalse: Bool { self == true } }
 
+/// The end of one original cache operation, which a second request for the same clip joins.
+/// Cancelling a joiner ends only its own wait, never the operation it joined.
+@MainActor private final class LibraryCacheCompletion {
+    private(set) var location: URL?
+    private var finished = false
+    private var waiters: [UUID: CheckedContinuation<Void, Never>] = [:]
+    func finish(_ location: URL?) {
+        guard !finished else { return }
+        finished = true
+        self.location = location
+        let held = waiters
+        waiters = [:]
+        for waiter in held.values { waiter.resume() }
+    }
+    func wait() async throws {
+        let id = UUID()
+        await withTaskCancellationHandler {
+            await withCheckedContinuation { continuation in
+                if finished || Task.isCancelled { continuation.resume() } else { waiters[id] = continuation }
+            }
+        } onCancel: {
+            Task { @MainActor in self.waiters.removeValue(forKey: id)?.resume() }
+        }
+        try Task.checkCancellation()
+    }
+}
+
 private actor LibraryProgressSink: MediaByteSink {
     let writer: MonitorMediaCacheWrite
     let publish: @MainActor @Sendable (UInt64) -> Void
@@ -1744,12 +2091,12 @@ private actor LibraryProgressSink: MediaByteSink {
 private actor LibraryHostProgressSink: MediaTransferProgressSink {
     let sink: any MediaByteSink
     let admitted: @MainActor @Sendable () -> Bool
-    let publish: @MainActor @Sendable (Double) -> Void
+    let publish: @MainActor @Sendable (Double, UInt64) -> Void
     var expected: UInt64?
     var bytes: UInt64 = 0
     init(sink: any MediaByteSink, expected: UInt64?,
         admitted: @escaping @MainActor @Sendable () -> Bool,
-        publish: @escaping @MainActor @Sendable (Double) -> Void) {
+        publish: @escaping @MainActor @Sendable (Double, UInt64) -> Void) {
         self.sink = sink; self.expected = expected.flatMap { $0 > 0 ? $0 : nil }
         self.admitted = admitted; self.publish = publish
     }
@@ -1763,7 +2110,7 @@ private actor LibraryHostProgressSink: MediaTransferProgressSink {
         guard await admitted(), !Task.isCancelled else { throw MediaServiceError.retired }
         bytes += UInt64(chunk.count)
         let progress = expected.map { min(1, Double(bytes) / Double($0)) } ?? 0
-        await publish(progress)
+        await publish(progress, bytes)
     }
 }
 

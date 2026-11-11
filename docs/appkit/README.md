@@ -431,12 +431,35 @@ cleanup awaits. Every page, operation and delayed completion checks its captured
 old result cannot publish or clear successor state. Kotlin publishes one immutable `StateFlow`
 value on the supplied owner dispatcher, with a child supervisor for handled optional refusals.
 
+Large cards (budgets in `MonitorMediaLibraryPerformanceTests`, `MonitorOperatorCatalogPerformanceTests`;
+3200 records, 2026-10-25 Z field stalls): Swift observation is split into groups (records, status,
+cache, progress, deletion, presentation, selection), so a transfer tick never invalidates a view
+that reads only records, filters or selection. `displayedRecords`, `libraryRecords` and
+`records(in:)` are derived once per change of their inputs, and `record(_:)` is a dictionary
+lookup. `recordsRevision` changes only with the records, for host projections. A committed
+thumbnail or transfer rescans only its record, a listing page only its new and amended rows; a
+full rescan runs at begin, local removal, clear and `refreshLocalCache`. The default catalog
+persistence is `.everyPages(8)` plus the final checkpoint (`.eachDelta` remains). The shared
+catalog builds a `MonitorMediaItem` only for realized cells, inside the cell's own view, and the
+selection tray reads only permissions.
+
 Offline, the shared catalog lists only clips playable from this phone's cache (the last card
 listing stays hidden, as OpenZCine MEDIA-22 specifies) and its hint line says so: "Camera
 disconnected. Showing clips cached on this phone." An empty gallery's heading names its state
 (listing, filtered, disconnected, nothing cached) and reads "No clips yet" only when a connected
 camera listed nothing for the tab (`MonitorMediaGalleryCopy.emptyTitle`, Kotlin
 `MediaLibraryCopy.emptyTitle`).
+
+The grid is staggered (masonry): each card goes, in the displayed order, into the column that is
+shortest so far (the leftmost on a tie), so a column stacks its cards with no row gaps. A card is
+as tall as its picture at the column width plus its caption, and the picture's shape comes from
+metadata before any thumbnail loads (`aspectRatio` on the operator catalog screen, by default the
+listed `pixelSize`, which carries no EXIF orientation; OpenZCine supplies a shape turned by each
+still's learned orientation), so loading thumbnails
+never moves a card. SwiftUI places with `MonitorMediaMasonry` into one lazy stack per column;
+Compose uses `LazyVerticalStaggeredGrid` (`MonitorCatalogGrid`), which places the same way. Drag
+selection hit-tests the cards' real frames and sweeps the displayed order. The list view stays a
+list.
 
 `MediaCatalog` applies content-qualified opaque identities from the source. A proxy can remove a
 master in a later delta, two volumes can carry the same filename, and an old removal at a recycled
